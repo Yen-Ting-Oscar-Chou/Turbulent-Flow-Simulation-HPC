@@ -32,6 +32,11 @@ public:
   RealType Re = 0; //! Reynolds number
 };
 
+class TurbulenceParameters {
+  public: 
+    RealType (*deltaMixLen) (float, float, float, float) = NULL;  // x, rho, U, mu
+};
+
 class SolverParameters {
 public:
   RealType gamma         = 0;  //! Donor cell balance coefficient
@@ -153,6 +158,6 @@ public:
   ParallelParameters      parallel;
   StdOutParameters        stdOut;
   BFStepParameters        bfStep;
-  // TODO WS2: include parameters for turbulence
+  TurbulenceParameters    turbulence;
   Meshsize* meshsize;
 };

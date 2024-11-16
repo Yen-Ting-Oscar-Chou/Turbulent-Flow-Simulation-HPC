@@ -2,7 +2,7 @@
 
 #include "FlowField.hpp"
 
-class TurbulentFlowField : FlowField {
+class TurbulentFlowField: public FlowField {
 private:
   ScalarField viscosity_;
   ScalarField distance_;
@@ -17,7 +17,7 @@ public:
    */
   TurbulentFlowField(const Parameters& parameters);
 
-  virtual ~TurbulentFlowField() override = default;
+  virtual ~TurbulentFlowField() = default;
 
   ScalarField& getViscosity();
   ScalarField& getDistance();

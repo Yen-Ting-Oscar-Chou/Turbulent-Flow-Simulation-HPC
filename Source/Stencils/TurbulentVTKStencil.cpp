@@ -52,3 +52,64 @@ void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, in
     distanceStream_ << "0.0" << std::endl;
   }
 }
+
+void Stencils::TurbulentVTKStencil::write(TurbulentFlowField& turbulentField, int timeStep, RealType simulationTime) {
+  openFile(timeStep, simulationTime);
+
+  if (FieldStencil<FlowField>::parameters_.geometry.dim == 2) {
+    // Write pressure
+    ofile_
+      << "CELL_DATA " << turbulentField.getNx() * turbulentField.getNy() << std::endl
+      << "SCALARS pressure float 1" << std::endl
+      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << pressureStream_.str() << std::endl;
+    pressureStream_.str("");
+
+    ofile_
+      << "SCALARS distance float 1" << std::endl
+      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << distanceStream_.str() << std::endl;
+    distanceStream_.str("");
+
+    ofile_
+      << "SCALARS viscosity float 1" << std::endl
+      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << viscosityStream_.str() << std::endl;
+    viscosityStream_.str("");
+
+    // Write velocity
+    ofile_ << "VECTORS velocity float" << std::endl;
+    ofile_ << velocityStream_.str() << std::endl;
+    velocityStream_.str("");
+  }
+
+  if (FieldStencil<FlowField>::parameters_.geometry.dim == 3) {
+    // Write pressure
+    ofile_
+      << "CELL_DATA " << turbulentField.getNx() * turbulentField.getNy() * turbulentField.getNz() << std::endl
+      << "SCALARS pressure float 1" << std::endl
+      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << pressureStream_.str() << std::endl;
+    pressureStream_.str("");
+
+    ofile_
+      << "SCALARS distance float 1" << std::endl
+      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << distanceStream_.str() << std::endl;
+    distanceStream_.str("");
+
+    ofile_
+      << "SCALARS viscosity float 1" << std::endl
+      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << viscosityStream_.str() << std::endl;
+    viscosityStream_.str("");
+
+    // Write velocity
+    ofile_ << "VECTORS velocity float" << std::endl;
+    ofile_ << velocityStream_.str() << std::endl;
+    velocityStream_.str("");
+  }
+
+  written_ = true;
+  closeFile();
+}

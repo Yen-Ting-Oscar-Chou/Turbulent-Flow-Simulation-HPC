@@ -1,3 +1,4 @@
+#include "StdAfx.hpp"
 #include "TurbulentFlowField.hpp"
 
 TurbulentFlowField::TurbulentFlowField(const Parameters& parameters):

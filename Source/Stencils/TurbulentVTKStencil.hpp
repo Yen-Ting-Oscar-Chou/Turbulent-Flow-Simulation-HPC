@@ -12,7 +12,8 @@ namespace Stencils {
   public:
     TurbulentVTKStencil(const Parameters& parameters);
     ~TurbulentVTKStencil() override = default;
-
+    
+    using VTKStencil::apply;
     void apply(TurbulentFlowField& turbulentField, int i, int j);
     void apply(TurbulentFlowField& turbulentField, int i, int j, int k);
 

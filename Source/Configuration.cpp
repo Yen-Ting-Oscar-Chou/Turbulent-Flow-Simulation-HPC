@@ -454,4 +454,6 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
   MPI_Bcast(parameters.walls.vectorBack, 3, MY_MPI_FLOAT, 0, communicator);
 
   // TODO WS2: broadcast turbulence parameters
+  // wait for turbulence branch to be finished to implement the following:
+  // MPI_Bcast(parameters.turbulence.deltaMixLen)
 }

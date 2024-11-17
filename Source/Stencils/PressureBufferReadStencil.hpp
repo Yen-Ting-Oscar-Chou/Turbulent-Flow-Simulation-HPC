@@ -1,11 +1,12 @@
 #pragma once
 
-#include "Iterators.hpp"
+#include "BoundaryStencil.hpp"
+#include "Definitions.hpp"
 #include "FlowField.hpp"
 #include "Parameters.hpp"
-#include <vector>
 
 namespace Stencils {
+
   class PressureBufferReadStencil: public BoundaryStencil<FlowField> {
   public:
     PressureBufferReadStencil(const Parameters& parameters, const std::vector<RealType>& pressure);
@@ -24,6 +25,6 @@ namespace Stencils {
     void applyBackWall(FlowField& flowField, int i, int j, int k) override;
 
   private:
-    std::vector<RealType>& pressure_;
+    const std::vector<RealType>& pressure_;
   };
 } // namespace Stencils

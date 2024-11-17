@@ -84,6 +84,7 @@ void Simulation::solveTimestep() {
   // Solve for pressure
   solver_->solve();
   // TODO WS2: communicate pressure values
+  // Use PetscParallelManager::communicatePressure()
   // Compute velocity
   velocityIterator_.iterate();
   obstacleIterator_.iterate();

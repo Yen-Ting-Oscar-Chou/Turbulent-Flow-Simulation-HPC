@@ -10,7 +10,6 @@ Stencils::ObstacleCoordinatesStencil::ObstacleCoordinatesStencil(const Parameter
 void Stencils::ObstacleCoordinatesStencil::apply(FlowField& flowField, int i, int j) {
   const int obstacle = flowField.getFlags().getValue(i, j);
   if ((obstacle & OBSTACLE_SELF) == 1) {
-    //TODO only use outer obstacle cells
     RealType coords[2] = {0.0, 0.0};
     computeGlobalCoordinates(coords, parameters_, i, j);
     coordinatesList2D.push_back(std::make_tuple(coords[0], coords[1]));

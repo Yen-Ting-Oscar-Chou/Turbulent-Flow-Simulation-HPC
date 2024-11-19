@@ -98,6 +98,22 @@ namespace Stencils {
     return (lv[index0] - lv[index1]) / lm[index0];
   }
 
+  inline RealType dudy(const RealType* const lv, const RealType* const lm) {
+    // Evaluate dudy in the cell center by a central difference
+    const int index0  = mapd(0, 0, 0, 0);
+    const int index1  = mapd(0, -1, 0, 0);
+    const int index_d = mapd(0, 0, 0, 1);
+    return (lv[index0] - lv[index1]) / lm[index_d];
+  }
+
+  inline RealType dvdx(const RealType* const lv, const RealType* const lm) {
+    // Evaluate dvdx in the cell center by a central difference
+    const int index0  = mapd(0, 0, 0, 1);
+    const int index1  = mapd(-1, 0, 0, 1);
+    const int index_d = mapd(0, 0, 0, 0);
+    return (lv[index0] - lv[index1]) / lm[index_d];
+  }
+
   // TODO WS1: Second derivatives
   // Second derivative of u w.r.t. x-direction
   inline RealType d2udx2(const RealType* const lv, const RealType* const lm) {
@@ -109,64 +125,64 @@ namespace Stencils {
 
   // Second derivative of u w.r.t. y-direction
   inline RealType d2udy2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm = lm[mapd(0, 0, 0, 1)];
-    const RealType dp = lm[mapd(0, 1, 0, 1)];
+    const RealType dm  = lm[mapd(0, 0, 0, 1)];
+    const RealType dp  = lm[mapd(0, 1, 0, 1)];
     const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
     return fac * (dm * (lv[mapd(0, 1, 0, 0)] - lv[mapd(0, 0, 0, 0)]) + dp * (lv[mapd(0, -1, 0, 0)] - lv[mapd(0, 0, 0, 0)]));
   }
 
   // Second derivative of u w.r.t. z-direction
   inline RealType d2udz2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm = lm[mapd(0, 0, 0, 2)];
-    const RealType dp = lm[mapd(0, 0, 1, 2)];
+    const RealType dm  = lm[mapd(0, 0, 0, 2)];
+    const RealType dp  = lm[mapd(0, 0, 1, 2)];
     const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
     return fac * (dm * (lv[mapd(0, 0, 1, 0)] - lv[mapd(0, 0, 0, 0)]) + dp * (lv[mapd(0, 0, -1, 0)] - lv[mapd(0, 0, 0, 0)]));
   }
 
   // Second derivative of v w.r.t. x-direction
   inline RealType d2vdx2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm = lm[mapd(0, 0, 0, 0)];
-    const RealType dp = lm[mapd(1, 0, 0, 0)];
+    const RealType dm  = lm[mapd(0, 0, 0, 0)];
+    const RealType dp  = lm[mapd(1, 0, 0, 0)];
     const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
     return fac * (dm * (lv[mapd(1, 0, 0, 1)] - lv[mapd(0, 0, 0, 1)]) + dp * (lv[mapd(-1, 0, 0, 1)] - lv[mapd(0, 0, 0, 1)]));
   }
 
   // Second derivative of v w.r.t. y-direction
   inline RealType d2vdy2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm = lm[mapd(0, 0, 0, 1)];
-    const RealType dp = lm[mapd(0, 1, 0, 1)];
+    const RealType dm  = lm[mapd(0, 0, 0, 1)];
+    const RealType dp  = lm[mapd(0, 1, 0, 1)];
     const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
     return fac * (dm * (lv[mapd(0, 1, 0, 1)] - lv[mapd(0, 0, 0, 1)]) + dp * (lv[mapd(0, -1, 0, 1)] - lv[mapd(0, 0, 0, 1)]));
   }
 
   // Second derivative of v w.r.t. z-direction
   inline RealType d2vdz2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm = lm[mapd(0, 0, 0, 2)];
-    const RealType dp = lm[mapd(0, 0, 1, 2)];
+    const RealType dm  = lm[mapd(0, 0, 0, 2)];
+    const RealType dp  = lm[mapd(0, 0, 1, 2)];
     const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
     return fac * (dm * (lv[mapd(0, 0, 1, 1)] - lv[mapd(0, 0, 0, 1)]) + dp * (lv[mapd(0, 0, -1, 1)] - lv[mapd(0, 0, 0, 1)]));
   }
 
   // Second derivative of w w.r.t. x-direction
   inline RealType d2wdx2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm = lm[mapd(0, 0, 0, 0)];
-    const RealType dp = lm[mapd(1, 0, 0, 0)];
+    const RealType dm  = lm[mapd(0, 0, 0, 0)];
+    const RealType dp  = lm[mapd(1, 0, 0, 0)];
     const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
     return fac * (dm * (lv[mapd(1, 0, 0, 2)] - lv[mapd(0, 0, 0, 2)]) + dp * (lv[mapd(-1, 0, 0, 2)] - lv[mapd(0, 0, 0, 2)]));
   }
 
   // Second derivative of w w.r.t. y-direction
   inline RealType d2wdy2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm = lm[mapd(0, 0, 0, 1)];
-    const RealType dp = lm[mapd(0, 1, 0, 1)];
+    const RealType dm  = lm[mapd(0, 0, 0, 1)];
+    const RealType dp  = lm[mapd(0, 1, 0, 1)];
     const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
     return fac * (dm * (lv[mapd(0, 1, 0, 2)] - lv[mapd(0, 0, 0, 2)]) + dp * (lv[mapd(0, -1, 0, 2)] - lv[mapd(0, 0, 0, 2)]));
   }
 
   // Second derivative of w w.r.t. z-direction
   inline RealType d2wdz2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm = lm[mapd(0, 0, 0, 2)];
-    const RealType dp = lm[mapd(0, 0, 1, 2)];
+    const RealType dm  = lm[mapd(0, 0, 0, 2)];
+    const RealType dp  = lm[mapd(0, 0, 1, 2)];
     const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
     return fac * (dm * (lv[mapd(0, 0, 1, 2)] - lv[mapd(0, 0, 0, 2)]) + dp * (lv[mapd(0, 0, -1, 2)] - lv[mapd(0, 0, 0, 2)]));
   }

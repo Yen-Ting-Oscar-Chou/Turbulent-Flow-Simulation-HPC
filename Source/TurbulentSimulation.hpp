@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Stencils/DistanceStencil.hpp"
 #include "Stencils/ObstacleCoordinatesStencil.hpp"
 #include "Simulation.hpp"

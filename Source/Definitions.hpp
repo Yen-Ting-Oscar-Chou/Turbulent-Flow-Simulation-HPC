@@ -15,6 +15,7 @@ using RealType = double;
 
 static constexpr RealType MY_FLOAT_MAX = std::numeric_limits<RealType>::max();
 static constexpr RealType MY_FLOAT_MIN = std::numeric_limits<RealType>::min();
+static constexpr RealType KAPPA = 0.41;
 
 #define LIKELY(x) __builtin_expect(bool(x), 1)
 #define UNLIKELY(x) __builtin_expect(bool(x), 0)

@@ -12,7 +12,7 @@ namespace Stencils {
    * When iterated with, creates a VTK file.
    */
   class VTKStencil: public FieldStencil<FlowField> {
-  private:
+  protected:
     bool          written_; //! Whether the file has already been written
     std::string   prefix_;  //! Prefix to be attached to the vtk files
     std::ofstream ofile_;   //! Output file stream
@@ -36,6 +36,8 @@ namespace Stencils {
      * Stores all the streams and closes the file.
      */
     void closeFile();
+    
+
 
   public:
     VTKStencil(const Parameters& parameters);

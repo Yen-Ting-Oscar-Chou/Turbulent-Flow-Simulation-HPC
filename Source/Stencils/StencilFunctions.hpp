@@ -1,9 +1,30 @@
 #pragma once
 
+#include "StdAfx.hpp"
+
 #include "Definitions.hpp"
 #include "Parameters.hpp"
 
 namespace Stencils {
+
+  inline RealType computeDistance(RealType* coords1, RealType* coords2, const Parameters& parameters_) {
+    RealType result = 0.0;
+    for (int i = 0; i < parameters_.geometry.dim; i++) {
+      result += pow(coords1[0] - coords2[0], 2);
+    }
+    return sqrt(result);
+  }
+
+  inline void computeGlobalCoordinates(RealType* coords, const Parameters& parameters_, int i, int j) {
+    coords[0] = parameters_.meshsize->getPosX(i, j, -1) + 0.5 * parameters_.meshsize->getDx(i, j, -1);
+    coords[1] = parameters_.meshsize->getPosY(i, j, -1) + 0.5 * parameters_.meshsize->getDy(i, j, -1);
+  }
+
+  inline void computeGlobalCoordinates(RealType* coords, const Parameters& parameters_, int i, int j, int k) {
+    coords[0] = parameters_.meshsize->getPosX(i, j, k) + 0.5 * parameters_.meshsize->getDx(i, j, k);
+    coords[1] = parameters_.meshsize->getPosY(i, j, k) + 0.5 * parameters_.meshsize->getDy(i, j, k);
+    coords[2] = parameters_.meshsize->getPosZ(i, j, k) + 0.5 * parameters_.meshsize->getDz(i, j, k);
+  }
 
   // Load the local velocity cube with relevant velocities of the 2D plane
   inline void loadLocalVelocity2D(FlowField& flowField, RealType* const localVelocity, int i, int j) {

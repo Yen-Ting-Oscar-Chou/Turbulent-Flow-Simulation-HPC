@@ -1,55 +1,80 @@
 #include "StdAfx.hpp"
-
-#include "PressureBufferFillStencil.hpp"
 #include <vector>
 
+#include "PressureBufferFillStencil.hpp"
 
-Stencils::PressureBufferFillStencil::PressureBufferFillStencil(const Parameters& parameters): 
-  BoundaryStencil(parameters) {}
-// Read the pressure values in each of the six (3D) boundary faces of a sub-domain
-// and store them consecutively in one-dimensional buffer arrays.
-if(parameters.geometry.dim == 2) {
-  pressureLeft_ = std::vector<RealType>(parameters.parallel.localSize[1]);
-  pressureRight_ = std::vector<RealType>(parameters.parallel.localSize[1]);
-  pressureBottom_ = std::vector<RealType>(parameters.parallel.localSize[0]);
-  pressureTop_ = std::vector<RealType>(parameters.parallel.localSize[0]);
-}
-else if(parameters.geometry.dim == 3) {
-  pressureLeft_ = std::vector<RealType>(parameters.parallel.localSize[1] * parameters.parallel.localSize[2]);
-  pressureRight_ = std::vector<RealType>(parameters.parallel.localSize[1] * parameters.parallel.localSize[2]);
-  pressureBottom_ = std::vector<RealType>(parameters.parallel.localSize[0] * parameters.parallel.localSize[2]);
-  pressureTop_ = std::vector<RealType>(parameters.parallel.localSize[0] * parameters.parallel.localSize[2]);
-  pressureFront_ = std::vector<RealType>(parameters.parallel.localSize[0] * parameters.parallel.localSize[1]);
-  pressureBack_ = std::vector<RealType>(parameters.parallel.localSize[0] * parameters.parallel.localSize[1]);
+Stencils::PressureBufferFillStencil::PressureBufferFillStencil(const Parameters& parameters):
+  BoundaryStencil(parameters), pressureLeft_(selectPressureLeft(parameters)),
+  pressureRight_(selectPressureRight(parameters)),
+  pressureBottom_(selectPressureBottom(parameters)),
+  pressureTop_(selectPressureTop(parameters)),
+  pressureFront_(selectPressureFront(parameters)),
+  pressureBack_(selectPressureBack(parameters)) {
+  // Read the pressure values in each of the six (3D) boundary faces of a subdomain
+  // and store them consecutively in one-dimensional buffer arrays.
+
+  if (parameters.geometry.dim == 2) {
+    // Initialize the vectors if 2D
+    pressureLeft_.resize(parameters.parallel.localSize[1]);
+    pressureRight_.resize(parameters.parallel.localSize[1]);
+    pressureBottom_.resize(parameters.parallel.localSize[0]);
+    pressureTop_.resize(parameters.parallel.localSize[0]);
+  } else if (parameters.geometry.dim == 3) {
+    // Initialize the vectors if 3D
+    pressureLeft_.resize(parameters.parallel.localSize[1] * parameters.parallel.localSize[2]);
+    pressureRight_.resize(parameters.parallel.localSize[1] * parameters.parallel.localSize[2]);
+    pressureBottom_.resize(parameters.parallel.localSize[0] * parameters.parallel.localSize[2]);
+    pressureTop_.resize(parameters.parallel.localSize[0] * parameters.parallel.localSize[2]);
+    pressureFront_.resize(parameters.parallel.localSize[0] * parameters.parallel.localSize[1]);
+    pressureBack_.resize(parameters.parallel.localSize[0] * parameters.parallel.localSize[1]);
+  } else {
+    throw std::invalid_argument("Unsupported dimensionality: must be 2 or 3.");
+  }
 }
 
-void PressureBufferFillStencil::applyLeftWall(FlowField& flowField, int i, int j) {
+RealType &Stencils::PressureBufferFillStencil::getScalar(FlowField &flowField, int i, int j) {
+  return flowField.getPressure().getScalar(i, j);
+}
+
+RealType &Stencils::PressureBufferFillStencil::getScalar(FlowField &flowField, int i, int j, int k) {
+  return flowField.getPressure().getScalar(i, j, k);
+}
+
+/* Methods for 2D case */
+
+void Stencils::PressureBufferFillStencil::applyLeftWall(FlowField& flowField, int i, int j) {
   pressureLeft_[j] = flowField.getPressure().getScalar(i, j);
 }
-void PressureBufferFillStencil::applyRightWall(FlowField& flowField, int i, int j) {
+
+void Stencils::PressureBufferFillStencil::applyRightWall(FlowField& flowField, int i, int j) {
   pressureRight_[j] = flowField.getPressure().getScalar(i, j);
 }
-void PressureBufferFillStencil::applyBottomWall(FlowField& flowField, int i, int j) {
-  pressureBottom_[i] = flowField.getPressure().getScalar(i, j);
+
+void Stencils::PressureBufferFillStencil::applyBottomWall(FlowField& flowField, int i, int j) {
+  pressureBottom_[j] = flowField.getPressure().getScalar(i, j);
 }
-void PressureBufferFillStencil::applyTopWall(FlowField& flowField, int i, int j) {
-  pressureTop_[i] = flowField.getPressure().getScalar(i, j);
+
+void Stencils::PressureBufferFillStencil::applyTopWall(FlowField& flowField, int i, int j) {
+  pressureBottom_[j] = flowField.getPressure().getScalar(i, j);
 }
-void PressureBufferFillStencil::applyLeftWall(FlowField& flowField, int i, int j, int k) {
-  pressureLeft_[j + parameters.geometry.localSize[1] * k] = flowField.getPressure().getScalar(i, j, k);
+
+/* Methods for 3D case */
+
+void Stencils::PressureBufferFillStencil::applyLeftWall(FlowField& flowField, int i, int j, int k) {
+  pressureLeft_[j + BoundaryStencil<FlowField>::parameters_.parallel.localSize[1] * k] = flowField.getPressure().getScalar(i, j, k);
 }
-void PressureBufferFillStencil::applyRightWall(FlowField& flowField, int i, int j, int k) {
-  pressureRight_[j + parameters.geometry.localSize[1] * k] = flowField.getPressure().getScalar(i, j, k);
+void Stencils::PressureBufferFillStencil::applyRightWall(FlowField& flowField, int i, int j, int k) {
+  pressureRight_[j + BoundaryStencil<FlowField>::parameters_.parallel.localSize[1] * k] = flowField.getPressure().getScalar(i, j, k);
 }
-void PressureBufferFillStencil::applyBottomWall(FlowField& flowField, int i, int j, int k) {
-  pressureBottom_[i + parameters.geometry.localSize[0] * k] = flowField.getPressure().getScalar(i, j, k);
+void Stencils::PressureBufferFillStencil::applyBottomWall(FlowField& flowField, int i, int j, int k) {
+  pressureBottom_[i + BoundaryStencil<FlowField>::parameters_.parallel.localSize[0] * k] = flowField.getPressure().getScalar(i, j, k);
 }
-void PressureBufferFillStencil::applyTopWall(FlowField& flowField, int i, int j, int k) {
-  pressureTop_[i + parameters.geometry.localSize[0] * k] = flowField.getPressure().getScalar(i, j, k);
+void Stencils::PressureBufferFillStencil::applyTopWall(FlowField& flowField, int i, int j, int k) {
+  pressureTop_[i + BoundaryStencil<FlowField>::parameters_.parallel.localSize[0] * k] = flowField.getPressure().getScalar(i, j, k);
 }
-void PressureBufferFillStencil::applyFrontWall(FlowField& flowField, int i, int j, int l) {
-  pressureFront_[i + parameters.geometry.localSize[0] * j] = flowField.getPressure().getScalar(i, j, k);
+void Stencils::PressureBufferFillStencil::applyFrontWall(FlowField& flowField, int i, int j, int k) {
+  pressureFront_[i + BoundaryStencil<FlowField>::parameters_.parallel.localSize[0] * j] = flowField.getPressure().getScalar(i, j, k);
 }
-void PressureBufferFillStencil::applyBackWall(FlowField& flowField, int i, int j, int l) {
-  pressureBack_[i + parameters.geometry.localSize[0] * j] = flowField.getPressure().getScalar(i, j, k);
+void Stencils::PressureBufferFillStencil::applyBackWall(FlowField& flowField, int i, int j, int k) {
+  pressureBack_[i +BoundaryStencil<FlowField>::parameters_.parallel.localSize[0] * j] = flowField.getPressure().getScalar(i, j, k);
 }

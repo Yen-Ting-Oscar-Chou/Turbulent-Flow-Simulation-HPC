@@ -4,7 +4,9 @@
 
 TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowField& flowField):
   Simulation(parameters, flowField),
-  turbulentField_(flowField) {};
+  turbulentField_(flowField),
+  viscosityStencil_(parameters),
+  viscosityIterator_(turbulentField_, parameters, viscosityStencil_) {};
 
 void TurbulentSimulation::initializeFlowField() {
   Simulation::initializeFlowField();
@@ -30,4 +32,10 @@ void TurbulentSimulation::plotVTK(int timeStep, RealType simulationTime) {
 
   vtkIterator.iterate();
   vtkStencil.write(turbulentField_, timeStep, simulationTime);
+}
+
+void TurbulentSimulation::solveTimestep() {
+  viscosityIterator_.iterate();
+  // TODO communicate viscosity
+  Simulation::solveTimestep();
 }

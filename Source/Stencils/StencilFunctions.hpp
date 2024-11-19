@@ -4,6 +4,7 @@
 
 #include "Definitions.hpp"
 #include "Parameters.hpp"
+#include "TurbulentFlowField.hpp"
 
 namespace Stencils {
 
@@ -69,6 +70,26 @@ namespace Stencils {
           localMeshsize[39 + 27 * layer + 9 * row + 3 * column]     = parameters.meshsize->getDx(i + column, j + row, k + layer);
           localMeshsize[39 + 27 * layer + 9 * row + 3 * column + 1] = parameters.meshsize->getDy(i + column, j + row, k + layer);
           localMeshsize[39 + 27 * layer + 9 * row + 3 * column + 2] = parameters.meshsize->getDz(i + column, j + row, k + layer);
+        }
+      }
+    }
+  }
+
+  // Load local viscosity for 2D -> same as loadLocalVelocity2D, but invoking call to meshsize-ptr
+  inline void loadLocalViscosity2D(const Parameters& parameters, TurbulentFlowField& turbulentField, RealType* const localViscosity, int i, int j) {
+    for (int row = -1; row <= 1; row++) {
+      for (int column = -1; column <= 1; column++) {
+        localViscosity[39 + 9 * row + 3 * column]     = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row);
+      }
+    }
+  }
+
+  // Load local meshsize for 3D
+  inline void loadLocalViscosity3D(const Parameters& parameters, TurbulentFlowField& turbulentField, RealType* const localViscosity, int i, int j, int k) {
+    for (int layer = -1; layer <= 1; layer++) {
+      for (int row = -1; row <= 1; row++) {
+        for (int column = -1; column <= 1; column++) {
+          localViscosity[39 + 27 * layer + 9 * row + 3 * column]     = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row, k + layer);
         }
       }
     }

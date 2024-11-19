@@ -72,7 +72,7 @@ void Stencils::TurbulentVTKStencil::write(TurbulentFlowField& turbulentField, in
     distanceStream_.str("");
 
     ofile_
-      << "SCALARS viscosity float 1" << std::endl
+      << "SCALARS turbulent_viscosity float 1" << std::endl
       << "LOOKUP_TABLE default" << std::endl;
     ofile_ << viscosityStream_.str() << std::endl;
     viscosityStream_.str("");
@@ -99,7 +99,7 @@ void Stencils::TurbulentVTKStencil::write(TurbulentFlowField& turbulentField, in
     distanceStream_.str("");
 
     ofile_
-      << "SCALARS viscosity float 1" << std::endl
+      << "SCALARS turbulent_viscosity float 1" << std::endl
       << "LOOKUP_TABLE default" << std::endl;
     ofile_ << viscosityStream_.str() << std::endl;
     viscosityStream_.str("");

@@ -4,7 +4,7 @@
 #include "TurbulentFlowField.hpp"
 
 namespace Stencils {
-  class TurbulentVTKStencil : public VTKStencil {
+  class TurbulentVTKStencil : public VTKStencil<TurbulentFlowField>{
   private:
     std::stringstream viscosityStream_; //! Stream for the viscosity data
     std::stringstream distanceStream_;  //! Stream for the distance data
@@ -13,9 +13,8 @@ namespace Stencils {
     TurbulentVTKStencil(const Parameters& parameters);
     ~TurbulentVTKStencil() override = default;
     
-    using VTKStencil::apply;
-    void apply(TurbulentFlowField& turbulentField, int i, int j);
-    void apply(TurbulentFlowField& turbulentField, int i, int j, int k);
+    void apply(TurbulentFlowField& turbulentField, int i, int j) override;
+    void apply(TurbulentFlowField& turbulentField, int i, int j, int k) override;
 
     void write(TurbulentFlowField& turbulentField, int timeStep, RealType simulationTime);
   };

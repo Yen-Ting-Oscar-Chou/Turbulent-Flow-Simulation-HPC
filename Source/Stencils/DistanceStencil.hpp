@@ -11,7 +11,7 @@ namespace Stencils {
 
   /** Computes distance to nearest obstacle for each cell
    */
-  class DistanceStencil: public FieldStencil<FlowField> {
+  class DistanceStencil: public FieldStencil<TurbulentFlowField> {
   private:
     std::list<std::tuple<RealType, RealType>>           coordinatesList2D;
     std::list<std::tuple<RealType, RealType, RealType>> coordinatesList3D;
@@ -20,9 +20,8 @@ namespace Stencils {
     DistanceStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType>>& coordinatesList);
     DistanceStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList);
     ~DistanceStencil() override = default;
-    using FieldStencil::apply;
-    void apply(TurbulentFlowField& turbulentField, int i, int j);
-    void apply(TurbulentFlowField& turbulentField, int i, int j, int k);
+    void apply(TurbulentFlowField& turbulentField, int i, int j) override;
+    void apply(TurbulentFlowField& turbulentField, int i, int j, int k) override;
   };
 
 } // namespace Stencils

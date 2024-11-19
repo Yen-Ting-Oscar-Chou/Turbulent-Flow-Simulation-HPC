@@ -3,11 +3,11 @@
 #include "DistanceStencil.hpp"
 
 Stencils::DistanceStencil::DistanceStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType>>& coordinatesList):
-  FieldStencil<FlowField>(parameters),
+  FieldStencil<TurbulentFlowField>(parameters),
   coordinatesList2D(coordinatesList) {}
 
 Stencils::DistanceStencil::DistanceStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList):
-  FieldStencil<FlowField>(parameters),
+  FieldStencil<TurbulentFlowField>(parameters),
   coordinatesList3D(coordinatesList) {}
 
 void Stencils::DistanceStencil::apply(TurbulentFlowField& turbulentField, int i, int j) {

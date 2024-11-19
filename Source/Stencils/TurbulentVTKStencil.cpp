@@ -6,7 +6,7 @@ Stencils::TurbulentVTKStencil::TurbulentVTKStencil(const Parameters& parameters)
   VTKStencil(parameters) {};
 
 void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, int i, int j) {
-  ASSERTION(FieldStencil<FlowField>::parameters_.geometry.dim == 2);
+  ASSERTION(FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 2);
 
   RealType pressure    = 0.0;
   RealType viscosity   = 0.0;
@@ -30,7 +30,7 @@ void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, in
 }
 
 void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, int i, int j, int k) {
-  ASSERTION(FieldStencil<FlowField>::parameters_.geometry.dim == 3);
+  ASSERTION(FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 3);
 
   RealType pressure    = 0.0;
   RealType viscosity = 0.0;
@@ -56,7 +56,7 @@ void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, in
 void Stencils::TurbulentVTKStencil::write(TurbulentFlowField& turbulentField, int timeStep, RealType simulationTime) {
   openFile(timeStep, simulationTime);
 
-  if (FieldStencil<FlowField>::parameters_.geometry.dim == 2) {
+  if (FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 2) {
     // Write pressure
     ofile_
       << "CELL_DATA " << turbulentField.getNx() * turbulentField.getNy() << std::endl
@@ -83,7 +83,7 @@ void Stencils::TurbulentVTKStencil::write(TurbulentFlowField& turbulentField, in
     velocityStream_.str("");
   }
 
-  if (FieldStencil<FlowField>::parameters_.geometry.dim == 3) {
+  if (FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 3) {
     // Write pressure
     ofile_
       << "CELL_DATA " << turbulentField.getNx() * turbulentField.getNy() * turbulentField.getNz() << std::endl

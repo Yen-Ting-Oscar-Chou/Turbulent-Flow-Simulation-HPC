@@ -34,7 +34,7 @@ public:
 
 class TurbulenceParameters {
   public: 
-    RealType (*deltaMixLen) (float, float, float, float) = NULL;  // x, rho, U, mu
+    RealType (*deltaMixLen) (RealType, RealType) = NULL;  // x, Re
 };
 
 class SolverParameters {

@@ -13,12 +13,15 @@ namespace Stencils {
    */
   class ObstacleCoordinatesStencil: public FieldStencil<FlowField> {
   private:
-    std::list<std::tuple<RealType, RealType>>        coordinatesList2D;
-    std::list<std::tuple<RealType, RealType, RealType>> coordinatesList3D;
+    std::list<std::tuple<RealType, RealType>>&           coordinatesList2D;
+    std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList3D;
 
   public:
-    ObstacleCoordinatesStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType>>& coordinatesList);
-    ObstacleCoordinatesStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList);
+    ObstacleCoordinatesStencil(
+      const Parameters& parameters, 
+      std::list<std::tuple<RealType, RealType>>& coordinatesList2D, 
+      std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList3D
+    );
     ~ObstacleCoordinatesStencil() override = default;
 
     void apply(FlowField& flowField, int i, int j) override;

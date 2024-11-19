@@ -84,11 +84,11 @@ int main(int argc, char* argv[]) {
   // Initialise simulation
   if (parameters.simulation.type == "turbulence") {
      if (rank == 0) {
-      spdlog::info("Start DNS simulation in {}D", parameters.geometry.dim);
+      spdlog::info("Start turbulence simulation in {}D", parameters.geometry.dim);
     }
     TurbulentFlowField* turbulentFlowField = new TurbulentFlowField(parameters);
     if (turbulentFlowField == NULL) {
-      throw std::runtime_error("flowField == NULL!");
+      throw std::runtime_error("turbulentFlowField == NULL!");
     }
     TurbulentSimulation* turbulentSimulation = new TurbulentSimulation(parameters, *turbulentFlowField);
     flowField = turbulentFlowField;

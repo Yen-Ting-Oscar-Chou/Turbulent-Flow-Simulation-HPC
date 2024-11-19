@@ -6,7 +6,7 @@
 
 class TurbulentSimulation : public Simulation {
   private:
-    TurbulentFlowField turbulentField_;
+    TurbulentFlowField& turbulentField_;
 
 public:
   TurbulentSimulation(Parameters& parameters, TurbulentFlowField& flowField);

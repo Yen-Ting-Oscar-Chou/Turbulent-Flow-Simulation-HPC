@@ -10,7 +10,7 @@ namespace Stencils {
   inline RealType computeDistance(RealType* coords1, RealType* coords2, const Parameters& parameters_) {
     RealType result = 0.0;
     for (int i = 0; i < parameters_.geometry.dim; i++) {
-      result += pow(coords1[0] - coords2[0], 2);
+      result += pow(coords1[i] - coords2[i], 2);
     }
     return sqrt(result);
   }

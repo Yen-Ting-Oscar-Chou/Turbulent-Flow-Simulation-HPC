@@ -8,22 +8,17 @@ TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowFi
 
 void TurbulentSimulation::initializeFlowField() {
   Simulation::initializeFlowField();
+  std::list<std::tuple<RealType, RealType, RealType>> coordinateList3D;
+  std::list<std::tuple<RealType, RealType>>           coordinateList2D;
+  Stencils::ObstacleCoordinatesStencil                obstStencil(parameters_, coordinateList2D, coordinateList3D);
+  FieldIterator<FlowField>                            obstIterator(flowField_, parameters_, obstStencil);
+  obstIterator.iterate();
   if (parameters_.geometry.dim == 2) {
-    std::list<std::tuple<RealType, RealType>> coordinateList;
-    Stencils::ObstacleCoordinatesStencil      obstStencil(parameters_, coordinateList);
-    FieldIterator<FlowField>                  obstIterator(flowField_, parameters_, obstStencil);
-    obstIterator.iterate();
-
-    Stencils::DistanceStencil distStencil(parameters_, coordinateList);
+    Stencils::DistanceStencil         distStencil(parameters_, coordinateList2D);
     FieldIterator<TurbulentFlowField> distIterator(turbulentField_, parameters_, distStencil);
     distIterator.iterate();
   } else {
-    std::list<std::tuple<RealType, RealType, RealType>> coordinateList;
-    Stencils::ObstacleCoordinatesStencil      obstStencil(parameters_, coordinateList);
-    FieldIterator<FlowField>                  obstIterator(flowField_, parameters_, obstStencil);
-    obstIterator.iterate();
-
-    Stencils::DistanceStencil distStencil(parameters_, coordinateList);
+    Stencils::DistanceStencil         distStencil(parameters_, coordinateList3D);
     FieldIterator<TurbulentFlowField> distIterator(turbulentField_, parameters_, distStencil);
     distIterator.iterate();
   }

@@ -2,13 +2,10 @@
 
 #include "ObstacleCoordinatesStencil.hpp"
 
-Stencils::ObstacleCoordinatesStencil::ObstacleCoordinatesStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType>>& coordinatesList):
+Stencils::ObstacleCoordinatesStencil::ObstacleCoordinatesStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType>>& coordinatesList2D, std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList3D):
   FieldStencil<FlowField>(parameters),
-  coordinatesList2D(coordinatesList) {}
-
-Stencils::ObstacleCoordinatesStencil::ObstacleCoordinatesStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList):
-  FieldStencil<FlowField>(parameters),
-  coordinatesList3D(coordinatesList) {}
+  coordinatesList2D(coordinatesList2D),
+  coordinatesList3D(coordinatesList3D) {}
 
 void Stencils::ObstacleCoordinatesStencil::apply(FlowField& flowField, int i, int j) {
   const int obstacle = flowField.getFlags().getValue(i, j);

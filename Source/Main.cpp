@@ -4,6 +4,7 @@
 #include "Configuration.hpp"
 #include "MeshsizeFactory.hpp"
 #include "Simulation.hpp"
+#include <fenv.h>
 
 
 #include "ParallelManagers/PetscParallelConfiguration.hpp"
@@ -38,6 +39,9 @@ int main(int argc, char* argv[]) {
 
 #ifndef NDEBUG
   spdlog::warn("Running in Debug mode; make sure to switch to Release mode for production/benchmark runs.");
+#ifdef __linux__
+  feenableexcept(FE_DIVBYZERO | FE_INVALID);
+#endif
 #else
   spdlog::info("Running in Release mode");
 #endif

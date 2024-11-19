@@ -81,110 +81,94 @@ namespace Stencils {
   // the local mesh sizes dudx <-> first derivative of u-component of velocity field w.r.t. x-direction.
   inline RealType dudx(const RealType* const lv, const RealType* const lm) {
     // Evaluate dudx in the cell center by a central difference
-    const int index0  = mapd(0, 0, 0, 0);
-    const int index_1 = mapd(-1, 0, 0, 0);
-    return (lv[index0] - lv[index_1]) / lm[index0];
+    const int index0 = mapd(0, 0, 0, 0);
+    const int index1 = mapd(-1, 0, 0, 0);
+    return (lv[index0] - lv[index1]) / lm[index0];
   }
 
   inline RealType dvdy(const RealType* const lv, const RealType* const lm) {
-    const int index0  = mapd(0, 0, 0, 1);
-    const int index_1 = mapd(0, -1, 0, 1);
-    return (lv[index0] - lv[index_1]) / lm[index0];
+    const int index0 = mapd(0, 0, 0, 1);
+    const int index1 = mapd(0, -1, 0, 1);
+    return (lv[index0] - lv[index1]) / lm[index0];
   }
 
   inline RealType dwdz(const RealType* const lv, const RealType* const lm) {
-    const int index0  = mapd(0, 0, 0, 2);
-    const int index_1 = mapd(0, 0, -1, 2);
-    return (lv[index0] - lv[index_1]) / lm[index0];
+    const int index0 = mapd(0, 0, 0, 2);
+    const int index1 = mapd(0, 0, -1, 2);
+    return (lv[index0] - lv[index1]) / lm[index0];
   }
 
   // TODO WS1: Second derivatives
+  // Second derivative of u w.r.t. x-direction
   inline RealType d2udx2(const RealType* const lv, const RealType* const lm) {
-    // Note: lm[mapd(...)] 4th element (0, 1, 2) == (dx, dy, dz)
-    // Calculate forward and backward grid size for stretched grid case
-    const RealType hforw = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(1, 0, 0, 0)]);
-    const RealType hback = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(-1, 0, 0, 0)]);
-    // indexes used for velocities: 4th index (0, 1, 2) == (u, v, w)
-    const int index0  = mapd(0, 0, 0, 0);
-    const int index_1 = mapd(-1, 0, 0, 0);
-    const int index1  = mapd(1, 0, 0, 0);
-    // Using Shortley-Weller scheme to account for stretched grids
-    return 2 * (lv[index1] / (hforw * (hback + hforw)) - lv[index0] / (hforw * hback) + lv[index_1] / (hback * (hback + hforw)));
+    const RealType dxm = lm[mapd(0, 0, 0, 0)];
+    const RealType dxp = lm[mapd(1, 0, 0, 0)];
+    const RealType fac = 2 / (dxm * dxp * dxp + dxp * dxm * dxm);
+    return fac * (dxm * (lv[mapd(1, 0, 0, 0)] - lv[mapd(0, 0, 0, 0)]) + dxp * (lv[mapd(-1, 0, 0, 0)] - lv[mapd(0, 0, 0, 0)]));
   }
 
-  inline RealType d2vdx2(const RealType* const lv, const RealType* const lm) {
-    const RealType hforw = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(1, 0, 0, 0)]);
-    const RealType hback = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(-1, 0, 0, 0)]);
-
-    const int index0  = mapd(0, 0, 0, 1);
-    const int index_1 = mapd(-1, 0, 0, 1);
-    const int index1  = mapd(1, 0, 0, 1);
-    return 2 * (lv[index1] / (hforw * (hback + hforw)) - lv[index0] / (hforw * hback) + lv[index_1] / (hback * (hback + hforw)));
-  }
-  inline RealType d2wdx2(const RealType* const lv, const RealType* const lm) {
-    const RealType hforw = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(1, 0, 0, 0)]);
-    const RealType hback = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(-1, 0, 0, 0)]);
-
-    const int index0  = mapd(0, 0, 0, 2);
-    const int index_1 = mapd(-1, 0, 0, 2);
-    const int index1  = mapd(1, 0, 0, 2);
-    return 2 * (lv[index1] / (hforw * (hback + hforw)) - lv[index0] / (hforw * hback) + lv[index_1] / (hback * (hback + hforw)));
-  }
-
+  // Second derivative of u w.r.t. y-direction
   inline RealType d2udy2(const RealType* const lv, const RealType* const lm) {
-    const RealType hforw = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, 1, 0, 1)]);
-    const RealType hback = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, -1, 0, 1)]);
-
-    const int index0  = mapd(0, 0, 0, 0);
-    const int index_1 = mapd(0, -1, 0, 0);
-    const int index1  = mapd(0, 1, 0, 0);
-    return 2 * (lv[index1] / (hforw * (hback + hforw)) - lv[index0] / (hforw * hback) + lv[index_1] / (hback * (hback + hforw)));
-  }
-  inline RealType d2vdy2(const RealType* const lv, const RealType* const lm) {
-    const RealType hforw = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, 1, 0, 1)]);
-    const RealType hback = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, -1, 0, 1)]);
-
-    const int index0  = mapd(0, 0, 0, 1);
-    const int index_1 = mapd(0, -1, 0, 1);
-    const int index1  = mapd(0, 1, 0, 1);
-    return 2 * (lv[index1] / (hforw * (hback + hforw)) - lv[index0] / (hforw * hback) + lv[index_1] / (hback * (hback + hforw)));
-  }
-  inline RealType d2wdy2(const RealType* const lv, const RealType* const lm) {
-    const RealType hforw = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, 1, 0, 1)]);
-    const RealType hback = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, -1, 0, 1)]);
-
-    const int index0  = mapd(0, 0, 0, 2);
-    const int index_1 = mapd(0, -1, 0, 2);
-    const int index1  = mapd(0, 1, 0, 2);
-    return 2 * (lv[index1] / (hforw * (hback + hforw)) - lv[index0] / (hforw * hback) + lv[index_1] / (hback * (hback + hforw)));
+    const RealType dm = lm[mapd(0, 0, 0, 1)];
+    const RealType dp = lm[mapd(0, 1, 0, 1)];
+    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
+    return fac * (dm * (lv[mapd(0, 1, 0, 0)] - lv[mapd(0, 0, 0, 0)]) + dp * (lv[mapd(0, -1, 0, 0)] - lv[mapd(0, 0, 0, 0)]));
   }
 
+  // Second derivative of u w.r.t. z-direction
   inline RealType d2udz2(const RealType* const lv, const RealType* const lm) {
-    const RealType hforw = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, 1, 2)]);
-    const RealType hback = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, -1, 2)]);
-
-    const int index0  = mapd(0, 0, 0, 0);
-    const int index_1 = mapd(0, 0, -1, 0);
-    const int index1  = mapd(0, 0, 1, 0);
-    return 2 * (lv[index1] / (hforw * (hback + hforw)) - lv[index0] / (hforw * hback) + lv[index_1] / (hback * (hback + hforw)));
+    const RealType dm = lm[mapd(0, 0, 0, 2)];
+    const RealType dp = lm[mapd(0, 0, 1, 2)];
+    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
+    return fac * (dm * (lv[mapd(0, 0, 1, 0)] - lv[mapd(0, 0, 0, 0)]) + dp * (lv[mapd(0, 0, -1, 0)] - lv[mapd(0, 0, 0, 0)]));
   }
+
+  // Second derivative of v w.r.t. x-direction
+  inline RealType d2vdx2(const RealType* const lv, const RealType* const lm) {
+    const RealType dm = lm[mapd(0, 0, 0, 0)];
+    const RealType dp = lm[mapd(1, 0, 0, 0)];
+    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
+    return fac * (dm * (lv[mapd(1, 0, 0, 1)] - lv[mapd(0, 0, 0, 1)]) + dp * (lv[mapd(-1, 0, 0, 1)] - lv[mapd(0, 0, 0, 1)]));
+  }
+
+  // Second derivative of v w.r.t. y-direction
+  inline RealType d2vdy2(const RealType* const lv, const RealType* const lm) {
+    const RealType dm = lm[mapd(0, 0, 0, 1)];
+    const RealType dp = lm[mapd(0, 1, 0, 1)];
+    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
+    return fac * (dm * (lv[mapd(0, 1, 0, 1)] - lv[mapd(0, 0, 0, 1)]) + dp * (lv[mapd(0, -1, 0, 1)] - lv[mapd(0, 0, 0, 1)]));
+  }
+
+  // Second derivative of v w.r.t. z-direction
   inline RealType d2vdz2(const RealType* const lv, const RealType* const lm) {
-    const RealType hforw = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, 1, 2)]);
-    const RealType hback = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, -1, 2)]);
-
-    const int index0  = mapd(0, 0, 0, 1);
-    const int index_1 = mapd(0, 0, -1, 1);
-    const int index1  = mapd(0, 0, 1, 1);
-    return 2 * (lv[index1] / (hforw * (hback + hforw)) - lv[index0] / (hforw * hback) + lv[index_1] / (hback * (hback + hforw)));
+    const RealType dm = lm[mapd(0, 0, 0, 2)];
+    const RealType dp = lm[mapd(0, 0, 1, 2)];
+    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
+    return fac * (dm * (lv[mapd(0, 0, 1, 1)] - lv[mapd(0, 0, 0, 1)]) + dp * (lv[mapd(0, 0, -1, 1)] - lv[mapd(0, 0, 0, 1)]));
   }
-  inline RealType d2wdz2(const RealType* const lv, const RealType* const lm) {
-    const RealType hforw = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, 1, 2)]);
-    const RealType hback = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, -1, 2)]);
 
-    const int index0  = mapd(0, 0, 0, 2);
-    const int index_1 = mapd(0, 0, -1, 2);
-    const int index1  = mapd(0, 0, 1, 2);
-    return 2 * (lv[index1] / (hforw * (hback + hforw)) - lv[index0] / (hforw * hback) + lv[index_1] / (hback * (hback + hforw)));
+  // Second derivative of w w.r.t. x-direction
+  inline RealType d2wdx2(const RealType* const lv, const RealType* const lm) {
+    const RealType dm = lm[mapd(0, 0, 0, 0)];
+    const RealType dp = lm[mapd(1, 0, 0, 0)];
+    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
+    return fac * (dm * (lv[mapd(1, 0, 0, 2)] - lv[mapd(0, 0, 0, 2)]) + dp * (lv[mapd(-1, 0, 0, 2)] - lv[mapd(0, 0, 0, 2)]));
+  }
+
+  // Second derivative of w w.r.t. y-direction
+  inline RealType d2wdy2(const RealType* const lv, const RealType* const lm) {
+    const RealType dm = lm[mapd(0, 0, 0, 1)];
+    const RealType dp = lm[mapd(0, 1, 0, 1)];
+    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
+    return fac * (dm * (lv[mapd(0, 1, 0, 2)] - lv[mapd(0, 0, 0, 2)]) + dp * (lv[mapd(0, -1, 0, 2)] - lv[mapd(0, 0, 0, 2)]));
+  }
+
+  // Second derivative of w w.r.t. z-direction
+  inline RealType d2wdz2(const RealType* const lv, const RealType* const lm) {
+    const RealType dm = lm[mapd(0, 0, 0, 2)];
+    const RealType dp = lm[mapd(0, 0, 1, 2)];
+    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
+    return fac * (dm * (lv[mapd(0, 0, 1, 2)] - lv[mapd(0, 0, 0, 2)]) + dp * (lv[mapd(0, 0, -1, 2)] - lv[mapd(0, 0, 0, 2)]));
   }
 
   // First derivative of product (u*v), evaluated at the location of the v-component.
@@ -651,45 +635,57 @@ namespace Stencils {
   }
 
   inline RealType computeF2D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {
-    // TODO WS1
     return localVelocity[mapd(0, 0, 0, 0)]
-        + dt * ((1 / parameters.flow.Re) * (d2udx2(localVelocity, localMeshsize) + d2udy2(localVelocity, localMeshsize)) 
-        - du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize)     
-        + parameters.environment.gx);
+           + dt
+               * (-du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize) + 1 / parameters.flow.Re * (d2udx2(localVelocity, localMeshsize) + d2udy2(localVelocity, localMeshsize)));
   }
 
   inline RealType computeG2D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {
-    // TODO WS1
     return localVelocity[mapd(0, 0, 0, 1)]
-        + dt * ((1 / parameters.flow.Re) * (d2vdx2(localVelocity, localMeshsize) + d2vdy2(localVelocity, localMeshsize))
-        - dv2dy(localVelocity, parameters, localMeshsize) - duvdx(localVelocity, parameters, localMeshsize)
-        + parameters.environment.gy);
+           + dt
+               * (-duvdx(localVelocity, parameters, localMeshsize) - dv2dy(localVelocity, parameters, localMeshsize) + 1 / parameters.flow.Re * (d2vdx2(localVelocity, localMeshsize) + d2vdy2(localVelocity, localMeshsize)));
   }
 
   inline RealType computeF3D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {
-    // TODO WS1
     return localVelocity[mapd(0, 0, 0, 0)]
-        + dt * ((1 / parameters.flow.Re) * (d2udx2(localVelocity, localMeshsize) + d2udy2(localVelocity, localMeshsize)
-        + d2udz2(localVelocity, localMeshsize)) 
-        - du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize)
-        - duwdz(localVelocity, parameters, localMeshsize) + parameters.environment.gx);
+        + dt * (
+            -du2dx(localVelocity, parameters, localMeshsize) 
+            - duvdy(localVelocity, parameters, localMeshsize) 
+            - duwdz(localVelocity, parameters, localMeshsize) 
+            + 1 / parameters.flow.Re * (
+              d2udx2(localVelocity, localMeshsize) 
+              + d2udy2(localVelocity, localMeshsize) 
+              + d2udz2(localVelocity, localMeshsize)
+            )
+            );
   }
 
   inline RealType computeG3D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {
-    // TODO WS1
     return localVelocity[mapd(0, 0, 0, 1)]
-        + dt * ((1 / parameters.flow.Re) * (d2vdx2(localVelocity, localMeshsize) + d2vdy2(localVelocity, localMeshsize)
-        + d2vdz2(localVelocity, localMeshsize)) 
-        - dv2dy(localVelocity, parameters, localMeshsize) - duvdx(localVelocity, parameters, localMeshsize) 
-        - dvwdz(localVelocity, parameters, localMeshsize) + parameters.environment.gy);
+        + dt * (
+          -dv2dy(localVelocity, parameters, localMeshsize) 
+          - duvdx(localVelocity, parameters, localMeshsize)
+          - dvwdz(localVelocity, parameters, localMeshsize) 
+          + 1 / parameters.flow.Re * (
+            d2vdx2(localVelocity, localMeshsize)
+            + d2vdy2(localVelocity, localMeshsize)
+            + d2vdz2(localVelocity, localMeshsize)
+          )
+          );
   }
+
   inline RealType computeH3D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {
-    // TODO WS1
     return localVelocity[mapd(0, 0, 0, 2)]
-        + dt * ((1 / parameters.flow.Re) * (d2wdx2(localVelocity, localMeshsize) + d2wdy2(localVelocity, localMeshsize)
-        + d2wdz2(localVelocity, localMeshsize)) 
-        - dw2dz(localVelocity, parameters, localMeshsize) - duwdx(localVelocity, parameters, localMeshsize)
-        - dvwdy(localVelocity, parameters, localMeshsize) + parameters.environment.gz);
+        + dt * (
+          -dw2dz(localVelocity, parameters, localMeshsize) 
+          - duwdx(localVelocity, parameters, localMeshsize)
+          - dvwdy(localVelocity, parameters, localMeshsize) 
+          + 1 / parameters.flow.Re * (
+            d2wdx2(localVelocity, localMeshsize)
+            + d2wdy2(localVelocity, localMeshsize)
+            + d2wdz2(localVelocity, localMeshsize)
+          )
+          );
   }
 
 } // namespace Stencils

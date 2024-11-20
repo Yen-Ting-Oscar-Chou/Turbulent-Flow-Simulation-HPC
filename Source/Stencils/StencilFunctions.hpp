@@ -80,6 +80,7 @@ namespace Stencils {
     for (int row = -1; row <= 1; row++) {
       for (int column = -1; column <= 1; column++) {
         localViscosity[39 + 9 * row + 3 * column]     = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row);
+        localViscosity[39 + 9 * row + 3 * column + 1] = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row);
       }
     }
   }
@@ -90,6 +91,8 @@ namespace Stencils {
       for (int row = -1; row <= 1; row++) {
         for (int column = -1; column <= 1; column++) {
           localViscosity[39 + 27 * layer + 9 * row + 3 * column]     = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row, k + layer);
+          localViscosity[39 + 27 * layer + 9 * row + 3 * column + 1] = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row, k + layer);
+          localViscosity[39 + 27 * layer + 9 * row + 3 * column + 2] = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row, k + layer);
         }
       }
     }
@@ -107,23 +110,19 @@ namespace Stencils {
     return (lv[index0] - lv[index1]) / lm[index0];
   }
 
-  inline RealType dvdy(const RealType* const lv, const RealType* const lm) {
-    const int index0 = mapd(0, 0, 0, 1);
-    const int index1 = mapd(0, -1, 0, 1);
-    return (lv[index0] - lv[index1]) / lm[index0];
-  }
-
-  inline RealType dwdz(const RealType* const lv, const RealType* const lm) {
-    const int index0 = mapd(0, 0, 0, 2);
-    const int index1 = mapd(0, 0, -1, 2);
-    return (lv[index0] - lv[index1]) / lm[index0];
-  }
-
   inline RealType dudy(const RealType* const lv, const RealType* const lm) {
     // Evaluate dudy in the cell center by a central difference
     const int index0  = mapd(0, 0, 0, 0);
     const int index1  = mapd(0, -1, 0, 0);
     const int index_d = mapd(0, 0, 0, 1);
+    return (lv[index0] - lv[index1]) / lm[index_d];
+  }
+
+  inline RealType dudz(const RealType* const lv, const RealType* const lm) {
+    // Evaluate dudy in the cell center by a central difference
+    const int index0  = mapd(0, 0, 0, 0);
+    const int index1  = mapd(0, 0, -1, 0);
+    const int index_d = mapd(0, 0, 0, 2);
     return (lv[index0] - lv[index1]) / lm[index_d];
   }
 
@@ -133,6 +132,116 @@ namespace Stencils {
     const int index1  = mapd(-1, 0, 0, 1);
     const int index_d = mapd(0, 0, 0, 0);
     return (lv[index0] - lv[index1]) / lm[index_d];
+  }
+
+  inline RealType dvdy(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 1);
+    const int index1 = mapd(0, -1, 0, 1);
+    return (lv[index0] - lv[index1]) / lm[index0];
+  }
+
+  inline RealType dvdz(const RealType* const lv, const RealType* const lm) {
+    // Evaluate dvdz in the cell center by a central difference
+    const int index0  = mapd(0, 0, 0, 1);
+    const int index1  = mapd(0, 0, -1, 1);
+    const int index_d = mapd(0, 0, 0, 2);
+    return (lv[index0] - lv[index1]) / lm[index_d];
+  }
+
+  inline RealType dwdx(const RealType* const lv, const RealType* const lm) {
+    // Evaluate dwdx in the cell center by a central difference
+    const int index0  = mapd(0, 0, 0, 2);
+    const int index1  = mapd(0, 0, -1, 2);
+    const int index_d = mapd(0, 0, 0, 0);
+    return (lv[index0] - lv[index1]) / lm[index_d];
+  }
+
+  inline RealType dwdy(const RealType* const lv, const RealType* const lm) {
+    // Evaluate dvdy in the cell center by a central difference
+    const int index0  = mapd(0, 0, 0, 2);
+    const int index1  = mapd(0, -1, 0, 2);
+    const int index_d = mapd(0, 0, 0, 1);
+    return (lv[index0] - lv[index1]) / lm[index_d];
+  }
+
+  inline RealType dwdz(const RealType* const lv, const RealType* const lm) {
+    const int index0 = mapd(0, 0, 0, 2);
+    const int index1 = mapd(0, 0, -1, 2);
+    return (lv[index0] - lv[index1]) / lm[index0];
+  }
+
+  // d/dx * (v + du/dx)
+  inline RealType dVdxdudx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
+    const int index_minus = mapd(-1, 0, 0, 0);
+    const int index_this  = mapd(0, 0, 0, 0);
+    const int index_plus  = mapd(1, 0, 0, 0);
+
+    const RealType delta_minus = lMesh[index_this]; // TODO correct?
+    const RealType delta_plus  = lMesh[index_plus]; // TODO correct?
+
+    const RealType visc_this   = lVis[index_this] + 1 / re;
+    const RealType visc_plus   = lVis[index_plus] + 1 / re;
+    const RealType vel_this    = lVel[index_this];
+    const RealType vel_plus    = lVel[index_plus];
+    const RealType vel_minus   = lVel[index_minus];
+    const RealType denominator = (delta_minus * delta_plus * delta_plus + delta_plus * delta_minus * delta_minus);
+    return 2 / denominator * (delta_minus * (visc_plus * (vel_plus - vel_this)) - delta_plus * (visc_this * (vel_this - vel_minus)));
+  }
+
+  // d/dy * (v + dv/dy)
+  inline RealType dVdydvdy(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
+    const int index_minus = mapd(0, -1, 0, 1);
+    const int index_this  = mapd(0, 0, 0, 1);
+    const int index_plus  = mapd(0, 1, 0, 1);
+
+    const RealType delta_minus = lMesh[index_this]; // TODO correct?
+    const RealType delta_plus  = lMesh[index_plus]; // TODO correct?
+
+    const RealType visc_this   = lVis[index_this] + 1 / re;
+    const RealType visc_plus   = lVis[index_plus] + 1 / re;
+    const RealType vel_this    = lVel[index_this];
+    const RealType vel_plus    = lVel[index_plus];
+    const RealType vel_minus   = lVel[index_minus];
+    const RealType denominator = (delta_minus * delta_plus * delta_plus + delta_plus * delta_minus * delta_minus);
+    return 2 / denominator * (delta_minus * (visc_plus * (vel_plus - vel_this)) - delta_plus * (visc_this * (vel_this - vel_minus)));
+  }
+
+  // d/dz * (v + dw/dz)
+  inline RealType dVdzdwdz(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
+    const int index_minus = mapd(0, 0, -1, 2);
+    const int index_this  = mapd(0, 0, 0, 2);
+    const int index_plus  = mapd(0, 0, 1, 2);
+
+    const RealType delta_minus = lMesh[index_this]; // TODO correct?
+    const RealType delta_plus  = lMesh[index_plus]; // TODO correct?
+
+    const RealType visc_this   = lVis[index_this] + 1 / re;
+    const RealType visc_plus   = lVis[index_plus] + 1 / re;
+    const RealType vel_this    = lVel[index_this];
+    const RealType vel_plus    = lVel[index_plus];
+    const RealType vel_minus   = lVel[index_minus];
+    const RealType denominator = (delta_minus * delta_plus * delta_plus + delta_plus * delta_minus * delta_minus);
+    return 2 / denominator * (delta_minus * (visc_plus * (vel_plus - vel_this)) - delta_plus * (visc_this * (vel_this - vel_minus)));
+  }
+
+  // d/dy * (v * (du/dy + dv/dx))
+  inline RealType dVdydudydvdx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
+    const int index_minus = mapd(0, -1, 0, 1);
+    const int index_this  = mapd(0, 0, 0, 1);
+    const int index_plus  = mapd(0, 1, 0, 1);
+
+    const RealType delta_minus = lMesh[index_this]; // TODO correct?
+    const RealType delta_plus  = lMesh[index_plus]; // TODO correct?
+    const RealType denominator = 2 * (delta_minus * delta_plus);
+    const RealType phi_this    = 0.0;
+    const RealType visc_minus  = interpolateViscosity(lVis[mapd(0, 0, 0, 0)], lVis[mapd(1, 0, 0, 0)], lVis[mapd(0, 1, 0, 0)], lVis[mapd(1, 1, 0, 0)]);
+    const RealType phi_minus   = visc_minus;
+    const RealType phi_plus    = 0.0;
+    return 1 / denominator * (delta_minus * (phi_plus) + (delta_plus - delta_minus) * (phi_this)-delta_plus * (phi_minus));
+  }
+
+  inline RealType interpolateViscosity(const RealType visc_bl, const RealType visc_br, const RealType visc_tl, const RealType visc_tr) {
+    return 0.5 * (0.5 * (visc_bl + visc_br) + 0.5 * (visc_tl + visc_tr));
   }
 
   // TODO WS1: Second derivatives

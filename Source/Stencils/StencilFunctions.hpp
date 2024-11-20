@@ -102,12 +102,17 @@ namespace Stencils {
   inline int mapd(int i, int j, int k, int component) { return 39 + 27 * k + 9 * j + 3 * i + component; }
 
   inline RealType firstDerivative(const RealType* const lv, const RealType* const lm, const char comp, const char deriv) {
-    const int which_comp  = comp == COMP_X ? 0 : comp == COMP_Y ? 1 : 2;
-    const int which_deriv = deriv == DERIV_X ? 0 : deriv == DERIV_Y ? 1 : 2;
+    const bool is_X = DERIV_X == deriv;
+    const bool is_Y = DERIV_Y == deriv;
+    const bool is_Z = DERIV_Z == deriv;
+
+    const int which_comp  = (COMP_Y == comp) + ((COMP_Z == comp) * 2); // implicit COMP_X == comp = 0
+    const int which_deriv = is_Y + (is_Z * 2);
+
     const int index_this  = mapd(0, 0, 0, which_comp);
-    const int index_minus = mapd(deriv == DERIV_X ? -1 : 0, deriv == DERIV_Y ? -1 : 0, deriv == DERIV_Z ? -1 : 0, which_comp);
-    const int index_plus  = mapd(deriv == DERIV_X ? 1 : 0, deriv == DERIV_Y ? 1 : 0, deriv == DERIV_Z ? 1 : 0, which_comp);
-    const int index_dm    = mapd(deriv == DERIV_X ? -1 : 0, deriv == DERIV_Y ? -1 : 0, deriv == DERIV_Z ? -1 : 0, which_deriv);
+    const int index_minus = is_X * mapd(-1, 0, 0, which_comp) + is_Y * mapd(0, -1, 0, which_comp) + is_Z * mapd(0, 0, -1, which_comp);
+    const int index_plus  = is_X * mapd(1, 0, 0, which_comp) + is_Y * mapd(0, 1, 0, which_comp) + is_Z * mapd(0, 0, 1, which_comp);
+    const int index_dm    = is_X * mapd(-1, 0, 0, which_deriv) + is_Y * mapd(0, -1, 0, which_deriv) + is_Z * mapd(0, 0, -1, which_deriv);
     const int index_dp    = mapd(0, 0, 0, which_deriv);
 
     const RealType dp = lm[index_dp];
@@ -117,12 +122,17 @@ namespace Stencils {
   }
 
   inline RealType secondDerivative(const RealType* const lv, const RealType* const lm, const char comp, const char deriv) {
-    const int which_comp  = comp == COMP_X ? 0 : comp == COMP_Y ? 1 : 2;
-    const int which_deriv = deriv == DERIV_X ? 0 : deriv == DERIV_Y ? 1 : 2;
+    const bool is_X = DERIV_X == deriv;
+    const bool is_Y = DERIV_Y == deriv;
+    const bool is_Z = DERIV_Z == deriv;
+
+    const int which_comp  = (COMP_Y == comp) + ((COMP_Z == comp) * 2); // implicit COMP_X == comp = 0
+    const int which_deriv = is_Y + (is_Z * 2);
+    
     const int index_this  = mapd(0, 0, 0, which_comp);
-    const int index_minus = mapd(deriv == DERIV_X ? -1 : 0, deriv == DERIV_Y ? -1 : 0, deriv == DERIV_Z ? -1 : 0, which_comp);
-    const int index_plus  = mapd(deriv == DERIV_X ? 1 : 0, deriv == DERIV_Y ? 1 : 0, deriv == DERIV_Z ? 1 : 0, which_comp);
-    const int index_dm    = mapd(deriv == DERIV_X ? -1 : 0, deriv == DERIV_Y ? -1 : 0, deriv == DERIV_Z ? -1 : 0, which_deriv);
+    const int index_minus = is_X * mapd(-1, 0, 0, which_comp) + is_Y * mapd(0, -1, 0, which_comp) + is_Z * mapd(0, 0, -1, which_comp);
+    const int index_plus  = is_X * mapd(1, 0, 0, which_comp) + is_Y * mapd(0, 1, 0, which_comp) + is_Z * mapd(0, 0, 1, which_comp);
+    const int index_dm    = is_X * mapd(-1, 0, 0, which_deriv) + is_Y * mapd(0, -1, 0, which_deriv) + is_Z * mapd(0, 0, -1, which_deriv);
     const int index_dp    = mapd(0, 0, 0, which_deriv);
 
     const RealType dp = lm[index_dp];
@@ -232,20 +242,20 @@ namespace Stencils {
   }
 
   // d/dy * (v * (du/dy + dv/dx))
-  inline RealType dVdydudydvdx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    const int index_minus = mapd(0, -1, 0, 1);
-    const int index_this  = mapd(0, 0, 0, 1);
-    const int index_plus  = mapd(0, 1, 0, 1);
+  // inline RealType dVdydudydvdx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
+  //   const int index_minus = mapd(0, -1, 0, 1);
+  //   const int index_this  = mapd(0, 0, 0, 1);
+  //   const int index_plus  = mapd(0, 1, 0, 1);
 
-    const RealType delta_minus = lMesh[index_minus];
-    const RealType delta_plus  = lMesh[index_this];
-    const RealType denominator = 2 * (delta_minus * delta_plus);
-    const RealType phi_this    = 0.0;
-    const RealType visc_minus  = interpolateViscosity(lVis[mapd(0, 0, 0, 0)], lVis[mapd(1, 0, 0, 0)], lVis[mapd(0, 1, 0, 0)], lVis[mapd(1, 1, 0, 0)]);
-    const RealType phi_minus   = visc_minus;
-    const RealType phi_plus    = 0.0;
-    return 1 / denominator * (delta_minus * (phi_plus) + (delta_plus - delta_minus) * (phi_this)-delta_plus * (phi_minus));
-  }
+  //   const RealType delta_minus = lMesh[index_minus];
+  //   const RealType delta_plus  = lMesh[index_this];
+  //   const RealType denominator = 2 * (delta_minus * delta_plus);
+  //   const RealType phi_this    = 0.0;
+  //   const RealType visc_minus  = interpolateViscosity(lVis[mapd(0, 0, 0, 0)], lVis[mapd(1, 0, 0, 0)], lVis[mapd(0, 1, 0, 0)], lVis[mapd(1, 1, 0, 0)]);
+  //   const RealType phi_minus   = visc_minus;
+  //   const RealType phi_plus    = 0.0;
+  //   return 1 / denominator * (delta_minus * (phi_plus) + (delta_plus - delta_minus) * (phi_this)-delta_plus * (phi_minus));
+  // }
 
   // TODO WS1: Second derivatives
   // Second derivative of u w.r.t. x-direction

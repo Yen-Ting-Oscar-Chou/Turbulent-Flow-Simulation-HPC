@@ -101,83 +101,77 @@ namespace Stencils {
   // Maps an index and a component to the corresponding value in the cube.
   inline int mapd(int i, int j, int k, int component) { return 39 + 27 * k + 9 * j + 3 * i + component; }
 
+  inline RealType firstDerivative(const RealType* const lv, const RealType* const lm, const char comp, const char deriv) {
+    const int which_comp  = comp == COMP_X ? 0 : comp == COMP_Y ? 1 : 2;
+    const int which_deriv = deriv == DERIV_X ? 0 : deriv == DERIV_Y ? 1 : 2;
+    const int index_this  = mapd(0, 0, 0, which_comp);
+    const int index_minus = mapd(deriv == DERIV_X ? -1 : 0, deriv == DERIV_Y ? -1 : 0, deriv == DERIV_Z ? -1 : 0, which_comp);
+    const int index_plus  = mapd(deriv == DERIV_X ? 1 : 0, deriv == DERIV_Y ? 1 : 0, deriv == DERIV_Z ? 1 : 0, which_comp);
+    const int index_dm    = mapd(deriv == DERIV_X ? -1 : 0, deriv == DERIV_Y ? -1 : 0, deriv == DERIV_Z ? -1 : 0, which_deriv);
+    const int index_dp    = mapd(0, 0, 0, which_deriv);
+
+    const RealType dp = lm[index_dp];
+    const RealType dm = lm[index_dm];
+
+    return 1 / (2 * (dp * dm)) * (dm * lv[index_plus] + (dp - dm) * lv[index_this] - dp * lv[index_minus]);
+  }
+
+  inline RealType secondDerivative(const RealType* const lv, const RealType* const lm, const char comp, const char deriv) {
+    const int which_comp  = comp == COMP_X ? 0 : comp == COMP_Y ? 1 : 2;
+    const int which_deriv = deriv == DERIV_X ? 0 : deriv == DERIV_Y ? 1 : 2;
+    const int index_this  = mapd(0, 0, 0, which_comp);
+    const int index_minus = mapd(deriv == DERIV_X ? -1 : 0, deriv == DERIV_Y ? -1 : 0, deriv == DERIV_Z ? -1 : 0, which_comp);
+    const int index_plus  = mapd(deriv == DERIV_X ? 1 : 0, deriv == DERIV_Y ? 1 : 0, deriv == DERIV_Z ? 1 : 0, which_comp);
+    const int index_dm    = mapd(deriv == DERIV_X ? -1 : 0, deriv == DERIV_Y ? -1 : 0, deriv == DERIV_Z ? -1 : 0, which_deriv);
+    const int index_dp    = mapd(0, 0, 0, which_deriv);
+
+    const RealType dp = lm[index_dp];
+    const RealType dm = lm[index_dm];
+
+    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
+    return fac * (dm * (lv[index_plus] - lv[index_this]) + dp * (lv[index_minus] - lv[index_this]));
+  }
+
   // Derivative functions. They are applied to a cube of 3x3x3 cells. lv stands for the local velocity, lm represents
   // the local mesh sizes dudx <-> first derivative of u-component of velocity field w.r.t. x-direction.
   inline RealType dudx(const RealType* const lv, const RealType* const lm) {
     // Evaluate dudx in the cell center by a central difference
-    const int      index0 = mapd(0, 0, 0, 0);
-    const int      indexM = mapd(-1, 0, 0, 0);
-    const int      indexP = mapd(1, 0, 0, 0);
-    const RealType dp     = lm[index0];
-    const RealType dm     = lm[indexM];
-    return 1 / (2 * (dp * dm)) * (dm * lv[indexP] + (dp - dm) * lv[index0] - dp * lv[indexM]);
+    return firstDerivative(lv, lm, COMP_X, DERIV_X);
   }
 
   inline RealType dudy(const RealType* const lv, const RealType* const lm) {
     // Evaluate dudy in the cell center by a central difference
-    const int index0  = mapd(0, 0, 0, 0);
-    const int index1  = mapd(0, -1, 0, 0);
-    const int index_d = mapd(0, 0, 0, 1);
-    return (lv[index0] - lv[index1]) / lm[index_d];
+    return firstDerivative(lv, lm, COMP_X, DERIV_Y);
   }
 
   inline RealType dudz(const RealType* const lv, const RealType* const lm) {
-    // Evaluate dudy in the cell center by a central difference
-    const int index0  = mapd(0, 0, 0, 0);
-    const int index1  = mapd(0, 0, -1, 0);
-    const int index_d = mapd(0, 0, 0, 2);
-    return (lv[index0] - lv[index1]) / lm[index_d];
+    // Evaluate dudz in the cell center by a central difference
+    return firstDerivative(lv, lm, COMP_X, DERIV_Z);
   }
 
   inline RealType dvdx(const RealType* const lv, const RealType* const lm) {
     // Evaluate dvdx in the cell center by a central difference
-    const int index0  = mapd(0, 0, 0, 1);
-    const int index1  = mapd(-1, 0, 0, 1);
-    const int index_d = mapd(0, 0, 0, 0);
-    return (lv[index0] - lv[index1]) / lm[index_d];
+    return firstDerivative(lv, lm, COMP_Y, DERIV_X);
   }
 
-  inline RealType dvdy(const RealType* const lv, const RealType* const lm) {
-    const int      index0 = mapd(0, 0, 0, 1);
-    const int      indexM = mapd(0, -1, 0, 1);
-    const int      indexP = mapd(0, 1, 0, 1);
-    const RealType dp     = lm[index0];
-    const RealType dm     = lm[indexM];
-    return 1 / (2 * (dp * dm)) * (dm * lv[indexP] + (dp - dm) * lv[index0] - dp * lv[indexM]);
-  }
+  inline RealType dvdy(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_Y, DERIV_Y); }
 
   inline RealType dvdz(const RealType* const lv, const RealType* const lm) {
     // Evaluate dvdz in the cell center by a central difference
-    const int index0  = mapd(0, 0, 0, 1);
-    const int index1  = mapd(0, 0, -1, 1);
-    const int index_d = mapd(0, 0, 0, 2);
-    return (lv[index0] - lv[index1]) / lm[index_d];
+    return firstDerivative(lv, lm, COMP_Y, DERIV_Z);
   }
 
   inline RealType dwdx(const RealType* const lv, const RealType* const lm) {
     // Evaluate dwdx in the cell center by a central difference
-    const int index0  = mapd(0, 0, 0, 2);
-    const int index1  = mapd(0, 0, -1, 2);
-    const int index_d = mapd(0, 0, 0, 0);
-    return (lv[index0] - lv[index1]) / lm[index_d];
+    return firstDerivative(lv, lm, COMP_Z, DERIV_X);
   }
 
   inline RealType dwdy(const RealType* const lv, const RealType* const lm) {
     // Evaluate dvdy in the cell center by a central difference
-    const int index0  = mapd(0, 0, 0, 2);
-    const int index1  = mapd(0, -1, 0, 2);
-    const int index_d = mapd(0, 0, 0, 1);
-    return (lv[index0] - lv[index1]) / lm[index_d];
+    return firstDerivative(lv, lm, COMP_Z, DERIV_Y);
   }
 
-  inline RealType dwdz(const RealType* const lv, const RealType* const lm) {
-    const int      index0 = mapd(0, 0, 0, 2);
-    const int      indexM = mapd(0, 0, -1, 2);
-    const int      indexP = mapd(0, 0, 1, 2);
-    const RealType dp     = lm[index0];
-    const RealType dm     = lm[indexM];
-    return 1 / (2 * (dp * dm)) * (dm * lv[indexP] + (dp - dm) * lv[index0] - dp * lv[indexM]);
-  }
+  inline RealType dwdz(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_Z, DERIV_Z); }
 
   // d/dx * (v + du/dx)
   inline RealType dVdxdudx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
@@ -185,8 +179,8 @@ namespace Stencils {
     const int index_this  = mapd(0, 0, 0, 0);
     const int index_plus  = mapd(1, 0, 0, 0);
 
-    const RealType delta_minus = lMesh[index_this]; // TODO correct?
-    const RealType delta_plus  = lMesh[index_plus]; // TODO correct?
+    const RealType delta_minus = lMesh[index_minus];
+    const RealType delta_plus  = lMesh[index_this];
 
     const RealType visc_this   = lVis[index_this] + 1 / re;
     const RealType visc_plus   = lVis[index_plus] + 1 / re;
@@ -203,8 +197,8 @@ namespace Stencils {
     const int index_this  = mapd(0, 0, 0, 1);
     const int index_plus  = mapd(0, 1, 0, 1);
 
-    const RealType delta_minus = lMesh[index_this]; // TODO correct?
-    const RealType delta_plus  = lMesh[index_plus]; // TODO correct?
+    const RealType delta_minus = lMesh[index_minus];
+    const RealType delta_plus  = lMesh[index_this];
 
     const RealType visc_this   = lVis[index_this] + 1 / re;
     const RealType visc_plus   = lVis[index_plus] + 1 / re;
@@ -221,8 +215,8 @@ namespace Stencils {
     const int index_this  = mapd(0, 0, 0, 2);
     const int index_plus  = mapd(0, 0, 1, 2);
 
-    const RealType delta_minus = lMesh[index_this]; // TODO correct?
-    const RealType delta_plus  = lMesh[index_plus]; // TODO correct?
+    const RealType delta_minus = lMesh[index_minus];
+    const RealType delta_plus  = lMesh[index_this];
 
     const RealType visc_this   = lVis[index_this] + 1 / re;
     const RealType visc_plus   = lVis[index_plus] + 1 / re;
@@ -233,14 +227,18 @@ namespace Stencils {
     return 2 / denominator * (delta_minus * (visc_plus * (vel_plus - vel_this)) - delta_plus * (visc_this * (vel_this - vel_minus)));
   }
 
+  inline RealType interpolateViscosity(const RealType visc_bl, const RealType visc_br, const RealType visc_tl, const RealType visc_tr) {
+    return 0.5 * (0.5 * (visc_bl + visc_br) + 0.5 * (visc_tl + visc_tr));
+  }
+
   // d/dy * (v * (du/dy + dv/dx))
   inline RealType dVdydudydvdx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
     const int index_minus = mapd(0, -1, 0, 1);
     const int index_this  = mapd(0, 0, 0, 1);
     const int index_plus  = mapd(0, 1, 0, 1);
 
-    const RealType delta_minus = lMesh[index_this]; // TODO correct?
-    const RealType delta_plus  = lMesh[index_plus]; // TODO correct?
+    const RealType delta_minus = lMesh[index_minus];
+    const RealType delta_plus  = lMesh[index_this];
     const RealType denominator = 2 * (delta_minus * delta_plus);
     const RealType phi_this    = 0.0;
     const RealType visc_minus  = interpolateViscosity(lVis[mapd(0, 0, 0, 0)], lVis[mapd(1, 0, 0, 0)], lVis[mapd(0, 1, 0, 0)], lVis[mapd(1, 1, 0, 0)]);
@@ -249,82 +247,33 @@ namespace Stencils {
     return 1 / denominator * (delta_minus * (phi_plus) + (delta_plus - delta_minus) * (phi_this)-delta_plus * (phi_minus));
   }
 
-  inline RealType interpolateViscosity(const RealType visc_bl, const RealType visc_br, const RealType visc_tl, const RealType visc_tr) {
-    return 0.5 * (0.5 * (visc_bl + visc_br) + 0.5 * (visc_tl + visc_tr));
-  }
-
   // TODO WS1: Second derivatives
   // Second derivative of u w.r.t. x-direction
-  inline RealType d2udx2(const RealType* const lv, const RealType* const lm) {
-    const RealType dxm = lm[mapd(-1, 0, 0, 0)];
-    const RealType dxp = lm[mapd(0, 0, 0, 0)];
-    const RealType fac = 2 / (dxm * dxp * dxp + dxp * dxm * dxm);
-    return fac * (dxm * (lv[mapd(1, 0, 0, 0)] - lv[mapd(0, 0, 0, 0)]) + dxp * (lv[mapd(-1, 0, 0, 0)] - lv[mapd(0, 0, 0, 0)]));
-  }
+  inline RealType d2udx2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMP_X, DERIV_X); }
 
   // Second derivative of u w.r.t. y-direction
-  inline RealType d2udy2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm  = lm[mapd(0, -1, 0, 1)];
-    const RealType dp  = lm[mapd(0, 0, 0, 1)];
-    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
-    return fac * (dm * (lv[mapd(0, 1, 0, 0)] - lv[mapd(0, 0, 0, 0)]) + dp * (lv[mapd(0, -1, 0, 0)] - lv[mapd(0, 0, 0, 0)]));
-  }
+  inline RealType d2udy2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMP_X, DERIV_Y); }
 
   // Second derivative of u w.r.t. z-direction
-  inline RealType d2udz2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm  = lm[mapd(0, 0, -1, 2)];
-    const RealType dp  = lm[mapd(0, 0, 0, 2)];
-    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
-    return fac * (dm * (lv[mapd(0, 0, 1, 0)] - lv[mapd(0, 0, 0, 0)]) + dp * (lv[mapd(0, 0, -1, 0)] - lv[mapd(0, 0, 0, 0)]));
-  }
+  inline RealType d2udz2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMP_X, DERIV_Z); }
 
   // Second derivative of v w.r.t. x-direction
-  inline RealType d2vdx2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm  = lm[mapd(-1, 0, 0, 0)];
-    const RealType dp  = lm[mapd(0, 0, 0, 0)];
-    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
-    return fac * (dm * (lv[mapd(1, 0, 0, 1)] - lv[mapd(0, 0, 0, 1)]) + dp * (lv[mapd(-1, 0, 0, 1)] - lv[mapd(0, 0, 0, 1)]));
-  }
+  inline RealType d2vdx2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMP_Y, DERIV_X); }
 
   // Second derivative of v w.r.t. y-direction
-  inline RealType d2vdy2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm  = lm[mapd(0, -1, 0, 1)];
-    const RealType dp  = lm[mapd(0, 0, 0, 1)];
-    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
-    return fac * (dm * (lv[mapd(0, 1, 0, 1)] - lv[mapd(0, 0, 0, 1)]) + dp * (lv[mapd(0, -1, 0, 1)] - lv[mapd(0, 0, 0, 1)]));
-  }
+  inline RealType d2vdy2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMP_Y, DERIV_Y); }
 
   // Second derivative of v w.r.t. z-direction
-  inline RealType d2vdz2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm  = lm[mapd(0, 0, -1, 2)];
-    const RealType dp  = lm[mapd(0, 0, 0, 2)];
-    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
-    return fac * (dm * (lv[mapd(0, 0, 1, 1)] - lv[mapd(0, 0, 0, 1)]) + dp * (lv[mapd(0, 0, -1, 1)] - lv[mapd(0, 0, 0, 1)]));
-  }
+  inline RealType d2vdz2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMP_Y, DERIV_Z); }
 
   // Second derivative of w w.r.t. x-direction
-  inline RealType d2wdx2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm  = lm[mapd(-1, 0, 0, 0)];
-    const RealType dp  = lm[mapd(0, 0, 0, 0)];
-    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
-    return fac * (dm * (lv[mapd(1, 0, 0, 2)] - lv[mapd(0, 0, 0, 2)]) + dp * (lv[mapd(-1, 0, 0, 2)] - lv[mapd(0, 0, 0, 2)]));
-  }
+  inline RealType d2wdx2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMP_Z, DERIV_X); }
 
   // Second derivative of w w.r.t. y-direction
-  inline RealType d2wdy2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm  = lm[mapd(0, -1, 0, 1)];
-    const RealType dp  = lm[mapd(0, 0, 0, 1)];
-    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
-    return fac * (dm * (lv[mapd(0, 1, 0, 2)] - lv[mapd(0, 0, 0, 2)]) + dp * (lv[mapd(0, -1, 0, 2)] - lv[mapd(0, 0, 0, 2)]));
-  }
+  inline RealType d2wdy2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMP_Z, DERIV_Y); }
 
   // Second derivative of w w.r.t. z-direction
-  inline RealType d2wdz2(const RealType* const lv, const RealType* const lm) {
-    const RealType dm  = lm[mapd(0, 0, -1, 2)];
-    const RealType dp  = lm[mapd(0, 0, 0, 2)];
-    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
-    return fac * (dm * (lv[mapd(0, 0, 1, 2)] - lv[mapd(0, 0, 0, 2)]) + dp * (lv[mapd(0, 0, -1, 2)] - lv[mapd(0, 0, 0, 2)]));
-  }
+  inline RealType d2wdz2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMP_Z, DERIV_Z); }
 
   // First derivative of product (u*v), evaluated at the location of the v-component.
   inline RealType duvdx(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {

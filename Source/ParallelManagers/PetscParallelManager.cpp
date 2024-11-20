@@ -12,7 +12,7 @@ PetscParallelManager::PetscParallelManager(const Parameters & parameters, FlowFi
    int Ny = _parameters.parallel.localSize[1];
    int Nz = _parameters.parallel.localSize[2];
 
-   constexpr int ghostLayers = 2;
+   constexpr int ghostLayers = 3;
    constexpr int n2D = 2;
    constexpr int n3D = 3;
 

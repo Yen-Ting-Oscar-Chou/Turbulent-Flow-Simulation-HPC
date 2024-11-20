@@ -3,11 +3,11 @@
 #include "FlowField.hpp"
 #include "Parameters.hpp"
 
-#include "../stencils/PressureBufferFillStencil.hpp"
-#include "../stencils/PressureBufferReadStencil.hpp"
+#include "../Stencils/PressureBufferFillStencil.hpp"
+#include "../Stencils/PressureBufferReadStencil.hpp"
 
-#include "../stencils/VelocityBufferFillStencil.hpp"
-#include "../stencils/VelocityBufferReadStencil.hpp"
+#include "../Stencils/VelocityBufferFillStencil.hpp"
+#include "../Stencils/VelocityBufferReadStencil.hpp"
 
 class PetscParallelManager {
 

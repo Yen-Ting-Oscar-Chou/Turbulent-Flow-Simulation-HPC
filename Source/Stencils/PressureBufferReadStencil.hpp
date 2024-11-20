@@ -4,7 +4,7 @@
 #include "Definitions.hpp"
 #include "FlowField.hpp"
 #include "Parameters.hpp"
-
+#include <vector>
 namespace Stencils {
 
   class PressureBufferReadStencil: public BoundaryStencil<FlowField> {

@@ -1,9 +1,12 @@
+#include "StdAfx.hpp"
+#include <vector>
+
 #include "VelocityBufferReadStencil.hpp"
 
 Stencils::VelocityBufferReadStencil::VelocityBufferReadStencil(const Parameters& parameters, const std::vector<RealType>& velocity)
   : BoundaryStencil(parameters), velocity_(velocity) {}
 
-// Write the pressure values from a 1-D array to the correct flowField boundaries.
+// Write the velocity values from a 1-D array to the correct flowField boundaries.
 
 void Stencils::VelocityBufferReadStencil::applyLeftWall(FlowField& flowField, int i, int j) {
   flowField.getPressure().getScalar(i, j) = velocity_[j];

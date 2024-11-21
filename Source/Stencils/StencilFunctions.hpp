@@ -128,7 +128,7 @@ namespace Stencils {
 
     const int which_comp  = (COMP_Y == comp) + ((COMP_Z == comp) * 2); // implicit COMP_X == comp = 0
     const int which_deriv = is_Y + (is_Z * 2);
-    
+
     const int index_this  = mapd(0, 0, 0, which_comp);
     const int index_minus = is_X * mapd(-1, 0, 0, which_comp) + is_Y * mapd(0, -1, 0, which_comp) + is_Z * mapd(0, 0, -1, which_comp);
     const int index_plus  = is_X * mapd(1, 0, 0, which_comp) + is_Y * mapd(0, 1, 0, which_comp) + is_Z * mapd(0, 0, 1, which_comp);
@@ -144,50 +144,34 @@ namespace Stencils {
 
   // Derivative functions. They are applied to a cube of 3x3x3 cells. lv stands for the local velocity, lm represents
   // the local mesh sizes dudx <-> first derivative of u-component of velocity field w.r.t. x-direction.
-  inline RealType dudx(const RealType* const lv, const RealType* const lm) {
-    // Evaluate dudx in the cell center by a central difference
-    return firstDerivative(lv, lm, COMP_X, DERIV_X);
-  }
+  inline RealType dudx(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_X, DERIV_X); }
 
-  inline RealType dudy(const RealType* const lv, const RealType* const lm) {
-    // Evaluate dudy in the cell center by a central difference
-    return firstDerivative(lv, lm, COMP_X, DERIV_Y);
-  }
+  inline RealType dudy(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_X, DERIV_Y); }
 
-  inline RealType dudz(const RealType* const lv, const RealType* const lm) {
-    // Evaluate dudz in the cell center by a central difference
-    return firstDerivative(lv, lm, COMP_X, DERIV_Z);
-  }
+  inline RealType dudz(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_X, DERIV_Z); }
 
-  inline RealType dvdx(const RealType* const lv, const RealType* const lm) {
-    // Evaluate dvdx in the cell center by a central difference
-    return firstDerivative(lv, lm, COMP_Y, DERIV_X);
-  }
+  inline RealType dvdx(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_Y, DERIV_X); }
 
   inline RealType dvdy(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_Y, DERIV_Y); }
 
-  inline RealType dvdz(const RealType* const lv, const RealType* const lm) {
-    // Evaluate dvdz in the cell center by a central difference
-    return firstDerivative(lv, lm, COMP_Y, DERIV_Z);
-  }
+  inline RealType dvdz(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_Y, DERIV_Z); }
 
-  inline RealType dwdx(const RealType* const lv, const RealType* const lm) {
-    // Evaluate dwdx in the cell center by a central difference
-    return firstDerivative(lv, lm, COMP_Z, DERIV_X);
-  }
+  inline RealType dwdx(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_Z, DERIV_X); }
 
-  inline RealType dwdy(const RealType* const lv, const RealType* const lm) {
-    // Evaluate dvdy in the cell center by a central difference
-    return firstDerivative(lv, lm, COMP_Z, DERIV_Y);
-  }
+  inline RealType dwdy(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_Z, DERIV_Y); }
 
   inline RealType dwdz(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMP_Z, DERIV_Z); }
 
-  // d/dx * (v + du/dx)
-  inline RealType dVdxdudx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    const int index_minus = mapd(-1, 0, 0, 0);
-    const int index_this  = mapd(0, 0, 0, 0);
-    const int index_plus  = mapd(1, 0, 0, 0);
+  inline RealType viscositySingleDerivative(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re, const COMP comp) {
+    const bool is_X = COMP_X == comp;
+    const bool is_Y = COMP_Y == comp;
+    const bool is_Z = COMP_Z == comp;
+
+    const int which_comp = is_Y + (is_Z * 2); // implicit COMP_X == comp = 0
+
+    const int index_minus = is_X * mapd(-1, 0, 0, which_comp) + is_Y * mapd(0, -1, 0, which_comp) + is_Z * mapd(0, 0, -1, which_comp);
+    const int index_this  = mapd(0, 0, 0, which_comp);
+    const int index_plus  = is_X * mapd(1, 0, 0, which_comp) + is_Y * mapd(0, 1, 0, which_comp) + is_Z * mapd(0, 0, 1, which_comp);
 
     const RealType delta_minus = lMesh[index_minus];
     const RealType delta_plus  = lMesh[index_this];
@@ -199,42 +183,21 @@ namespace Stencils {
     const RealType vel_minus   = lVel[index_minus];
     const RealType denominator = (delta_minus * delta_plus * delta_plus + delta_plus * delta_minus * delta_minus);
     return 2 / denominator * (delta_minus * (visc_plus * (vel_plus - vel_this)) - delta_plus * (visc_this * (vel_this - vel_minus)));
+  }
+
+  // d/dx * (v + du/dx)
+  inline RealType dVdxdudx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
+    return viscositySingleDerivative(lVel, lVis, lMesh, re, COMP_X);
   }
 
   // d/dy * (v + dv/dy)
   inline RealType dVdydvdy(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    const int index_minus = mapd(0, -1, 0, 1);
-    const int index_this  = mapd(0, 0, 0, 1);
-    const int index_plus  = mapd(0, 1, 0, 1);
-
-    const RealType delta_minus = lMesh[index_minus];
-    const RealType delta_plus  = lMesh[index_this];
-
-    const RealType visc_this   = lVis[index_this] + 1 / re;
-    const RealType visc_plus   = lVis[index_plus] + 1 / re;
-    const RealType vel_this    = lVel[index_this];
-    const RealType vel_plus    = lVel[index_plus];
-    const RealType vel_minus   = lVel[index_minus];
-    const RealType denominator = (delta_minus * delta_plus * delta_plus + delta_plus * delta_minus * delta_minus);
-    return 2 / denominator * (delta_minus * (visc_plus * (vel_plus - vel_this)) - delta_plus * (visc_this * (vel_this - vel_minus)));
+    return viscositySingleDerivative(lVel, lVis, lMesh, re, COMP_Y);
   }
 
   // d/dz * (v + dw/dz)
   inline RealType dVdzdwdz(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    const int index_minus = mapd(0, 0, -1, 2);
-    const int index_this  = mapd(0, 0, 0, 2);
-    const int index_plus  = mapd(0, 0, 1, 2);
-
-    const RealType delta_minus = lMesh[index_minus];
-    const RealType delta_plus  = lMesh[index_this];
-
-    const RealType visc_this   = lVis[index_this] + 1 / re;
-    const RealType visc_plus   = lVis[index_plus] + 1 / re;
-    const RealType vel_this    = lVel[index_this];
-    const RealType vel_plus    = lVel[index_plus];
-    const RealType vel_minus   = lVel[index_minus];
-    const RealType denominator = (delta_minus * delta_plus * delta_plus + delta_plus * delta_minus * delta_minus);
-    return 2 / denominator * (delta_minus * (visc_plus * (vel_plus - vel_this)) - delta_plus * (visc_this * (vel_this - vel_minus)));
+    return viscositySingleDerivative(lVel, lVis, lMesh, re, COMP_Z);
   }
 
   inline RealType interpolateViscosity(const RealType visc_bl, const RealType visc_br, const RealType visc_tl, const RealType visc_tr) {

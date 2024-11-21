@@ -101,7 +101,7 @@ namespace Stencils {
   // Maps an index and a component to the corresponding value in the cube.
   inline int mapd(int i, int j, int k, int component) { return 39 + 27 * k + 9 * j + 3 * i + component; }
 
-  inline RealType firstDerivative(const RealType* const lv, const RealType* const lm, const char comp, const char deriv) {
+  inline RealType firstDerivative(const RealType* const lv, const RealType* const lm, const COMP comp, const DERIV deriv) {
     const bool is_X = DERIV_X == deriv;
     const bool is_Y = DERIV_Y == deriv;
     const bool is_Z = DERIV_Z == deriv;
@@ -121,7 +121,7 @@ namespace Stencils {
     return 1 / (2 * (dp * dm)) * (dm * lv[index_plus] + (dp - dm) * lv[index_this] - dp * lv[index_minus]);
   }
 
-  inline RealType secondDerivative(const RealType* const lv, const RealType* const lm, const char comp, const char deriv) {
+  inline RealType secondDerivative(const RealType* const lv, const RealType* const lm, const COMP comp, const DERIV deriv) {
     const bool is_X = DERIV_X == deriv;
     const bool is_Y = DERIV_Y == deriv;
     const bool is_Z = DERIV_Z == deriv;

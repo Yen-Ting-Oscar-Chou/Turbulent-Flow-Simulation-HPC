@@ -34,7 +34,7 @@ public:
 
 class TurbulenceParameters {
   public: 
-    RealType (*deltaMixLen) (RealType, RealType) = NULL;  // x, Re
+    std::function<RealType (const RealType, const RealType)> deltaMixLen = NULL;
 };
 
 class SolverParameters {

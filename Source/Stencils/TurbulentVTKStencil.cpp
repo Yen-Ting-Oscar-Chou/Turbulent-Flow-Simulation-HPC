@@ -33,8 +33,8 @@ void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, in
   ASSERTION(FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 3);
 
   RealType pressure    = 0.0;
-  RealType viscosity = 0.0;
-  RealType distance = 0.0;
+  RealType viscosity   = 0.0;
+  RealType distance    = 0.0;
   RealType velocity[3] = {0.0, 0.0, 0.0};
 
   if ((turbulentField.getFlags().getValue(i, j, k) & OBSTACLE_SELF) == 0) {
@@ -58,22 +58,15 @@ void Stencils::TurbulentVTKStencil::write(TurbulentFlowField& turbulentField, in
 
   if (FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 2) {
     // Write pressure
-    ofile_
-      << "CELL_DATA " << turbulentField.getNx() * turbulentField.getNy() << std::endl
-      << "SCALARS pressure float 1" << std::endl
-      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << "CELL_DATA " << turbulentField.getNx() * turbulentField.getNy() << std::endl << "SCALARS pressure float 1" << std::endl << "LOOKUP_TABLE default" << std::endl;
     ofile_ << pressureStream_.str() << std::endl;
     pressureStream_.str("");
 
-    ofile_
-      << "SCALARS distance float 1" << std::endl
-      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << "SCALARS distance float 1" << std::endl << "LOOKUP_TABLE default" << std::endl;
     ofile_ << distanceStream_.str() << std::endl;
     distanceStream_.str("");
 
-    ofile_
-      << "SCALARS turbulent_viscosity float 1" << std::endl
-      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << "SCALARS turbulent_viscosity float 1" << std::endl << "LOOKUP_TABLE default" << std::endl;
     ofile_ << viscosityStream_.str() << std::endl;
     viscosityStream_.str("");
 
@@ -92,15 +85,11 @@ void Stencils::TurbulentVTKStencil::write(TurbulentFlowField& turbulentField, in
     ofile_ << pressureStream_.str() << std::endl;
     pressureStream_.str("");
 
-    ofile_
-      << "SCALARS distance float 1" << std::endl
-      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << "SCALARS distance float 1" << std::endl << "LOOKUP_TABLE default" << std::endl;
     ofile_ << distanceStream_.str() << std::endl;
     distanceStream_.str("");
 
-    ofile_
-      << "SCALARS turbulent_viscosity float 1" << std::endl
-      << "LOOKUP_TABLE default" << std::endl;
+    ofile_ << "SCALARS turbulent_viscosity float 1" << std::endl << "LOOKUP_TABLE default" << std::endl;
     ofile_ << viscosityStream_.str() << std::endl;
     viscosityStream_.str("");
 

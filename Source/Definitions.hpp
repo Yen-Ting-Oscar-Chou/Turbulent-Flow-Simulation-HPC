@@ -16,8 +16,10 @@ using RealType = double;
 static constexpr RealType MY_FLOAT_MAX = std::numeric_limits<RealType>::max();
 static constexpr RealType MY_FLOAT_MIN = std::numeric_limits<RealType>::min();
 static constexpr RealType KAPPA = 0.41;
-enum COMP {COMP_X, COMP_Y, COMP_Z}; 
-enum DERIV {DERIV_X, DERIV_Y, DERIV_Z};
+static constexpr RealType EPSILON = std::numeric_limits<RealType>::epsilon();
+
+enum COMP {COMPX = 0, COMPY = 1, COMPZ = 2}; 
+enum DERIV {DERIVX = 0, DERIVY = 1, DERIVZ = 2};
 
 #define LIKELY(x) __builtin_expect(bool(x), 1)
 #define UNLIKELY(x) __builtin_expect(bool(x), 0)

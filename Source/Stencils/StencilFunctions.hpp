@@ -187,21 +187,26 @@ namespace Stencils {
   inline RealType viscosityDoubleDerivative(
     const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re, const COMP comp1, const COMP comp2
   ) {
+    // first component is the outer derivative and first inner derivative
     const bool  isX1   = COMPX == comp1;
     const bool  isY1   = COMPY == comp1;
     const bool  isZ1   = COMPZ == comp1;
+    // second component is the second inner derivative
     const bool  isX2   = COMPX == comp2;
     const bool  isY2   = COMPY == comp2;
     const bool  isZ2   = COMPZ == comp2;
     const DERIV deriv1 = static_cast<DERIV>(comp1);
     const DERIV deriv2 = static_cast<DERIV>(comp2);
 
+    // here index*1 is associated with the outer derivative and first inner derivative 
+    // and index*2 is associated with the second inner derivative
     const int indexThis1       = mapd(0, 0, 0, comp2);
     const int indexThis2       = mapd(0, 0, 0, comp1);
     const int indexMinus1      = mapd(isX1 * -1, isY1 * -1, isZ1 * -1, comp2);
+    // this index is shifted +1 in the second and -1 in the first component (i. e. i+1, j-1 for y, x)
     const int indexPlus2Minus1 = mapd(isX2 + isX1 * -1, isY2 + isY1 * -1, isZ2 + isZ1 * -1, comp1);
-    const int indexPlus1       = mapd(isX1 * 1, isY1 * 1, isZ1 * 1, comp2);
-    const int indexPlus2       = mapd(isX2 * 1, isY2 * 1, isZ2 * 1, comp1);
+    const int indexPlus1       = mapd(isX1, isY1, isZ1, comp2);
+    const int indexPlus2       = mapd(isX2, isY2, isZ2, comp1);
     const int indexDm1         = mapd(isX1 * -1, isY1 * -1, isZ1 * -1, deriv1);
     const int indexDm2         = mapd(isX1 * -1, isY1 * -1, isZ1 * -1, deriv2);
     const int indexDp1         = mapd(0, 0, 0, deriv1);
@@ -211,18 +216,19 @@ namespace Stencils {
     const RealType dm2 = lMesh[indexDm2];
     const RealType dp1 = lMesh[indexDp1];
     const RealType dp2 = lMesh[indexDp2];
-    const RealType d   = (dm1 + dp1) / 2; // (j-1+j+1)/2
+    const RealType d   = (dm1 + dp1) / 2; // stretched discretization length in first component
 
-    const int      indexBottomLeft1  = indexThis1;
-    const int      indexBottomRight1 = indexPlus2;
-    const int      indexTopLeft1     = mapd(isX1, isY1, isZ1, 0);
-    const int      indexTopRight1    = mapd(isX1 + isX2, isY1 + isY2, isZ1 + isZ2, 0);
+    // comments are for y, x
+    const int      indexBottomLeft1  = indexThis1; // (i,j)
+    const int      indexBottomRight1 = indexPlus2; // (i+1, j)
+    const int      indexTopLeft1     = mapd(isX1, isY1, isZ1, 0); // (i, j+1)
+    const int      indexTopRight1    = mapd(isX1 + isX2, isY1 + isY2, isZ1 + isZ2, 0); // (i+1, j+1)
     const RealType visc1             = interpolateViscosity(lVis[indexBottomLeft1], lVis[indexBottomRight1], lVis[indexTopLeft1], lVis[indexTopRight1]) + (1 / re);
 
-    const int      indexBottomLeft2  = indexMinus1;
-    const int      indexBottomRight2 = mapd(isX1 * -1 + isX2, isY1 * -1 + isY2, isZ1 * -1 + isZ2, 0);
-    const int      indexTopLeft2     = indexThis2;
-    const int      indexTopRight2    = mapd(isX2, isY2, isZ2, 0);
+    const int      indexBottomLeft2  = indexMinus1; // (i, j-1)
+    const int      indexBottomRight2 = mapd(isX1 * -1 + isX2, isY1 * -1 + isY2, isZ1 * -1 + isZ2, 0); // (i+1, j-1)
+    const int      indexTopLeft2     = indexThis2; // (i, j)
+    const int      indexTopRight2    = mapd(isX2, isY2, isZ2, 0); // (i+1, j)
     const RealType visc2             = interpolateViscosity(lVis[indexBottomLeft2], lVis[indexBottomRight2], lVis[indexTopLeft2], lVis[indexTopRight2]) + (1 / re);
 
     const RealType forward1  = (lVel[indexPlus1] - lVel[indexThis1]) / dp1;

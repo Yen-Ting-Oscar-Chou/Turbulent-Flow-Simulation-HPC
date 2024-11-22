@@ -17,7 +17,7 @@ void Stencils::DistanceStencil::apply(TurbulentFlowField& turbulentField, int i,
   }
   RealType coords[2] = {0.0, 0.0};
   computeGlobalCoordinates(coords, parameters_, i, j);
-  RealType minDistance = MY_FLOAT_MAX;
+  RealType minDistance = 1e38; //Paraview can't handle large numbers :(
   for (const auto& coordsObst : coordinatesList2D) {
     RealType coordsObstArr[2] = {std::get<0>(coordsObst), std::get<1>(coordsObst)};
     minDistance               = std::min(minDistance, computeDistance(coords, coordsObstArr, parameters_));
@@ -33,7 +33,7 @@ void Stencils::DistanceStencil::apply(TurbulentFlowField& turbulentField, int i,
   }
   RealType coords[3] = {0.0, 0.0, 0.0};
   computeGlobalCoordinates(coords, parameters_, i, j, k);
-  RealType minDistance = MY_FLOAT_MAX;
+  RealType minDistance = 1e38;
   for (const auto& coordsObst : coordinatesList3D) {
     RealType coordsObstArr[3] = {std::get<0>(coordsObst), std::get<1>(coordsObst), std::get<2>(coordsObst)};
     minDistance               = std::min(minDistance, computeDistance(coords, coordsObstArr, parameters_));

@@ -2,7 +2,9 @@
 
 #include "Simulation.hpp"
 #include "Stencils/DistanceStencil.hpp"
+#include "Stencils/MaxViscStencil.hpp"
 #include "Stencils/ObstacleCoordinatesStencil.hpp"
+#include "Stencils/TurbulentFGHStencil.hpp"
 #include "Stencils/TurbulentVTKStencil.hpp"
 #include "Stencils/ViscosityStencil.hpp"
 #include "TurbulentFlowField.hpp"
@@ -12,6 +14,14 @@ private:
   TurbulentFlowField&               turbulentField_;
   Stencils::ViscosityStencil        viscosityStencil_;
   FieldIterator<TurbulentFlowField> viscosityIterator_;
+  Stencils::TurbulentFGHStencil     turbulentFGHStencil_;
+  FieldIterator<TurbulentFlowField> turbulentFGHIterator_;
+  Stencils::MaxViscStencil          maxViscStencil_;
+  FieldIterator<TurbulentFlowField> maxViscIterator_;
+
+
+protected:
+  void setTimeStep() override;
 
 public:
   TurbulentSimulation(Parameters& parameters, TurbulentFlowField& flowField);

@@ -61,20 +61,39 @@ void Stencils::PressureBufferFillStencil::applyTopWall(FlowField& flowField, int
 /* Methods for 3D case */
 
 void Stencils::PressureBufferFillStencil::applyLeftWall(FlowField& flowField, int i, int j, int k) {
-  pressureLeft_[j - 2 + flowField.getNy() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
+  pressureLeft_[j - 2 + flowField.getCellsY() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
 }
 void Stencils::PressureBufferFillStencil::applyRightWall(FlowField& flowField, int i, int j, int k) {
-  pressureRight_[j - 2 + flowField.getNy() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
+  pressureRight_[j - 2 + flowField.getCellsY() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
 }
 void Stencils::PressureBufferFillStencil::applyBottomWall(FlowField& flowField, int i, int j, int k) {
-  pressureBottom_[i - 2 + flowField.getNx() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
+  pressureBottom_[i - 2 + flowField.getCellsX() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
 }
 void Stencils::PressureBufferFillStencil::applyTopWall(FlowField& flowField, int i, int j, int k) {
-  pressureTop_[i - 2 + flowField.getNx() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
+  pressureTop_[i - 2 + flowField.getCellsX() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
 }
 void Stencils::PressureBufferFillStencil::applyFrontWall(FlowField& flowField, int i, int j, int k) {
-  pressureFront_[i - 2 + flowField.getNx() * (j - 2)] = flowField.getPressure().getScalar(i, j, k);
+  pressureFront_[i - 2 + flowField.getCellsX() * (j - 2)] = flowField.getPressure().getScalar(i, j, k);
 }
 void Stencils::PressureBufferFillStencil::applyBackWall(FlowField& flowField, int i, int j, int k) {
-  pressureBack_[i - 2 + flowField.getNx() * (j - 2)] = flowField.getPressure().getScalar(i, j, k);
+  pressureBack_[i - 2 + flowField.getCellsX() * (j - 2)] = flowField.getPressure().getScalar(i, j, k);
+}
+
+std::vector<RealType>& Stencils::PressureBufferFillStencil::getpressureLeft(){
+  return pressureLeft_;
+}
+std::vector<RealType>& Stencils::PressureBufferFillStencil::getpressureRight(){
+  return pressureRight_;
+}
+std::vector<RealType>& Stencils::PressureBufferFillStencil::getpressureBottom(){
+  return pressureBottom_;
+}
+std::vector<RealType>& Stencils::PressureBufferFillStencil::getpressureTop(){
+  return pressureTop_;
+}
+std::vector<RealType>& Stencils::PressureBufferFillStencil::getpressureFront(){
+  return pressureFront_;
+}
+std::vector<RealType>& Stencils::PressureBufferFillStencil::getpressureBack(){
+  return pressureBack_;
 }

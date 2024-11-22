@@ -18,6 +18,8 @@
 #include "Stencils/PeriodicBoundaryStencils.hpp"
 #include "Stencils/VelocityStencil.hpp"
 #include "Stencils/VTKStencil.hpp"
+#include "ParallelManagers/PetscParallelManager.hpp"
+
 
 
 class Simulation {
@@ -48,6 +50,7 @@ protected:
 
 
   std::unique_ptr<Solvers::LinearSolver> solver_;
+  PetscParallelManager petscParallelManager_;
 
   virtual void setTimeStep();
 

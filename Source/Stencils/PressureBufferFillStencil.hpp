@@ -66,6 +66,13 @@ namespace Stencils {
       return pressureBack;
     }
 
+    std::vector<RealType>& getpressureLeft();
+    std::vector<RealType>& getpressureRight();
+    std::vector<RealType>& getpressureBottom();
+    std::vector<RealType>& getpressureTop();
+    std::vector<RealType>& getpressureFront();
+    std::vector<RealType>& getpressureBack();
+
   protected:
     static RealType &getScalar(FlowField &flowField, int i, int j);
     static RealType &getScalar(FlowField &flowField, int i, int j, int k);

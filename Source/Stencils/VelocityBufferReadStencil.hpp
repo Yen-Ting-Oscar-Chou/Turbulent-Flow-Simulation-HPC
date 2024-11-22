@@ -10,7 +10,7 @@
 namespace Stencils {
   class VelocityBufferReadStencil: public BoundaryStencil<FlowField> {
   public:
-      VelocityBufferReadStencil(const Parameters& parameters, const std::vector<RealType>& velocity);
+      VelocityBufferReadStencil(const Parameters& parameters);
       ~VelocityBufferReadStencil() override = default;
 
       void applyLeftWall(FlowField& flowField, int i, int j) override;
@@ -25,8 +25,19 @@ namespace Stencils {
       void applyFrontWall(FlowField& flowField, int i, int j, int k) override;
       void applyBackWall(FlowField& flowField, int i, int j, int k) override;
 
+      std::vector<RealType>& getvelocityLeft();
+      std::vector<RealType>& getvelocityRight();
+      std::vector<RealType>& getvelocityTop();
+      std::vector<RealType>& getvelocityBottom();
+      std::vector<RealType>& getvelocityFront();
+      std::vector<RealType>& getvelocityBack();
     private:
-      const std::vector<RealType>& velocity_;
+      std::vector<RealType> velocityLeft_;
+      std::vector<RealType> velocityRight_;
+      std::vector<RealType> velocityBottom_;
+      std::vector<RealType> velocityTop_;
+      std::vector<RealType> velocityFront_;
+      std::vector<RealType> velocityBack_;
 
   };
 

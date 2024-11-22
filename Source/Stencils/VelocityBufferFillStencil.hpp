@@ -25,7 +25,7 @@ namespace Stencils {
     void applyTopWall(FlowField& flowField, int i, int j, int k) override;
     void applyFrontWall(FlowField& flowField, int i, int j, int k) override;
     void applyBackWall(FlowField& flowField, int i, int j, int k) override;
-    // What is the purpose for selectVelocity?
+
     static std::vector<RealType>& selectVelocityLeft(const Parameters& parameters) {
       if (parameters.geometry.dim == 2) {
         static std::vector<RealType> velocityLeft2D;
@@ -65,7 +65,13 @@ namespace Stencils {
       static std::vector<RealType> velocityBack;
       return velocityBack;
     }
-  // What is the purpose for getVector?
+    std::vector<RealType>& getvelocityLeft();
+    std::vector<RealType>& getvelocityRight();
+    std::vector<RealType>& getvelocityTop();
+    std::vector<RealType>& getvelocityBottom();
+    std::vector<RealType>& getvelocityFront();
+    std::vector<RealType>& getvelocityBack();
+
   protected:
     static RealType &getVector(FlowField &flowField, int i, int j);
     static RealType &getVector(FlowField &flowField, int i, int j, int k);

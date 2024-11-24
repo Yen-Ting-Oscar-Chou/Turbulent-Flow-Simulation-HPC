@@ -5,8 +5,8 @@
 
 #include "FlowField.hpp"
 
-PetscParallelManager::PetscParallelManager(const Parameters & parameters, FlowField & flowField, ParallelManagers::PetscParallelConfiguration & parallelConfig): flowfield_(flowField),
-  _parameters(parameters), _parallelConfig(parallelConfig) {
+PetscParallelManager::PetscParallelManager(const Parameters & parameters, FlowField & flowField): flowfield_(flowField),
+  _parameters(parameters) {
 
   // Get the local sizes in the x, y, and z directions from the parameters.
   // These values define the size of the computational domain in each dimension for the local subdomain.

@@ -1,15 +1,9 @@
 #include "StdAfx.hpp"
-#include <vector>
 
 #include "PressureBufferFillStencil.hpp"
 
 Stencils::PressureBufferFillStencil::PressureBufferFillStencil(const Parameters& parameters):
-  BoundaryStencil(parameters), pressureLeft_(selectPressureLeft(parameters)),
-  pressureRight_(selectPressureRight(parameters)),
-  pressureBottom_(selectPressureBottom(parameters)),
-  pressureTop_(selectPressureTop(parameters)),
-  pressureFront_(selectPressureFront(parameters)),
-  pressureBack_(selectPressureBack(parameters)) {
+  BoundaryStencil(parameters) {
   // Read the pressure values in each of the six (3D) boundary faces of a subdomain
   // and store them consecutively in one-dimensional buffer arrays.
 
@@ -30,14 +24,6 @@ Stencils::PressureBufferFillStencil::PressureBufferFillStencil(const Parameters&
   } else {
     throw std::invalid_argument("Unsupported dimensionality: must be 2 or 3.");
   }
-}
-
-RealType &Stencils::PressureBufferFillStencil::getScalar(FlowField &flowField, int i, int j) {
-  return flowField.getPressure().getScalar(i, j);
-}
-
-RealType &Stencils::PressureBufferFillStencil::getScalar(FlowField &flowField, int i, int j, int k) {
-  return flowField.getPressure().getScalar(i, j, k);
 }
 
 /* Methods for 2D case */

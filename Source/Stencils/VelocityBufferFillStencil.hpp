@@ -35,36 +35,7 @@ namespace Stencils {
         return velocityLeft3D;
       }
     }
-    // bug: return pressure for a velocity stencil
-    static std::vector<RealType>& selectVelocityRight(const Parameters& parameters) {
-      if (parameters.geometry.dim == 2) {
-        static std::vector<RealType> pressureRight2D;
-        return pressureRight2D;
-      } else {
-        static std::vector<RealType> pressureRight3D;
-        return pressureRight3D;
-      }
-    }
-    // Why are the below sections different from the two above?
-    static std::vector<RealType>& selectVelocityBottom(const Parameters& parameters) {
-      static std::vector<RealType> velocityBottom;
-      return velocityBottom;
-    }
 
-    static std::vector<RealType>& selectVelocityTop(const Parameters& parameters) {
-      static std::vector<RealType> velocityTop;
-      return velocityTop;
-    }
-
-    static std::vector<RealType>& selectVelocityFront(const Parameters& parameters) {
-      static std::vector<RealType> velocityFront;
-      return velocityFront;
-    }
-
-    static std::vector<RealType>& selectVelocityBack(const Parameters& parameters) {
-      static std::vector<RealType> velocityBack;
-      return velocityBack;
-    }
     std::vector<RealType>& getvelocityLeft();
     std::vector<RealType>& getvelocityRight();
     std::vector<RealType>& getvelocityTop();
@@ -72,17 +43,13 @@ namespace Stencils {
     std::vector<RealType>& getvelocityFront();
     std::vector<RealType>& getvelocityBack();
 
-  protected:
-    static RealType &getVector(FlowField &flowField, int i, int j);
-    static RealType &getVector(FlowField &flowField, int i, int j, int k);
-
   private:
-    std::vector<RealType>& velocityLeft_;
-    std::vector<RealType>& velocityRight_;
-    std::vector<RealType>& velocityBottom_;
-    std::vector<RealType>& velocityTop_;
-    std::vector<RealType>& velocityFront_;
-    std::vector<RealType>& velocityBack_;
+    std::vector<RealType> velocityLeft_;
+    std::vector<RealType> velocityRight_;
+    std::vector<RealType> velocityBottom_;
+    std::vector<RealType> velocityTop_;
+    std::vector<RealType> velocityFront_;
+    std::vector<RealType> velocityBack_;
   };
 
 } // namespace Stencils

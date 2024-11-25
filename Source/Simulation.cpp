@@ -21,7 +21,8 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   velocityStencil_(parameters),
   obstacleStencil_(parameters),
   velocityIterator_(flowField_, parameters, velocityStencil_),
-  obstacleIterator_(flowField_, parameters, obstacleStencil_)
+  obstacleIterator_(flowField_, parameters, obstacleStencil_),
+  petscParallelManager_(parameters, flowField)
 #ifdef ENABLE_PETSC
   ,
   solver_(std::make_unique<Solvers::PetscSolver>(flowField_, parameters))
@@ -84,7 +85,6 @@ void Simulation::solveTimestep() {
   // Solve for pressure
   solver_->solve();
   // TODO WS2: communicate pressure values
-  // Use PetscParallelManager::communicatePressure()
   petscParallelManager_.communicatePressure();
   // Compute velocity
   velocityIterator_.iterate();

@@ -1,5 +1,4 @@
 #include "StdAfx.hpp"
-#include <vector>
 
 #include "PressureBufferReadStencil.hpp"
 

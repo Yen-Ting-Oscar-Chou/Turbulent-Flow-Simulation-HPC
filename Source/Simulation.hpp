@@ -48,9 +48,9 @@ protected:
   FieldIterator<FlowField>  velocityIterator_;
   FieldIterator<FlowField>  obstacleIterator_;
 
-
+  ParallelManagers::PetscParallelManager petscParallelManager_;
   std::unique_ptr<Solvers::LinearSolver> solver_;
-  PetscParallelManager petscParallelManager_;
+  
 
   virtual void setTimeStep();
 

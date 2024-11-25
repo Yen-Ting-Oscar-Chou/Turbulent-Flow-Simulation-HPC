@@ -1,16 +1,9 @@
 #include "StdAfx.hpp"
-#include <vector>
 
 #include "VelocityBufferFillStencil.hpp"
 
 Stencils::VelocityBufferFillStencil::VelocityBufferFillStencil(const Parameters& parameters):
-  BoundaryStencil(parameters),
-  velocityLeft_(selectVelocityLeft(parameters)),
-  velocityRight_(selectVelocityRight(parameters)),
-  velocityBottom_(selectVelocityBottom(parameters)),
-  velocityTop_(selectVelocityTop(parameters)),
-  velocityFront_(selectVelocityFront(parameters)),
-  velocityBack_(selectVelocityBack(parameters)) {
+  BoundaryStencil(parameters) {
 
   // Read the pressure values in each of the six (3D) boundary faces of a subdomain
   // and store them consecutively in one-dimensional buffer arrays.
@@ -32,14 +25,6 @@ Stencils::VelocityBufferFillStencil::VelocityBufferFillStencil(const Parameters&
   } else {
     throw std::invalid_argument("Unsupported dimensionality. Must be 2 or 3.");
   }
-}
-
-RealType &Stencils::VelocityBufferFillStencil::getVector(FlowField &flowField, int i, int j) {
-  return *flowField.getVelocity().getVector(i, j);
-}
-
-RealType &Stencils::VelocityBufferFillStencil::getVector(FlowField &flowField, int i, int j, int k) {
-  return *flowField.getVelocity().getVector(i, j, k);
 }
 
 /* Methods for 2D case */

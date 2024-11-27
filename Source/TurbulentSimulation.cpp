@@ -18,7 +18,9 @@ void TurbulentSimulation::initializeFlowField() {
   std::list<std::tuple<RealType, RealType>>           coordinateList2D;
   Stencils::ObstacleCoordinatesStencil                obstStencil(parameters_, coordinateList2D, coordinateList3D);
   FieldIterator<FlowField>                            obstIterator(flowField_, parameters_, obstStencil);
+  GlobalBoundaryIterator<FlowField>                   obstBoundaryIterator(flowField_, parameters_, obstStencil);
   obstIterator.iterate();
+  obstBoundaryIterator.iterate();
   if (parameters_.geometry.dim == 2) {
     Stencils::DistanceStencil         distStencil(parameters_, coordinateList2D);
     FieldIterator<TurbulentFlowField> distIterator(turbulentField_, parameters_, distStencil);

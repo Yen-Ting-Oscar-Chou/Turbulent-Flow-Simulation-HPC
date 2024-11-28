@@ -132,10 +132,8 @@ void ParallelManagers::PetscParallelManager::communicateVelocities() {
   MPI_Irecv(velocityBuffers.rightRecv.data(), velocityBuffers.rightRecv.size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   MPI_Irecv(velocityBuffers.bottomRecv.data(), velocityBuffers.leftRecv.size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   MPI_Irecv(velocityBuffers.topRecv.data(), velocityBuffers.leftRecv.size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(velocityBuffers.frontSend.data(), velocityBuffers.frontSend.size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD,&requests.at(counter++));
-  MPI_Irecv(velocityBuffers.backSend.data(), velocityBuffers.backSend.size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD,&requests.at(counter++));
-
-
+  MPI_Irecv(velocityBuffers.frontRecv.data(), velocityBuffers.frontSend.size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD,&requests.at(counter++));
+  MPI_Irecv(velocityBuffers.backRecv.data(), velocityBuffers.backSend.size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD,&requests.at(counter++));
 
   MPI_Isend(velocityBuffers.rightSend.data(), velocityBuffers.rightSend.size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   MPI_Isend(velocityBuffers.leftSend.data(), velocityBuffers.leftSend.size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));

@@ -173,14 +173,14 @@ void ParallelManagers::PetscParallelManager::communicatePressure() {
   MPI_Irecv(pressureBuffers.rightRecv.data(), pressureBuffers.rightRecv.size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   MPI_Irecv(pressureBuffers.bottomRecv.data(), pressureBuffers.leftRecv.size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   MPI_Irecv(pressureBuffers.topRecv.data(), pressureBuffers.leftRecv.size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(pressureBuffers.frontSend.data(), pressureBuffers.frontSend.size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(pressureBuffers.backSend.data(), pressureBuffers.backSend.size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(pressureBuffers.frontRecv.data(), pressureBuffers.frontSend.size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(pressureBuffers.backRecv.data(), pressureBuffers.backSend.size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   
 
-  MPI_Isend(pressureBuffers.rightSend.data(), pressureBuffers.rightSend.size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(pressureBuffers.leftSend.data(), pressureBuffers.leftSend.size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(pressureBuffers.topSend.data(), pressureBuffers.topSend.size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(pressureBuffers.bottomSend.data(), pressureBuffers.bottomSend.size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(pressureBuffers.leftSend.data(), pressureBuffers.leftSend.size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(pressureBuffers.rightSend.data(), pressureBuffers.rightSend.size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(pressureBuffers.topSend.data(), pressureBuffers.topSend.size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(pressureBuffers.bottomSend.data(), pressureBuffers.bottomSend.size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   MPI_Isend(pressureBuffers.frontSend.data(), pressureBuffers.frontSend.size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   MPI_Isend(pressureBuffers.backSend.data(), pressureBuffers.backSend.size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   

@@ -203,6 +203,7 @@ namespace Stencils {
     const int indexThis1       = mapd(0, 0, 0, comp2);
     const int indexThis2       = mapd(0, 0, 0, comp1);
     const int indexMinus1      = mapd(isX1 * -1, isY1 * -1, isZ1 * -1, comp2);
+    const int indexMinus1Comp1 = mapd(isX1 * -1, isY1 * -1, isZ1 * -1, comp1);
     // this index is shifted +1 in the second and -1 in the first component (i. e. i+1, j-1 for y, x)
     const int indexPlus2Minus1 = mapd(isX2 + isX1 * -1, isY2 + isY1 * -1, isZ2 + isZ1 * -1, comp1);
     const int indexPlus1       = mapd(isX1, isY1, isZ1, comp2);
@@ -234,7 +235,7 @@ namespace Stencils {
     const RealType forward1  = (lVel[indexPlus1] - lVel[indexThis1]) / dp1;
     const RealType forward2  = (lVel[indexPlus2] - lVel[indexThis2]) / dp2;
     const RealType backward1 = (lVel[indexThis1] - lVel[indexMinus1]) / dm1;
-    const RealType backward2 = (lVel[indexPlus2Minus1] - lVel[indexMinus1]) / dm2;
+    const RealType backward2 = (lVel[indexPlus2Minus1] - lVel[indexMinus1Comp1]) / dm2;
 
     return 1 / d * (visc1 * (forward1 + forward2) - visc2 * (backward1 + backward2));
   }
@@ -787,7 +788,9 @@ namespace Stencils {
     const RealType re = parameters.flow.Re;
     return localVelocity[mapd(0, 0, 0, 0)]
            + dt
-               * (-du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize) + 2 * dVdxdudx(localVelocity, localViscosity, localMeshsize, re) + dVdydudydvdx(localVelocity, localViscosity, localMeshsize, re));
+               * (-du2dx(localVelocity, parameters, localMeshsize) 
+               - duvdy(localVelocity, parameters, localMeshsize) 
+               + 2 * dVdxdudx(localVelocity, localViscosity, localMeshsize, re) + dVdydudydvdx(localVelocity, localViscosity, localMeshsize, re));
   }
 
   inline RealType computeF3D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {

@@ -37,19 +37,21 @@ void Stencils::ObstacleCoordinatesStencil::addToList(int i, int j, int k) {
   coordinatesList3D.push_back(std::make_tuple(coords[0], coords[1], coords[2]));
 }
 
-void Stencils::ObstacleCoordinatesStencil::applyLeftWall(FlowField& flowField, int i, int j) {
+void Stencils::ObstacleCoordinatesStencil::applyLeftWall([[maybe_unused]] FlowField& flowField, int i, int j) {
   std::string scenario = FieldStencil::parameters_.simulation.scenario;
   if (scenario == "cavity") {
     addToList(i, j);
+  } else if (scenario == "channel") {
+    addToList(i, j);
   }
 }
-void Stencils::ObstacleCoordinatesStencil::applyRightWall(FlowField& flowField, int i, int j) {
+void Stencils::ObstacleCoordinatesStencil::applyRightWall([[maybe_unused]] FlowField& flowField, int i, int j) {
   std::string scenario = FieldStencil::parameters_.simulation.scenario;
   if (scenario == "cavity") {
     addToList(i, j);
   }
 };
-void Stencils::ObstacleCoordinatesStencil::applyBottomWall(FlowField& flowField, int i, int j) {
+void Stencils::ObstacleCoordinatesStencil::applyBottomWall([[maybe_unused]] FlowField& flowField, int i, int j) {
   std::string scenario = FieldStencil::parameters_.simulation.scenario;
   if (scenario == "cavity") {
     addToList(i, j);
@@ -57,7 +59,7 @@ void Stencils::ObstacleCoordinatesStencil::applyBottomWall(FlowField& flowField,
     addToList(i, j);
   }
 };
-void Stencils::ObstacleCoordinatesStencil::applyTopWall(FlowField& flowField, int i, int j) {
+void Stencils::ObstacleCoordinatesStencil::applyTopWall([[maybe_unused]] FlowField& flowField, int i, int j) {
   std::string scenario = FieldStencil::parameters_.simulation.scenario;
   if (scenario == "cavity") {
     addToList(i, j);
@@ -66,19 +68,21 @@ void Stencils::ObstacleCoordinatesStencil::applyTopWall(FlowField& flowField, in
   }
 };
 
-void Stencils::ObstacleCoordinatesStencil::applyLeftWall(FlowField& flowField, int i, int j, int k) {
+void Stencils::ObstacleCoordinatesStencil::applyLeftWall([[maybe_unused]] FlowField& flowField, int i, int j, int k) {
   std::string scenario = FieldStencil::parameters_.simulation.scenario;
   if (scenario == "cavity") {
     addToList(i, j, k);
+  } else if (scenario == "channel") {
+    addToList(i, j, k);
   }
 }
-void Stencils::ObstacleCoordinatesStencil::applyRightWall(FlowField& flowField, int i, int j, int k) {
+void Stencils::ObstacleCoordinatesStencil::applyRightWall([[maybe_unused]] FlowField& flowField, int i, int j, int k) {
   std::string scenario = FieldStencil::parameters_.simulation.scenario;
   if (scenario == "cavity") {
     addToList(i, j, k);
   }
 };
-void Stencils::ObstacleCoordinatesStencil::applyBottomWall(FlowField& flowField, int i, int j, int k) {
+void Stencils::ObstacleCoordinatesStencil::applyBottomWall([[maybe_unused]] FlowField& flowField, int i, int j, int k) {
   std::string scenario = FieldStencil::parameters_.simulation.scenario;
   if (scenario == "cavity") {
     addToList(i, j, k);
@@ -86,7 +90,7 @@ void Stencils::ObstacleCoordinatesStencil::applyBottomWall(FlowField& flowField,
     addToList(i, j);
   }
 };
-void Stencils::ObstacleCoordinatesStencil::applyTopWall(FlowField& flowField, int i, int j, int k) {
+void Stencils::ObstacleCoordinatesStencil::applyTopWall([[maybe_unused]] FlowField& flowField, int i, int j, int k) {
   std::string scenario = FieldStencil::parameters_.simulation.scenario;
   if (scenario == "cavity") {
     addToList(i, j, k);
@@ -94,7 +98,7 @@ void Stencils::ObstacleCoordinatesStencil::applyTopWall(FlowField& flowField, in
     addToList(i, j, k);
   }
 };
-void Stencils::ObstacleCoordinatesStencil::applyFrontWall(FlowField& flowField, int i, int j, int k) {
+void Stencils::ObstacleCoordinatesStencil::applyFrontWall([[maybe_unused]] FlowField& flowField, int i, int j, int k) {
   std::string scenario = FieldStencil::parameters_.simulation.scenario;
   if (scenario == "cavity") {
     addToList(i, j, k);
@@ -102,7 +106,7 @@ void Stencils::ObstacleCoordinatesStencil::applyFrontWall(FlowField& flowField, 
     addToList(i, j, k);
   }
 };
-void Stencils::ObstacleCoordinatesStencil::applyBackWall(FlowField& flowField, int i, int j, int k) {
+void Stencils::ObstacleCoordinatesStencil::applyBackWall([[maybe_unused]] FlowField& flowField, int i, int j, int k) {
   std::string scenario = FieldStencil::parameters_.simulation.scenario;
   if (scenario == "cavity") {
     addToList(i, j, k);

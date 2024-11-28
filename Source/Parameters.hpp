@@ -17,6 +17,7 @@ public:
   RealType    finalTime = 0; //! Final time for the simulation
   std::string type;          //! Type of the simulation (DNS vs. Turbulence)
   std::string scenario;      //! If channel or cavity, for example
+  std::string velocityProfile = "uniform"; //! block or parabolic, block by default
 };
 
 class EnvironmentalParameters {

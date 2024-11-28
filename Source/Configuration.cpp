@@ -272,6 +272,14 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
       throw std::runtime_error("Missing scenario in simulation parameters");
     }
 
+    subNode = node->FirstChildElement("velocityProfile");
+    if (subNode != NULL) {
+      readStringMandatory(parameters.simulation.velocityProfile, subNode);
+      if (parameters.simulation.velocityProfile != "parabolic" && parameters.simulation.velocityProfile != "uniform") {
+        throw std::runtime_error("Unsupported velocity profile in simulation parameters");
+      }
+    }
+
     //--------------------------------------------------
     // VTK parameters
     //--------------------------------------------------

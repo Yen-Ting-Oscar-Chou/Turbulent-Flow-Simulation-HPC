@@ -72,6 +72,8 @@ endif()
 
 option(ENABLE_PETSC "Enable the Portable, Extensible Toolkit for Scientific Computation (PETSc)" ON)
 if(ENABLE_PETSC)
+  # Set the PKG_CONFIG_PATH environment variable
+  set(ENV{PKG_CONFIG_PATH} "/mnt/d/Users/Oscar/Documents/Research/Engineering/CSEprojects/petsc/arch-linux-c-debug/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
   find_package(PETSc REQUIRED)
   target_compile_definitions(NS-EOF-Interface INTERFACE ENABLE_PETSC)
   target_link_libraries(NS-EOF-Interface INTERFACE ${PETSc_LIBRARIES})

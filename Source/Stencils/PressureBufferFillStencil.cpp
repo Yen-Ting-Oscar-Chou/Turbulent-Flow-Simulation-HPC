@@ -30,18 +30,53 @@ Stencils::PressureBufferFillStencil::PressureBufferFillStencil(const Parameters&
 // iterate "- 2" due to ghost cells in each direction. 
 void Stencils::PressureBufferFillStencil::applyLeftWall(FlowField& flowField, int i, int j) {
   pressureLeft_[j - 2] = flowField.getPressure().getScalar(i, j);
+  /*
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank == 0) {
+    std::cout << "i: " << i << " j: " << " " << j << std::endl;
+    std::cout << "Filled pressureLeft_[" << j - 2 << "] with value " << pressureLeft_[j - 2] 
+    << " == " << flowField.getPressure().getScalar(i, j) << std::endl;
+  }
+  */
 }
 
 void Stencils::PressureBufferFillStencil::applyRightWall(FlowField& flowField, int i, int j) {
   pressureRight_[j - 2] = flowField.getPressure().getScalar(i, j);
+  /*
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank == 0) {
+    std::cout << "i: " << i << " j: " << " " << j << std::endl;
+    std::cout << "Filled pressureRight_[" << j - 2 << "] with value " << pressureRight_[j - 2]
+    << " == " << flowField.getPressure().getScalar(i, j) << std::endl;
+  }
+  */
 }
+
 
 void Stencils::PressureBufferFillStencil::applyBottomWall(FlowField& flowField, int i, int j) {
   pressureBottom_[i - 2] = flowField.getPressure().getScalar(i, j);
+  /*
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank == 0) {
+    std::cout << "Filled pressureBottom_[" << i - 2 << "] with value " << pressureBottom_[i - 2]
+    << " == " << flowField.getPressure().getScalar(i, j) << std::endl;
+  }
+  */
 }
 
 void Stencils::PressureBufferFillStencil::applyTopWall(FlowField& flowField, int i, int j) {
-  pressureBottom_[i - 2] = flowField.getPressure().getScalar(i, j);
+  pressureTop_[i - 2] = flowField.getPressure().getScalar(i, j);
+  /*
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank == 0) {
+    std::cout << "Filled pressureTop_[" << i - 2 << "] with value " << pressureTop_[i - 2]
+    << " == " << flowField.getPressure().getScalar(i, j) << std::endl;
+  }
+  */
 }
 
 /* Methods for 3D case */
@@ -49,18 +84,23 @@ void Stencils::PressureBufferFillStencil::applyTopWall(FlowField& flowField, int
 void Stencils::PressureBufferFillStencil::applyLeftWall(FlowField& flowField, int i, int j, int k) {
   pressureLeft_[j - 2 + flowField.getCellsY() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
 }
+
 void Stencils::PressureBufferFillStencil::applyRightWall(FlowField& flowField, int i, int j, int k) {
   pressureRight_[j - 2 + flowField.getCellsY() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
 }
+
 void Stencils::PressureBufferFillStencil::applyBottomWall(FlowField& flowField, int i, int j, int k) {
   pressureBottom_[i - 2 + flowField.getCellsX() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
 }
+
 void Stencils::PressureBufferFillStencil::applyTopWall(FlowField& flowField, int i, int j, int k) {
   pressureTop_[i - 2 + flowField.getCellsX() * (k - 2)] = flowField.getPressure().getScalar(i, j, k);
 }
+
 void Stencils::PressureBufferFillStencil::applyFrontWall(FlowField& flowField, int i, int j, int k) {
   pressureFront_[i - 2 + flowField.getCellsX() * (j - 2)] = flowField.getPressure().getScalar(i, j, k);
 }
+
 void Stencils::PressureBufferFillStencil::applyBackWall(FlowField& flowField, int i, int j, int k) {
   pressureBack_[i - 2 + flowField.getCellsX() * (j - 2)] = flowField.getPressure().getScalar(i, j, k);
 }

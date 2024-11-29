@@ -111,16 +111,17 @@ void Simulation::setTimeStep() {
   RealType dyMin = parameters_.meshsize->getDyMin();
   RealType dzMin = (parameters_.geometry.dim == 3) ? parameters_.meshsize->getDzMin() : 1.0;
 
-  RealType epsilon = std::numeric_limits<RealType>::epsilon();
-  RealType factor = 1.0 / ((dxMin * dxMin) + epsilon)
-                    + 1.0 / ((dyMin * dyMin) + epsilon);
+  RealType factor = 1.0 / ((dxMin * dxMin))
+                    + 1.0 / ((dyMin * dyMin));
   if (parameters_.geometry.dim == 3) {
-    factor += 1.0 / ((dzMin * dzMin) + epsilon);
+    factor += 1.0 / ((dzMin * dzMin));
   }
 
   maxUStencil_.reset();
   maxUFieldIterator_.iterate();
   maxUBoundaryIterator_.iterate();
+
+  RealType epsilon = std::numeric_limits<RealType>::epsilon();
 
   parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[(parameters_.geometry.dim == 3) ? 2 : 0] + epsilon);
 
@@ -140,6 +141,7 @@ void Simulation::setTimeStep() {
   // machines.
   globalMin = MY_FLOAT_MAX;
   MPI_Allreduce(&localMin, &globalMin, 1, MY_MPI_FLOAT, MPI_MIN, PETSC_COMM_WORLD);
-
+  MPI_Barrier(PETSC_COMM_WORLD);
+  std::cout << "current rank:" << parameters_.parallel.rank << ", Global min= " << globalMin << std::endl;
   parameters_.timestep.dt = globalMin * parameters_.timestep.tau;
 }

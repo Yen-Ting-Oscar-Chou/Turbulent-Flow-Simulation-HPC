@@ -14,6 +14,8 @@ Stencils::VelocityBufferFillStencil::VelocityBufferFillStencil(const Parameters&
     velocityRight_.resize(parameters.parallel.localSize[1] * 2);
     velocityBottom_.resize(parameters.parallel.localSize[0] * 2);
     velocityTop_.resize(parameters.parallel.localSize[0] * 2);
+    velocityFront_.resize(0);
+    velocityBack_.resize(0);
   } else if (parameters.geometry.dim == 3) {
     // Initialize the vectors if 3D
     velocityLeft_.resize(parameters.parallel.localSize[1] * parameters.parallel.localSize[2] * 3);
@@ -81,9 +83,9 @@ void Stencils::VelocityBufferFillStencil::applyFrontWall(FlowField& flowField, i
 }
 
 void Stencils::VelocityBufferFillStencil::applyBackWall(FlowField& flowField, int i, int j, int k) {
-  velocityFront_[3 * (i - 2 + flowField.getCellsX() * (j - 2))] = flowField.getVelocity().getVector(i, j, k)[0];
-  velocityFront_[3 * (i - 2 + flowField.getCellsX() * (j - 2)) + 1] = flowField.getVelocity().getVector(i, j, k)[1];
-  velocityFront_[3 * (i - 2 + flowField.getCellsX() * (j - 2)) + 2] = flowField.getVelocity().getVector(i, j, k - 1)[2];
+  velocityBack_[3 * (i - 2 + flowField.getCellsX() * (j - 2))] = flowField.getVelocity().getVector(i, j, k)[0];
+  velocityBack_[3 * (i - 2 + flowField.getCellsX() * (j - 2)) + 1] = flowField.getVelocity().getVector(i, j, k)[1];
+  velocityBack_[3 * (i - 2 + flowField.getCellsX() * (j - 2)) + 2] = flowField.getVelocity().getVector(i, j, k - 1)[2];
 }
 
 std::vector<RealType>& Stencils::VelocityBufferFillStencil::getvelocityLeft(){

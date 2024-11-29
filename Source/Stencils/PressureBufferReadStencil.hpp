@@ -37,5 +37,6 @@ namespace Stencils {
     std::vector<RealType> pressureTop_;
     std::vector<RealType> pressureFront_;
     std::vector<RealType> pressureBack_;
+    Parameters parameters_;
   };
 } // namespace Stencils

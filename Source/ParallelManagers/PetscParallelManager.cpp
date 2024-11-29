@@ -5,85 +5,27 @@
 
 ParallelManagers::PetscParallelManager::PetscParallelManager(Parameters& parameters, FlowField & flowField):
   _parameters(parameters), _flowField(flowField) {
-
-  // Get the local sizes in the x, y, and z directions from the parameters.
-  // These values define the size of the computational domain in each dimension for the local subdomain.
-  int Nx = _parameters.parallel.localSize[0];
-  int Ny = _parameters.parallel.localSize[1];
-  int Nz = _parameters.parallel.localSize[2];
-
+  std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
 
    // Handles the dimensions internally.
   _pressureBufferFillStencil = new Stencils::PressureBufferFillStencil(parameters);
   _velocityBufferFillStencil = new Stencils::VelocityBufferFillStencil(parameters);
   _pressureBufferReadStencil = new Stencils::PressureBufferReadStencil(parameters);
   _velocityBufferReadStencil = new Stencils::VelocityBufferReadStencil(parameters);
-  if (parameters.geometry.dim == 2) {
-    pressureBuffers.leftRecv = _pressureBufferReadStencil->getpressureLeft();
-    pressureBuffers.leftRecv.resize(Ny);
-    pressureBuffers.rightRecv = _pressureBufferReadStencil->getpressureRight();
-    pressureBuffers.rightRecv.resize(Ny);
-    pressureBuffers.topRecv = _pressureBufferReadStencil->getpressureTop();
-    pressureBuffers.topRecv.resize(Nx);
-    pressureBuffers.bottomRecv = _pressureBufferReadStencil->getpressureBottom();
-    pressureBuffers.bottomRecv.resize(Nx);
-    pressureBuffers.frontRecv = _pressureBufferReadStencil->getpressureFront();
-    pressureBuffers.frontRecv.resize(0);
-    pressureBuffers.backRecv = _pressureBufferReadStencil->getpressureBack();
-    pressureBuffers.backRecv.resize(0);
-    velocityBuffers.leftRecv = _velocityBufferReadStencil->getvelocityLeft();
-    velocityBuffers.leftRecv.resize(2 * Ny);
-    velocityBuffers.rightRecv = _velocityBufferReadStencil->getvelocityRight();
-    velocityBuffers.rightRecv.resize(2 * Ny);
-    velocityBuffers.topRecv = _velocityBufferReadStencil->getvelocityTop();
-    velocityBuffers.topRecv.resize(2 * Nx);
-    velocityBuffers.bottomRecv = _velocityBufferReadStencil->getvelocityBottom();
-    velocityBuffers.bottomRecv.resize(2 * Nx);
-    velocityBuffers.frontRecv = _velocityBufferReadStencil->getvelocityFront();
-    velocityBuffers.frontRecv.resize(0);
-    velocityBuffers.backRecv = _velocityBufferReadStencil->getvelocityBack();
-    velocityBuffers.backRecv.resize(0);
-  } else if (parameters.geometry.dim == 3) {
-    pressureBuffers.leftRecv = _pressureBufferReadStencil->getpressureLeft();
-    pressureBuffers.leftRecv.resize(Ny * Nz);
-    pressureBuffers.rightRecv = _pressureBufferReadStencil->getpressureRight();
-    pressureBuffers.rightRecv.resize(Ny * Nz);
-    pressureBuffers.topRecv = _pressureBufferReadStencil->getpressureTop();
-    pressureBuffers.topRecv.resize(Nx * Nz);
-    pressureBuffers.bottomRecv = _pressureBufferReadStencil->getpressureBottom();
-    pressureBuffers.bottomRecv.resize(Nx * Nz);
-    pressureBuffers.frontRecv = _pressureBufferReadStencil->getpressureFront();
-    pressureBuffers.frontRecv.resize(Nx * Ny);
-    velocityBuffers.backRecv = _velocityBufferReadStencil->getvelocityBack();
-    velocityBuffers.backRecv.resize(Nx * Ny);
-    velocityBuffers.leftRecv = _velocityBufferReadStencil->getvelocityLeft();
-    velocityBuffers.leftRecv.resize(3 * Ny * Nz);
-    velocityBuffers.rightRecv = _velocityBufferReadStencil->getvelocityRight();
-    velocityBuffers.rightRecv.resize(3 * Ny * Nz);
-    velocityBuffers.topRecv = _velocityBufferReadStencil->getvelocityTop();
-    velocityBuffers.topRecv.resize(3 * Nx * Nz);
-    velocityBuffers.bottomRecv = _velocityBufferReadStencil->getvelocityBottom();
-    velocityBuffers.bottomRecv.resize(3 * Nx * Nz);
-    velocityBuffers.frontRecv = _velocityBufferReadStencil->getvelocityFront();
-    velocityBuffers.frontRecv.resize(3 * Nx * Ny);
-    velocityBuffers.backRecv = _velocityBufferReadStencil->getvelocityBack();
-    velocityBuffers.backRecv.resize(3 * Nx * Ny);
-  } else {
-    throw std::invalid_argument("Unsupported dimensionality: must be 2 or 3.");
-  }
-  int lowOffset = 0;
-  int highOffset = 0;
 
-   // Construct iterators.
-   _parallelBoundaryPressureFillIterator = new ParallelBoundaryIterator<FlowField>(_flowField, _parameters, *_pressureBufferFillStencil, lowOffset, highOffset);
-   _parallelBoundaryPressureReadIterator = new ParallelBoundaryIterator<FlowField>(_flowField, _parameters, *_pressureBufferReadStencil, lowOffset, highOffset);
+  int lowOffset = 2;
+  int highOffset = -1;
 
-   _parallelBoundaryVelocityFillIterator = new ParallelBoundaryIterator<FlowField>(_flowField, _parameters, *_pressureBufferFillStencil, lowOffset, highOffset);
-   _parallelBoundaryVelocityReadIterator = new ParallelBoundaryIterator<FlowField>(_flowField, _parameters, *_pressureBufferReadStencil, lowOffset, highOffset);
+  // Construct iterators.
+  _parallelBoundaryPressureFillIterator = new ParallelBoundaryIterator<FlowField>(_flowField, _parameters, *_pressureBufferFillStencil, lowOffset, highOffset);
+  _parallelBoundaryPressureReadIterator = new ParallelBoundaryIterator<FlowField>(_flowField, _parameters, *_pressureBufferReadStencil, lowOffset, highOffset);
+  
+  _parallelBoundaryVelocityFillIterator = new ParallelBoundaryIterator<FlowField>(_flowField, _parameters, *_velocityBufferFillStencil, lowOffset, highOffset);
+  _parallelBoundaryVelocityReadIterator = new ParallelBoundaryIterator<FlowField>(_flowField, _parameters, *_velocityBufferReadStencil, lowOffset, highOffset);
 }
 
 ParallelManagers::PetscParallelManager::~PetscParallelManager() {
-  delete _pressureBufferFillStencil;
+  delete _velocityBufferReadStencil;
   delete _pressureBufferReadStencil;
   delete _velocityBufferFillStencil;
   delete _velocityBufferReadStencil;
@@ -106,45 +48,217 @@ int ParallelManagers::PetscParallelManager::computeRankFromIndices(int i, int j,
   return nrank;
 }
 
-// MPI_Isend(send_buffer.data(), send_buffer.size(), MPI_DOUBLE, dest, dest_tag, _communicator, &requests.at(counter++));
 void ParallelManagers::PetscParallelManager::communicateVelocities() {
   int counter = 0;
   std::array<MPI_Request, 12> requests{};
 
   int index0 = _parameters.parallel.indices[0];
   int index1 = _parameters.parallel.indices[1];
-  int index2 = _parameters.parallel.indices[2];
+  int index2 = 0;
   int left = computeRankFromIndices(index0 - 1, index1, index2);
   int right = computeRankFromIndices(index0 + 1, index1, index2);
   int top = computeRankFromIndices(index0, index1 + 1, index2);
   int bottom = computeRankFromIndices(index0, index1 - 1, index2);
   int front = MPI_PROC_NULL;
   int back = MPI_PROC_NULL;
-
   if (_parameters.geometry.dim == 3) {
+    index2 = _parameters.parallel.indices[2];
     front = computeRankFromIndices(index0, index1, index2 - 1);
     back = computeRankFromIndices(index0, index1, index2 + 1);
   }
 
   _parallelBoundaryVelocityFillIterator->iterate();
   // Put recv before send to avoid exceptions
-  MPI_Irecv(velocityBuffers.leftRecv.data(), velocityBuffers.leftRecv.size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(velocityBuffers.rightRecv.data(), velocityBuffers.rightRecv.size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(velocityBuffers.bottomRecv.data(), velocityBuffers.leftRecv.size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(velocityBuffers.topRecv.data(), velocityBuffers.leftRecv.size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(velocityBuffers.frontRecv.data(), velocityBuffers.frontSend.size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD,&requests.at(counter++));
-  MPI_Irecv(velocityBuffers.backRecv.data(), velocityBuffers.backSend.size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD,&requests.at(counter++));
+  MPI_Irecv(_velocityBufferReadStencil->getvelocityLeft().data(), _velocityBufferReadStencil->getvelocityLeft().size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(_velocityBufferReadStencil->getvelocityRight().data(), _velocityBufferReadStencil->getvelocityRight().size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(_velocityBufferReadStencil->getvelocityBottom().data(), _velocityBufferReadStencil->getvelocityBottom().size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(_velocityBufferReadStencil->getvelocityTop().data(), _velocityBufferReadStencil->getvelocityTop().size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(_velocityBufferReadStencil->getvelocityFront().data(), _velocityBufferReadStencil->getvelocityFront().size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD,&requests.at(counter++));
+  MPI_Irecv(_velocityBufferReadStencil->getvelocityBack().data(), _velocityBufferReadStencil->getvelocityBack().size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD,&requests.at(counter++));
 
-  MPI_Isend(velocityBuffers.rightSend.data(), velocityBuffers.rightSend.size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(velocityBuffers.leftSend.data(), velocityBuffers.leftSend.size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(velocityBuffers.topSend.data(), velocityBuffers.topSend.size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(velocityBuffers.bottomSend.data(), velocityBuffers.bottomSend.size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(velocityBuffers.frontSend.data(), velocityBuffers.frontSend.size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(velocityBuffers.backSend.data(), velocityBuffers.backSend.size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_velocityBufferFillStencil->getvelocityLeft().data(), _velocityBufferFillStencil->getvelocityLeft().size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_velocityBufferFillStencil->getvelocityRight().data(), _velocityBufferFillStencil->getvelocityRight().size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_velocityBufferFillStencil->getvelocityBottom().data(), _velocityBufferFillStencil->getvelocityBottom().size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_velocityBufferFillStencil->getvelocityTop().data(), _velocityBufferFillStencil->getvelocityTop().size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_velocityBufferFillStencil->getvelocityFront().data(), _velocityBufferFillStencil->getvelocityFront().size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_velocityBufferFillStencil->getvelocityBack().data(), _velocityBufferFillStencil->getvelocityBack().size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   
-
   MPI_Waitall(counter, requests.data(), MPI_STATUSES_IGNORE);
+
+  /* MPI_Barrier(PETSC_COMM_WORLD);
+
+  if(_parameters.parallel.rank == computeRankFromIndices(0, 0, 0)) {
+    std::cout << "bottom left rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "right send buffer = ";
+    for (int i = 0; i < _velocityBufferFillStencil->getvelocityRight().size(); i++) {
+      std::cout << _velocityBufferFillStencil->getvelocityRight()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+  
+  if(_parameters.parallel.rank == computeRankFromIndices(1, 0, 0)) {
+    std::cout << "bottom right rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "left recv buffer = ";
+    for (int i = 0; i < _velocityBufferFillStencil->getvelocityLeft().size(); i++) {
+      std::cout << _velocityBufferFillStencil->getvelocityLeft()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  if(_parameters.parallel.rank == computeRankFromIndices(0, 0, 0)) {
+    std::cout << "bottom left rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "top send buffer = ";
+    for (int i = 0; i < _velocityBufferFillStencil->getvelocityTop().size(); i++) {
+      std::cout << _velocityBufferFillStencil->getvelocityTop()[i] << " ";
+    }
+  }
+    std::cout << std::endl;
+  if(_parameters.parallel.rank == computeRankFromIndices(0, 1, 0)) {
+    std::cout << "top left rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "bottom recv buffer = ";
+    for (int i = 0; i < _velocityBufferFillStencil->getvelocityBottom().size(); i++) {
+      std::cout << _velocityBufferFillStencil->getvelocityBottom()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  if(_parameters.parallel.rank == computeRankFromIndices(1, 1, 0)) {
+    std::cout << "top right rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "left send buffer = ";
+    for (int i = 0; i < _velocityBufferFillStencil->getvelocityLeft().size(); i++) {
+      std::cout << _velocityBufferFillStencil->getvelocityLeft()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+  if(_parameters.parallel.rank == computeRankFromIndices(0, 1, 0)) {
+    std::cout << "top left rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "right recv buffer = ";
+    for (int i = 0; i < _velocityBufferFillStencil->getvelocityRight().size(); i++) {
+      std::cout << _velocityBufferFillStencil->getvelocityRight()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  if(_parameters.parallel.rank == computeRankFromIndices(1, 1, 0)) {
+    std::cout << "top right rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "bottom send buffer = ";
+    for (int i = 0; i < _velocityBufferFillStencil->getvelocityBottom().size(); i++) {
+      std::cout << _velocityBufferFillStencil->getvelocityBottom()[i] << " ";
+    }
+  }
+    std::cout << std::endl;
+  if(_parameters.parallel.rank == computeRankFromIndices(1, 0, 0)) {
+    std::cout << "bottom right rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "top recv buffer = ";
+    for (int i = 0; i < _velocityBufferFillStencil->getvelocityTop().size(); i++) {
+      std::cout << _velocityBufferFillStencil->getvelocityTop()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  std::cout << "Done printing" << std::endl;
+ */
   _parallelBoundaryVelocityReadIterator->iterate();
+  
+  MPI_Barrier(PETSC_COMM_WORLD);
+
+  // print the pressure values for all ranks, including ghost cells
+  if (_parameters.parallel.rank == computeRankFromIndices(0, 0, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Velocity u values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getVelocity().getVector(i, j)[0] << " ";
+        }
+      std::cout << std::endl;
+      }
+    std::cout << std::endl;
+
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Velocity v values including ghost cells: " << std::endl;
+    for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+      for (int i = 0; i < _flowField.getCellsX(); i++) {
+        std::cout << _flowField.getVelocity().getVector(i, j)[1] << " ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+
+  MPI_Barrier(PETSC_COMM_WORLD);
+  
+  if (_parameters.parallel.rank == computeRankFromIndices(1, 0, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Velocity u values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getVelocity().getVector(i, j)[0] << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Velocity v values including ghost cells: " << std::endl;
+    for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+      for (int i = 0; i < _flowField.getCellsX(); i++) {
+        std::cout << _flowField.getVelocity().getVector(i, j)[1] << " ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  MPI_Barrier(PETSC_COMM_WORLD);
+
+  if (_parameters.parallel.rank == computeRankFromIndices(0, 1, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Velocity values for u including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getVelocity().getVector(i, j)[0] << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Velocity v values including ghost cells: " << std::endl;
+        for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+      for (int i = 0; i < _flowField.getCellsX(); i++) {
+        std::cout << _flowField.getVelocity().getVector(i, j)[1] << " ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  MPI_Barrier(PETSC_COMM_WORLD);
+
+  if (_parameters.parallel.rank == computeRankFromIndices(1, 1, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Velocity u values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getVelocity().getVector(i, j)[0] << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Velocity v values including ghost cells: " << std::endl;
+        for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+      for (int i = 0; i < _flowField.getCellsX(); i++) {
+        std::cout << _flowField.getVelocity().getVector(i, j)[1] << " ";
+      }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+
 }
 
 void ParallelManagers::PetscParallelManager::communicatePressure() {
@@ -166,24 +280,255 @@ void ParallelManagers::PetscParallelManager::communicatePressure() {
   }
 
   _parallelBoundaryPressureFillIterator->iterate();
+  
+/* 
+   if(_parameters.parallel.rank == 0) {
+      std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+      
+      std::cout << "left fill stencil = ";
+      for (int i = 0; i < _pressureBufferFillStencil..size(); i++) {
+        std::cout << _velocityBufferFillStencil->getvelocityLeft()[i] << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "right fille buffer = ";
+      for (int i = 0; i < _pressureBufferStencil.rightSend.size(); i++) {
+        std::cout << pressureBuffers.rightSend[i] << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "right fill stencil = ";
+      for (int i = 0; i < pressureBuffers.leftSend.size(); i++) {
+        std::cout << _velocityBufferReadStencil->getvelocityRight()[i] << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "top send buffer = ";
+      for (int i = 0; i < pressureBuffers.topSend.size(); i++) {
+        std::cout << pressureBuffers.topSend[i] << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "top fill stencil = ";
+      for (int i = 0; i < pressureBuffers.topSend.size(); i++) {
+        std::cout << _velocityBufferReadStencil->getvelocityTop()[i] << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "bottom send buffer = ";
+      for (int i = 0; i < pressureBuffers.bottomSend.size(); i++) {
+        std::cout << pressureBuffers.bottomSend[i] << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "bottom fill stencil = ";
+      for (int i = 0; i < pressureBuffers.bottomSend.size(); i++) {
+        std::cout << _velocityBufferReadStencil->getvelocityBottom()[i] << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "Done printing" << std::endl;
+  }  */
+  
   // Put recv before send to avoid exceptions
-  MPI_Irecv(pressureBuffers.leftRecv.data(), pressureBuffers.leftRecv.size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(pressureBuffers.rightRecv.data(), pressureBuffers.rightRecv.size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(pressureBuffers.bottomRecv.data(), pressureBuffers.leftRecv.size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(pressureBuffers.topRecv.data(), pressureBuffers.leftRecv.size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(pressureBuffers.frontRecv.data(), pressureBuffers.frontSend.size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Irecv(pressureBuffers.backRecv.data(), pressureBuffers.backSend.size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(_pressureBufferReadStencil->getpressureLeft().data(), _pressureBufferReadStencil->getpressureLeft().size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(_pressureBufferReadStencil->getpressureRight().data(), _pressureBufferReadStencil->getpressureRight().size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(_pressureBufferReadStencil->getpressureBottom().data(), _pressureBufferReadStencil->getpressureBottom().size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(_pressureBufferReadStencil->getpressureTop().data(), _pressureBufferReadStencil->getpressureTop().size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(_pressureBufferReadStencil->getpressureFront().data(), _pressureBufferReadStencil->getpressureFront().size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Irecv(_pressureBufferReadStencil->getpressureBack().data(), _pressureBufferReadStencil->getpressureBack().size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD, &requests.at(counter++));
   
-
-  MPI_Isend(pressureBuffers.leftSend.data(), pressureBuffers.leftSend.size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(pressureBuffers.rightSend.data(), pressureBuffers.rightSend.size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(pressureBuffers.topSend.data(), pressureBuffers.topSend.size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(pressureBuffers.bottomSend.data(), pressureBuffers.bottomSend.size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(pressureBuffers.frontSend.data(), pressureBuffers.frontSend.size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  MPI_Isend(pressureBuffers.backSend.data(), pressureBuffers.backSend.size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD, &requests.at(counter++));
-  
+  MPI_Isend(_pressureBufferFillStencil->getpressureLeft().data(), _pressureBufferFillStencil->getpressureLeft().size(), MY_MPI_FLOAT, left, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_pressureBufferFillStencil->getpressureRight().data(), _pressureBufferFillStencil->getpressureRight().size(), MY_MPI_FLOAT, right, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_pressureBufferFillStencil->getpressureBottom().data(), _pressureBufferFillStencil->getpressureBottom().size(), MY_MPI_FLOAT, bottom, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_pressureBufferFillStencil->getpressureTop().data(), _pressureBufferFillStencil->getpressureTop().size(), MY_MPI_FLOAT, top, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_pressureBufferFillStencil->getpressureFront().data(), _pressureBufferFillStencil->getpressureFront().size(), MY_MPI_FLOAT, front, 1, PETSC_COMM_WORLD, &requests.at(counter++));
+  MPI_Isend(_pressureBufferFillStencil->getpressureBack().data(), _pressureBufferFillStencil->getpressureBack().size(), MY_MPI_FLOAT, back, 1, PETSC_COMM_WORLD, &requests.at(counter++));
 
   MPI_Waitall(counter, requests.data(), MPI_STATUSES_IGNORE);
-  _parallelBoundaryPressureReadIterator->iterate();
-}
+  /*
+  // print the pressure values for all ranks, including ghost cells
+  if (_parameters.parallel.rank == computeRankFromIndices(0, 0, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Pressure values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getPressure().getScalar(i, j) << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+ 
+  MPI_Barrier(PETSC_COMM_WORLD);
+  
+  if (_parameters.parallel.rank == computeRankFromIndices(1, 0, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Pressure values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getPressure().getScalar(i, j) << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  MPI_Barrier(PETSC_COMM_WORLD);
 
+  if (_parameters.parallel.rank == computeRankFromIndices(0, 1, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Pressure values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getPressure().getScalar(i, j) << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  MPI_Barrier(PETSC_COMM_WORLD);
+
+  if (_parameters.parallel.rank == computeRankFromIndices(1, 1, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Pressure values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getPressure().getScalar(i, j) << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  MPI_Barrier(PETSC_COMM_WORLD);
+  */
+  // 
+  /*
+  if(_parameters.parallel.rank == computeRankFromIndices(0, 0, 0)) {
+    std::cout << "bottom left rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "right send buffer = ";
+    for (int i = 0; i < _pressureBufferFillStencil->getpressureRight().size(); i++) {
+      std::cout << _pressureBufferFillStencil->getpressureRight()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+  
+  if(_parameters.parallel.rank == computeRankFromIndices(1, 0, 0)) {
+    std::cout << "bottom right rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "left recv buffer = ";
+    for (int i = 0; i < _pressureBufferReadStencil->getpressureLeft().size(); i++) {
+      std::cout << _pressureBufferReadStencil->getpressureLeft()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  if(_parameters.parallel.rank == computeRankFromIndices(0, 0, 0)) {
+    std::cout << "bottom left rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "top send buffer = ";
+    for (int i = 0; i < _pressureBufferFillStencil->getpressureTop().size(); i++) {
+      std::cout << _pressureBufferFillStencil->getpressureTop()[i] << " ";
+    }
+  }
+    std::cout << std::endl;
+  if(_parameters.parallel.rank == computeRankFromIndices(0, 1, 0)) {
+    std::cout << "top left rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "bottom recv buffer = ";
+    for (int i = 0; i < _pressureBufferReadStencil->getpressureBottom().size(); i++) {
+      std::cout << _pressureBufferReadStencil->getpressureBottom()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  if(_parameters.parallel.rank == computeRankFromIndices(1, 1, 0)) {
+    std::cout << "top right rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "left send buffer = ";
+    for (int i = 0; i < _pressureBufferFillStencil->getpressureLeft().size(); i++) {
+      std::cout << _pressureBufferFillStencil->getpressureLeft()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+  if(_parameters.parallel.rank == computeRankFromIndices(0, 1, 0)) {
+    std::cout << "top left rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "right recv buffer = ";
+    for (int i = 0; i < _pressureBufferReadStencil->getpressureRight().size(); i++) {
+      std::cout << _pressureBufferReadStencil->getpressureRight()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  if(_parameters.parallel.rank == computeRankFromIndices(1, 1, 0)) {
+    std::cout << "top right rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "bottom send buffer = ";
+    for (int i = 0; i < _pressureBufferFillStencil->getpressureBottom().size(); i++) {
+      std::cout << _pressureBufferFillStencil->getpressureBottom()[i] << " ";
+    }
+  }
+    std::cout << std::endl;
+  if(_parameters.parallel.rank == computeRankFromIndices(1, 0, 0)) {
+    std::cout << "bottom right rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "top recv buffer = ";
+    for (int i = 0; i < _pressureBufferReadStencil->getpressureTop().size(); i++) {
+      std::cout << _pressureBufferReadStencil->getpressureTop()[i] << " ";
+    }
+    std::cout << std::endl;
+  }
+  std::cout << "Done printing" << std::endl;
+  */
+  _parallelBoundaryPressureReadIterator->iterate();
+  /*
+  MPI_Barrier(PETSC_COMM_WORLD);
+  // print the pressure values for all ranks, including ghost cells
+  if (_parameters.parallel.rank == computeRankFromIndices(0, 0, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Pressure values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getPressure().getScalar(i, j) << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+ 
+  MPI_Barrier(PETSC_COMM_WORLD);
+  
+  if (_parameters.parallel.rank == computeRankFromIndices(1, 0, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Pressure values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getPressure().getScalar(i, j) << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  MPI_Barrier(PETSC_COMM_WORLD);
+
+  if (_parameters.parallel.rank == computeRankFromIndices(0, 1, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Pressure values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getPressure().getScalar(i, j) << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  MPI_Barrier(PETSC_COMM_WORLD);
+
+  if (_parameters.parallel.rank == computeRankFromIndices(1, 1, 0)) {
+    std::cout << "current rank is:" << _parameters.parallel.rank << std::endl;
+    std::cout << "Pressure values including ghost cells: " << std::endl;
+    
+      for (int j = _flowField.getCellsY() - 1; j >= 0; j--) {
+          for (int i = 0; i < _flowField.getCellsX(); i++) {
+            std::cout << _flowField.getPressure().getScalar(i, j) << " ";
+        }
+      std::cout << std::endl;
+    }
+    std::cout << std::endl;
+  }
+  MPI_Barrier(PETSC_COMM_WORLD);
+  */
+}

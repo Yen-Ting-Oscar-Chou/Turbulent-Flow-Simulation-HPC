@@ -78,6 +78,10 @@ void Simulation::solveTimestep() {
   setTimeStep();
   // Compute FGH
   fghIterator_.iterate();
+  solveTimestepHelper();
+}
+
+void Simulation::solveTimestepHelper() {
   // Set global boundary values
   wallFGHIterator_.iterate();
   // Compute the right hand side (RHS)
@@ -96,8 +100,8 @@ void Simulation::solveTimestep() {
 }
 
 void Simulation::plotVTK(int timeStep, RealType simulationTime) {
-  Stencils::VTKStencil     vtkStencil(parameters_);
-  FieldIterator<FlowField> vtkIterator(flowField_, parameters_, vtkStencil, 1, 0);
+  Stencils::VTKStencil<FlowField> vtkStencil(parameters_);
+  FieldIterator<FlowField>        vtkIterator(flowField_, parameters_, vtkStencil, 1, 0);
 
   vtkIterator.iterate();
   vtkStencil.write(flowField_, timeStep, simulationTime);
@@ -106,40 +110,36 @@ void Simulation::plotVTK(int timeStep, RealType simulationTime) {
 void Simulation::setTimeStep() {
   RealType localMin, globalMin;
   ASSERTION(parameters_.geometry.dim == 2 || parameters_.geometry.dim == 3);
-
-  RealType dxMin = parameters_.meshsize->getDxMin();
-  RealType dyMin = parameters_.meshsize->getDyMin();
-  RealType dzMin = (parameters_.geometry.dim == 3) ? parameters_.meshsize->getDzMin() : 1.0;
-
-  RealType factor = 1.0 / ((dxMin * dxMin))
-                    + 1.0 / ((dyMin * dyMin));
-  if (parameters_.geometry.dim == 3) {
-    factor += 1.0 / ((dzMin * dzMin));
-  }
-
+  RealType factor = 1.0 / (parameters_.meshsize->getDxMin() * parameters_.meshsize->getDxMin())
+                  + 1.0 / (parameters_.meshsize->getDyMin() * parameters_.meshsize->getDyMin());
+  // Determine maximum velocity
   maxUStencil_.reset();
   maxUFieldIterator_.iterate();
   maxUBoundaryIterator_.iterate();
+  if (parameters_.geometry.dim == 3) {
+    factor += 1.0 / (parameters_.meshsize->getDzMin() * parameters_.meshsize->getDzMin());
+    parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[2] + EPSILON);
+  } else {
+    parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[0] + EPSILON);
+  }
 
-  RealType epsilon = std::numeric_limits<RealType>::epsilon();
-
-  parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[(parameters_.geometry.dim == 3) ? 2 : 0] + epsilon);
-
+  // localMin = std::min(parameters_.timestep.dt, std::min(std::min(parameters_.flow.Re/(2 * factor), 1.0 /
+  // maxUStencil_.getMaxValues()[0]), 1.0 / maxUStencil_.getMaxValues()[1]));
   localMin = std::min(
-    parameters_.flow.Re / (2 * factor + epsilon),
+    parameters_.flow.Re / (2 * factor),
     std::min(
-      parameters_.timestep.dt,
-      std::min(
-        1.0 / (maxUStencil_.getMaxValues()[0] + epsilon),
-        1.0 / (maxUStencil_.getMaxValues()[1] + epsilon)
-      )
+      parameters_.timestep.dt, std::min(1 / (maxUStencil_.getMaxValues()[0] + EPSILON), 1 / (maxUStencil_.getMaxValues()[1] + EPSILON))
     )
   );
 
   // Here, we select the type of operation before compiling. This allows to use the correct
   // data type for MPI. Not a concern for small simulations, but useful if using heterogeneous
   // machines.
+
+  globalMin = MY_FLOAT_MAX;
   MPI_Allreduce(&localMin, &globalMin, 1, MY_MPI_FLOAT, MPI_MIN, PETSC_COMM_WORLD);
-  MPI_Barrier(PETSC_COMM_WORLD);
-  parameters_.timestep.dt = globalMin * parameters_.timestep.tau;
+  
+  parameters_.timestep.dt = globalMin;
+  parameters_.timestep.dt *= parameters_.timestep.tau;
 }
+

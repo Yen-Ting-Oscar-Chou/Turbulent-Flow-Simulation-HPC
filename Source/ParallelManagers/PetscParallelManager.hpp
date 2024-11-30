@@ -25,7 +25,6 @@ namespace ParallelManagers {
       int _bottom;
       int _front;
       int _back;
-    public:
       
       Stencils::PressureBufferFillStencil *_pressureBufferFillStencil;
       Stencils::PressureBufferReadStencil *_pressureBufferReadStencil;
@@ -37,12 +36,12 @@ namespace ParallelManagers {
       ParallelBoundaryIterator<FlowField> *_parallelBoundaryPressureReadIterator;
       ParallelBoundaryIterator<FlowField> *_parallelBoundaryVelocityFillIterator;
       ParallelBoundaryIterator<FlowField> *_parallelBoundaryVelocityReadIterator;
-
+    
+    public:
       PetscParallelManager(Parameters& parameters, FlowField& flowField);
       ~PetscParallelManager();
 
       void communicatePressure();
       void communicateVelocities();
-      int computeRankFromIndices(int i, int j, int k) const;
   };
 } // namespace ParallelManagers

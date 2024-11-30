@@ -118,6 +118,7 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
   tinyxml2::XMLDocument confFile;
   tinyxml2::XMLElement* node;
   tinyxml2::XMLElement* subNode;
+  std::string deltaMixLen = "";
 
   int rank = -1;
   MPI_Comm_rank(communicator, &rank);
@@ -272,6 +273,14 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
       throw std::runtime_error("Missing scenario in simulation parameters");
     }
 
+    subNode = node->FirstChildElement("velocityProfile");
+    if (subNode != NULL) {
+      readStringMandatory(parameters.simulation.velocityProfile, subNode);
+      if (parameters.simulation.velocityProfile != "parabolic" && parameters.simulation.velocityProfile != "uniform") {
+        throw std::runtime_error("Unsupported velocity profile in simulation parameters");
+      }
+    }
+
     //--------------------------------------------------
     // VTK parameters
     //--------------------------------------------------
@@ -396,6 +405,19 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
     //------------------------------------------------------
     // TODO WS2: Turbulence
     //------------------------------------------------------
+    if (parameters.simulation.type == "turbulence") {
+      node = confFile.FirstChildElement()->FirstChildElement("deltaMixLen");
+      readStringMandatory(deltaMixLen, node);
+      if (deltaMixLen == "turbulence") {
+        parameters.turbulence.deltaMixLen = deltaTurbulent;
+      } else if (deltaMixLen == "laminar") {
+        parameters.turbulence.deltaMixLen = deltaLaminar;
+      } else if (deltaMixLen == "zero") {
+        parameters.turbulence.deltaMixLen = deltaZero;
+      } else {
+        throw std::runtime_error("Error loading delta for mixing lengths");
+      }
+    }
   }
 
   // Broadcasting of the values
@@ -454,6 +476,17 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
   MPI_Bcast(parameters.walls.vectorBack, 3, MY_MPI_FLOAT, 0, communicator);
 
   // TODO WS2: broadcast turbulence parameters
-  // wait for turbulence branch to be finished to implement the following:
-  // MPI_Bcast(parameters.turbulence.deltaMixLen)
+  broadcastString(parameters.simulation.velocityProfile, communicator);
+  broadcastString(deltaMixLen, communicator);  
+  if (rank != 0){
+    if (deltaMixLen == "turbulence") {
+      parameters.turbulence.deltaMixLen = deltaTurbulent;
+    } else if (deltaMixLen == "laminar") {
+      parameters.turbulence.deltaMixLen = deltaLaminar;
+    } else if (deltaMixLen == "zero") {
+      parameters.turbulence.deltaMixLen = deltaZero;
+    } else {
+      throw std::runtime_error("Error loading delta for mixing lengths");
+    }
+  }
 }

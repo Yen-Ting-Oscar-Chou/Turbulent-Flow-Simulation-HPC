@@ -4,6 +4,7 @@
 #include "Configuration.hpp"
 #include "MeshsizeFactory.hpp"
 #include "Simulation.hpp"
+#include "TurbulentSimulation.hpp"
 #include <fenv.h>
 
 
@@ -82,7 +83,16 @@ int main(int argc, char* argv[]) {
 
   // Initialise simulation
   if (parameters.simulation.type == "turbulence") {
-    // TODO WS2: initialise turbulent flow field and turbulent simulation object
+     if (rank == 0) {
+      spdlog::info("Start turbulence simulation in {}D", parameters.geometry.dim);
+    }
+    TurbulentFlowField* turbulentFlowField = new TurbulentFlowField(parameters);
+    if (turbulentFlowField == NULL) {
+      throw std::runtime_error("turbulentFlowField == NULL!");
+    }
+    TurbulentSimulation* turbulentSimulation = new TurbulentSimulation(parameters, *turbulentFlowField);
+    flowField = turbulentFlowField;
+    simulation = turbulentSimulation;
   } else if (parameters.simulation.type == "dns") {
     if (rank == 0) {
       spdlog::info("Start DNS simulation in {}D", parameters.geometry.dim);

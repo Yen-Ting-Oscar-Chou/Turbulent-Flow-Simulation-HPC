@@ -3,6 +3,7 @@
 #include "Definitions.hpp"
 #include "FieldStencil.hpp"
 #include "FlowField.hpp"
+#include "TurbulentFlowField.hpp"
 #include "Parameters.hpp"
 
 namespace Stencils {
@@ -11,8 +12,9 @@ namespace Stencils {
    *
    * When iterated with, creates a VTK file.
    */
-  class VTKStencil: public FieldStencil<FlowField> {
-  private:
+  template <class FlowFieldType>
+  class VTKStencil: public FieldStencil<FlowFieldType> {
+  protected:
     bool          written_; //! Whether the file has already been written
     std::string   prefix_;  //! Prefix to be attached to the vtk files
     std::ofstream ofile_;   //! Output file stream
@@ -36,15 +38,17 @@ namespace Stencils {
      * Stores all the streams and closes the file.
      */
     void closeFile();
+    
+
 
   public:
     VTKStencil(const Parameters& parameters);
     ~VTKStencil() override = default;
 
-    void apply(FlowField& flowField, int i, int j) override;
-    void apply(FlowField& flowField, int i, int j, int k) override;
+    void apply(FlowFieldType& flowField, int i, int j) override;
+    void apply(FlowFieldType& flowField, int i, int j, int k) override;
 
-    void write(FlowField& flowField, int timeStep, RealType simulationTime);
+    void write(FlowFieldType& flowField, int timeStep, RealType simulationTime);
   };
 
 } // namespace Stencils

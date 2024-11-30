@@ -2,6 +2,7 @@
 
 #include "Definitions.hpp"
 #include "Parameters.hpp"
+#include "MixingLengths.hpp"
 
 class Configuration {
 private:

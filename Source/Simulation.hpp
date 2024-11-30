@@ -54,6 +54,8 @@ protected:
 
   virtual void setTimeStep();
 
+  virtual void solveTimestepHelper();
+
 public:
   Simulation(Parameters& parameters, FlowField& flowField);
   virtual ~Simulation() = default;

@@ -17,6 +17,7 @@ public:
   RealType    finalTime = 0; //! Final time for the simulation
   std::string type;          //! Type of the simulation (DNS vs. Turbulence)
   std::string scenario;      //! If channel or cavity, for example
+  std::string velocityProfile = "uniform"; //! block or parabolic, block by default
 };
 
 class EnvironmentalParameters {
@@ -30,6 +31,11 @@ public:
 class FlowParameters {
 public:
   RealType Re = 0; //! Reynolds number
+};
+
+class TurbulenceParameters {
+  public: 
+    std::function<RealType (const RealType, const RealType)> deltaMixLen = NULL;
 };
 
 class SolverParameters {
@@ -153,6 +159,6 @@ public:
   ParallelParameters      parallel;
   StdOutParameters        stdOut;
   BFStepParameters        bfStep;
-  // TODO WS2: include parameters for turbulence
+  TurbulenceParameters    turbulence;
   Meshsize* meshsize;
 };

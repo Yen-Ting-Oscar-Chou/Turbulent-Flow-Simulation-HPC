@@ -1,7 +1,6 @@
 #include "StdAfx.hpp"
 
 #include "PetscParallelManager.hpp"
-//#include <petsclog.h>
 
 ParallelManagers::PetscParallelManager::PetscParallelManager(Parameters& parameters, FlowField & flowField):
   _parameters(parameters), _flowField(flowField) {
@@ -40,19 +39,6 @@ ParallelManagers::PetscParallelManager::~PetscParallelManager() {
   delete _parallelBoundaryPressureReadIterator;
   delete _parallelBoundaryVelocityFillIterator;
   delete _parallelBoundaryVelocityReadIterator;
-}
-
-int ParallelManagers::PetscParallelManager::computeRankFromIndices(int i, int j, int k) const {
-  if (i < 0 || i >= _parameters.parallel.numProcessors[0] ||
-      j < 0 || j >= _parameters.parallel.numProcessors[1] ||
-      k < 0 || k >= _parameters.parallel.numProcessors[2]) {
-    return MPI_PROC_NULL;
-  }
-  int nrank = i + j * _parameters.parallel.numProcessors[0];
-  if (_parameters.geometry.dim == 3) {
-    nrank += k * _parameters.parallel.numProcessors[0] * _parameters.parallel.numProcessors[1];
-  }
-  return nrank;
 }
 
 void ParallelManagers::PetscParallelManager::communicateVelocities() {

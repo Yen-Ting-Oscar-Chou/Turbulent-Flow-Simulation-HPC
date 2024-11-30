@@ -19,6 +19,12 @@ namespace ParallelManagers {
     private: 
       Parameters& _parameters;
       FlowField& _flowField;
+      int _left;
+      int _right; 
+      int _top;
+      int _bottom;
+      int _front;
+      int _back;
     public:
       
       Stencils::PressureBufferFillStencil *_pressureBufferFillStencil;

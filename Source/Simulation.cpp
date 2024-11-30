@@ -139,9 +139,7 @@ void Simulation::setTimeStep() {
   // Here, we select the type of operation before compiling. This allows to use the correct
   // data type for MPI. Not a concern for small simulations, but useful if using heterogeneous
   // machines.
-  globalMin = MY_FLOAT_MAX;
   MPI_Allreduce(&localMin, &globalMin, 1, MY_MPI_FLOAT, MPI_MIN, PETSC_COMM_WORLD);
   MPI_Barrier(PETSC_COMM_WORLD);
-  std::cout << "current rank:" << parameters_.parallel.rank << ", Global min= " << globalMin << std::endl;
   parameters_.timestep.dt = globalMin * parameters_.timestep.tau;
 }

@@ -44,22 +44,22 @@ void Stencils::PressureBufferReadStencil::applyTopWall(FlowField& flowField, int
 
 // 3D case
 void Stencils::PressureBufferReadStencil::applyLeftWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getPressure().getScalar(i - 1, j, k) = pressureLeft_[j - 2 + flowField.getCellsY() * (k - 2)];
+  flowField.getPressure().getScalar(i - 1, j, k) = pressureLeft_[j - 2 + flowField.getNy() * (k - 2)];
 }
 void Stencils::PressureBufferReadStencil::applyRightWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getPressure().getScalar(i + 1, j, k) = pressureRight_[j - 2 + flowField.getCellsY() * (k - 2)];
+  flowField.getPressure().getScalar(i + 1, j, k) = pressureRight_[j - 2 + flowField.getNy() * (k - 2)];
 }
 void Stencils::PressureBufferReadStencil::applyBottomWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getPressure().getScalar(i, j - 1, k) = pressureBottom_[i - 2 + flowField.getCellsX() * (k - 2)];
+  flowField.getPressure().getScalar(i, j - 1, k) = pressureBottom_[i - 2 + flowField.getNx() * (k - 2)];
 }
 void Stencils::PressureBufferReadStencil::applyTopWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getPressure().getScalar(i, j + 1, k) = pressureTop_[i - 2 + flowField.getCellsX() * (k - 2)];
+  flowField.getPressure().getScalar(i, j + 1, k) = pressureTop_[i - 2 + flowField.getNx() * (k - 2)];
 }
 void Stencils::PressureBufferReadStencil::applyFrontWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getPressure().getScalar(i, j, k - 1) = pressureFront_[i - 2 + flowField.getCellsX() * (j - 2)];
+  flowField.getPressure().getScalar(i, j, k - 1) = pressureFront_[i - 2 + flowField.getNx() * (j - 2)];
 }
 void Stencils::PressureBufferReadStencil::applyBackWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getPressure().getScalar(i, j, k + 1) = pressureBack_[i - 2 + flowField.getCellsX() * (j - 2)];
+  flowField.getPressure().getScalar(i, j, k + 1) = pressureBack_[i - 2 + flowField.getNx() * (j - 2)];
 }
 
 std::vector<RealType>& Stencils::PressureBufferReadStencil::getpressureLeft(){

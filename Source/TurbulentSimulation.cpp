@@ -10,7 +10,8 @@ TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowFi
   turbulentFGHStencil_(parameters),
   turbulentFGHIterator_(turbulentField_, parameters, turbulentFGHStencil_),
   maxViscStencil_(parameters),
-  maxViscIterator_(turbulentField_, parameters, maxViscStencil_),
+  maxViscFieldIterator_(turbulentField_, parameters, maxViscStencil_),
+  maxViscBoundaryIterator_(turbulentField_, parameters, maxViscStencil_),
   petscParallelManager_(parameters, turbulentField_) {};
 
 void TurbulentSimulation::initializeFlowField() {
@@ -61,7 +62,8 @@ void TurbulentSimulation::setTimeStep() {
   maxViscStencil_.reset();
   maxUFieldIterator_.iterate();
   maxUBoundaryIterator_.iterate();
-  maxViscIterator_.iterate();
+  maxViscFieldIterator_.iterate();
+  maxViscBoundaryIterator_.iterate();
   if (parameters_.geometry.dim == 3) {
     factor += 1.0 / (parameters_.meshsize->getDzMin() * parameters_.meshsize->getDzMin());
     parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[2] + EPSILON);

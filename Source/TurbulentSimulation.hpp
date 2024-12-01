@@ -18,7 +18,8 @@ private:
   Stencils::TurbulentFGHStencil     turbulentFGHStencil_;
   FieldIterator<TurbulentFlowField> turbulentFGHIterator_;
   Stencils::MaxViscStencil          maxViscStencil_;
-  FieldIterator<TurbulentFlowField> maxViscIterator_;
+  FieldIterator<TurbulentFlowField> maxViscFieldIterator_;
+  GlobalBoundaryIterator<TurbulentFlowField> maxViscBoundaryIterator_;
   ParallelManagers::TurbulentPetscParallelManager petscParallelManager_;
 
 protected:

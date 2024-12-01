@@ -3,7 +3,8 @@
 #include "MaxViscStencil.hpp"
 
 Stencils::MaxViscStencil::MaxViscStencil(const Parameters& parameters):
-  FieldStencil<TurbulentFlowField>(parameters) {
+  FieldStencil<TurbulentFlowField>(parameters),
+  BoundaryStencil<TurbulentFlowField>(parameters) {
   reset();
 }
 
@@ -13,6 +14,48 @@ void Stencils::MaxViscStencil::apply(TurbulentFlowField& flowField, int i, int j
 }
 
 void Stencils::MaxViscStencil::apply(TurbulentFlowField& flowField, int i, int j, int k) {
+  const RealType visc = flowField.getViscosity().getScalar(i, j, k);
+  maxValue_           = std::max(maxValue_, visc);
+}
+
+void Stencils::MaxViscStencil::applyLeftWall(TurbulentFlowField& flowField, int i, int j) {
+  const RealType visc = flowField.getViscosity().getScalar(i, j);
+  maxValue_           = std::max(maxValue_, visc);
+}
+void Stencils::MaxViscStencil::applyRightWall(TurbulentFlowField& flowField, int i, int j) {
+  const RealType visc = flowField.getViscosity().getScalar(i, j);
+  maxValue_           = std::max(maxValue_, visc);
+}
+void Stencils::MaxViscStencil::applyBottomWall(TurbulentFlowField& flowField, int i, int j) {
+  const RealType visc = flowField.getViscosity().getScalar(i, j);
+  maxValue_           = std::max(maxValue_, visc);
+}
+void Stencils::MaxViscStencil::applyTopWall(TurbulentFlowField& flowField, int i, int j) {
+  const RealType visc = flowField.getViscosity().getScalar(i, j);
+  maxValue_           = std::max(maxValue_, visc);
+}
+
+void Stencils::MaxViscStencil::applyLeftWall(TurbulentFlowField& flowField, int i, int j, int k) {
+  const RealType visc = flowField.getViscosity().getScalar(i, j, k);
+  maxValue_           = std::max(maxValue_, visc);
+}
+void Stencils::MaxViscStencil::applyRightWall(TurbulentFlowField& flowField, int i, int j, int k) {
+  const RealType visc = flowField.getViscosity().getScalar(i, j, k);
+  maxValue_           = std::max(maxValue_, visc);
+}
+void Stencils::MaxViscStencil::applyBottomWall(TurbulentFlowField& flowField, int i, int j, int k) {
+  const RealType visc = flowField.getViscosity().getScalar(i, j, k);
+  maxValue_           = std::max(maxValue_, visc);
+}
+void Stencils::MaxViscStencil::applyTopWall(TurbulentFlowField& flowField, int i, int j, int k) {
+  const RealType visc = flowField.getViscosity().getScalar(i, j, k);
+  maxValue_           = std::max(maxValue_, visc);
+}
+void Stencils::MaxViscStencil::applyFrontWall(TurbulentFlowField& flowField, int i, int j, int k) {
+  const RealType visc = flowField.getViscosity().getScalar(i, j, k);
+  maxValue_           = std::max(maxValue_, visc);
+}
+void Stencils::MaxViscStencil::applyBackWall(TurbulentFlowField& flowField, int i, int j, int k) {
   const RealType visc = flowField.getViscosity().getScalar(i, j, k);
   maxValue_           = std::max(maxValue_, visc);
 }

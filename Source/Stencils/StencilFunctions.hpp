@@ -19,8 +19,8 @@ namespace Stencils {
   }
 
   inline void computeGlobalCoordinates(RealType* coords, const Parameters& parameters_, int i, int j) {
-    coords[0] = parameters_.meshsize->getPosX(i, j, -1) + 0.5 * parameters_.meshsize->getDx(i, j, -1);
-    coords[1] = parameters_.meshsize->getPosY(i, j, -1) + 0.5 * parameters_.meshsize->getDy(i, j, -1);
+    coords[0] = parameters_.meshsize->getPosX(i, j) + 0.5 * parameters_.meshsize->getDx(i, j);
+    coords[1] = parameters_.meshsize->getPosY(i, j) + 0.5 * parameters_.meshsize->getDy(i, j);
   }
 
   inline void computeGlobalCoordinates(RealType* coords, const Parameters& parameters_, int i, int j, int k) {

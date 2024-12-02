@@ -34,6 +34,15 @@ void Stencils::ViscosityStencil::apply(TurbulentFlowField& turbulentField, int i
   const RealType S_ij_sq = S_11 * S_11 + S_22 * S_22 + 2 * S_12 * S_12;
   RealType&      v_t     = turbulentField.getViscosity().getScalar(i, j);
   v_t                    = mixingLength * mixingLength * sqrt(2 * S_ij_sq);
+
+  // For BFS
+  if ((obstacle & OBSTACLE_BOTTOM) == OBSTACLE_BOTTOM) {
+    turbulentField.getViscosity().getScalar(i, j - 1) = -v_t;
+  }
+
+  if ((obstacle & OBSTACLE_LEFT) == OBSTACLE_LEFT) {
+    turbulentField.getViscosity().getScalar(i - 1, j) = -v_t;
+  }
 }
 
 void Stencils::ViscosityStencil::apply(TurbulentFlowField& turbulentField, int i, int j, int k) {
@@ -62,4 +71,13 @@ void Stencils::ViscosityStencil::apply(TurbulentFlowField& turbulentField, int i
   const RealType S_ij_sq = S_11 * S_11 + S_22 * S_22 + S_33 * S_33 + 2 * (S_12 * S_12 + S_13 * S_13 + S_23 * S_23);
   RealType&      v_t     = turbulentField.getViscosity().getScalar(i, j, k);
   v_t                    = mixingLength * mixingLength * sqrt(2 * S_ij_sq);
+
+  // For BFS
+  if ((obstacle & OBSTACLE_BOTTOM) == OBSTACLE_BOTTOM) {
+    turbulentField.getViscosity().getScalar(i, j - 1, k) = -v_t;
+  }
+
+  if ((obstacle & OBSTACLE_LEFT) == OBSTACLE_LEFT) {
+    turbulentField.getViscosity().getScalar(i - 1, j, k) = -v_t;
+  }
 }

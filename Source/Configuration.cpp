@@ -476,17 +476,19 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
   MPI_Bcast(parameters.walls.vectorBack, 3, MY_MPI_FLOAT, 0, communicator);
 
   // TODO WS2: broadcast turbulence parameters
-  broadcastString(parameters.simulation.velocityProfile, communicator);
-  broadcastString(deltaMixLen, communicator);  
-  if (rank != 0){
-    if (deltaMixLen == "turbulence") {
-      parameters.turbulence.deltaMixLen = deltaTurbulent;
-    } else if (deltaMixLen == "laminar") {
-      parameters.turbulence.deltaMixLen = deltaLaminar;
-    } else if (deltaMixLen == "zero") {
-      parameters.turbulence.deltaMixLen = deltaZero;
-    } else {
-      throw std::runtime_error("Error loading delta for mixing lengths");
+  if (parameters.simulation.type == "turbulence") {
+    broadcastString(parameters.simulation.velocityProfile, communicator);
+    broadcastString(deltaMixLen, communicator);
+    if (rank != 0) {
+      if (deltaMixLen == "turbulence") {
+        parameters.turbulence.deltaMixLen = deltaTurbulent;
+      } else if (deltaMixLen == "laminar") {
+        parameters.turbulence.deltaMixLen = deltaLaminar;
+      } else if (deltaMixLen == "zero") {
+        parameters.turbulence.deltaMixLen = deltaZero;
+      } else {
+        throw std::runtime_error("Error loading delta for mixing lengths");
+      }
     }
   }
 }

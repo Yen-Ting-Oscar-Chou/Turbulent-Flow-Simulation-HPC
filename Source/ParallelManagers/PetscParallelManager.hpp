@@ -16,16 +16,9 @@
 namespace ParallelManagers {
 
   class PetscParallelManager {
-    private: 
-      Parameters& _parameters;
-      FlowField& _flowField;
-      int _left;
-      int _right; 
-      int _top;
-      int _bottom;
-      int _front;
-      int _back;
-      
+    private:
+    FlowField& _flowField;
+
       Stencils::PressureBufferFillStencil *_pressureBufferFillStencil;
       Stencils::PressureBufferReadStencil *_pressureBufferReadStencil;
 
@@ -36,7 +29,22 @@ namespace ParallelManagers {
       ParallelBoundaryIterator<FlowField> *_parallelBoundaryPressureReadIterator;
       ParallelBoundaryIterator<FlowField> *_parallelBoundaryVelocityFillIterator;
       ParallelBoundaryIterator<FlowField> *_parallelBoundaryVelocityReadIterator;
-    
+
+    protected:
+      int _left;
+
+      int _front;
+
+      int _back;
+
+      int _top;
+
+      int _bottom;
+
+      int _right;
+
+      Parameters& _parameters;
+
     public:
       PetscParallelManager(Parameters& parameters, FlowField& flowField);
       ~PetscParallelManager();

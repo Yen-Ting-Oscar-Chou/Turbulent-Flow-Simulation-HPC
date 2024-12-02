@@ -1,38 +1,29 @@
 #pragma once
 
 #include "Definitions.hpp"
-#include "TurbulentFlowField.hpp"
+#include "Iterators.hpp"
 #include "Parameters.hpp"
-
+#include "PetscParallelManager.hpp"
 #include "Stencils/ViscosityBufferFillStencil.hpp"
 #include "Stencils/ViscosityBufferReadStencil.hpp"
-
-
-#include "Iterators.hpp"
+#include "TurbulentFlowField.hpp"
 
 namespace ParallelManagers {
 
-  class TurbulentPetscParallelManager {
-    private: 
-      Parameters& _parameters;
-      TurbulentFlowField& _flowField;
-      int _left;
-      int _right; 
-      int _top;
-      int _bottom;
-      int _front;
-      int _back;
-      
-      Stencils::ViscosityBufferFillStencil *_viscosityBufferFillStencil;
-      Stencils::ViscosityBufferReadStencil *_viscosityBufferReadStencil;
+  class TurbulentPetscParallelManager : public PetscParallelManager {
+  private:
+    TurbulentFlowField& _turbulentFlowField; // Reference specific to TurbulentFlowField
 
-      ParallelBoundaryIterator<TurbulentFlowField> *_parallelBoundaryViscosityFillIterator;
-      ParallelBoundaryIterator<TurbulentFlowField> *_parallelBoundaryViscosityReadIterator;
-    
-    public:
-      TurbulentPetscParallelManager(Parameters& parameters, TurbulentFlowField& flowField);
-      ~TurbulentPetscParallelManager();
+    Stencils::ViscosityBufferFillStencil *_viscosityBufferFillStencil;
+    Stencils::ViscosityBufferReadStencil *_viscosityBufferReadStencil;
 
-      void communicateViscosity();
+    ParallelBoundaryIterator<TurbulentFlowField> *_parallelBoundaryViscosityFillIterator;
+    ParallelBoundaryIterator<TurbulentFlowField> *_parallelBoundaryViscosityReadIterator;
+
+  public:
+    TurbulentPetscParallelManager(Parameters& parameters, TurbulentFlowField& flowField);
+    ~TurbulentPetscParallelManager();
+
+    void communicateViscosity();
   };
 } // namespace ParallelManagers

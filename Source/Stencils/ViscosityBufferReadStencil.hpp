@@ -38,6 +38,5 @@ namespace Stencils {
     std::vector<RealType> viscosityTop_;
     std::vector<RealType> viscosityFront_;
     std::vector<RealType> viscosityBack_;
-    Parameters parameters_;
   };
 } // namespace Stencils

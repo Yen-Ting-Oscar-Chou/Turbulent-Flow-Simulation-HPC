@@ -20,7 +20,7 @@ private:
   Stencils::MaxViscStencil          maxViscStencil_;
   FieldIterator<TurbulentFlowField> maxViscFieldIterator_;
   GlobalBoundaryIterator<TurbulentFlowField> maxViscBoundaryIterator_;
-  ParallelManagers::TurbulentPetscParallelManager petscParallelManager_;
+  ParallelManagers::TurbulentPetscParallelManager turbulentPetscParallelManager_;
 
 protected:
   void setTimeStep() override;

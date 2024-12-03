@@ -10,19 +10,19 @@
 
 namespace ParallelManagers {
 
-  class TurbulentPetscParallelManager : public PetscParallelManager {
+  class TurbulentPetscParallelManager: public PetscParallelManager {
   private:
     TurbulentFlowField& _turbulentFlowField; // Reference specific to TurbulentFlowField
 
-    Stencils::ViscosityBufferFillStencil *_viscosityBufferFillStencil;
-    Stencils::ViscosityBufferReadStencil *_viscosityBufferReadStencil;
+    Stencils::ViscosityBufferFillStencil _viscosityBufferFillStencil;
+    Stencils::ViscosityBufferReadStencil _viscosityBufferReadStencil;
 
-    ParallelBoundaryIterator<TurbulentFlowField> *_parallelBoundaryViscosityFillIterator;
-    ParallelBoundaryIterator<TurbulentFlowField> *_parallelBoundaryViscosityReadIterator;
+    ParallelBoundaryIterator<TurbulentFlowField> _parallelBoundaryViscosityFillIterator;
+    ParallelBoundaryIterator<TurbulentFlowField> _parallelBoundaryViscosityReadIterator;
 
   public:
     TurbulentPetscParallelManager(Parameters& parameters, TurbulentFlowField& flowField);
-    ~TurbulentPetscParallelManager();
+    ~TurbulentPetscParallelManager() = default;
 
     void communicateViscosity();
   };

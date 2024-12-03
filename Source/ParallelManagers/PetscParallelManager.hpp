@@ -19,16 +19,16 @@ namespace ParallelManagers {
     private:
     FlowField& _flowField;
 
-      Stencils::PressureBufferFillStencil *_pressureBufferFillStencil;
-      Stencils::PressureBufferReadStencil *_pressureBufferReadStencil;
+      Stencils::PressureBufferFillStencil _pressureBufferFillStencil;
+      Stencils::PressureBufferReadStencil _pressureBufferReadStencil;
 
-      Stencils::VelocityBufferFillStencil *_velocityBufferFillStencil;
-      Stencils::VelocityBufferReadStencil *_velocityBufferReadStencil;
+      Stencils::VelocityBufferFillStencil _velocityBufferFillStencil;
+      Stencils::VelocityBufferReadStencil _velocityBufferReadStencil;
 
-      ParallelBoundaryIterator<FlowField> *_parallelBoundaryPressureFillIterator;
-      ParallelBoundaryIterator<FlowField> *_parallelBoundaryPressureReadIterator;
-      ParallelBoundaryIterator<FlowField> *_parallelBoundaryVelocityFillIterator;
-      ParallelBoundaryIterator<FlowField> *_parallelBoundaryVelocityReadIterator;
+      ParallelBoundaryIterator<FlowField> _parallelBoundaryPressureFillIterator;
+      ParallelBoundaryIterator<FlowField> _parallelBoundaryPressureReadIterator;
+      ParallelBoundaryIterator<FlowField> _parallelBoundaryVelocityFillIterator;
+      ParallelBoundaryIterator<FlowField> _parallelBoundaryVelocityReadIterator;
 
     protected:
       int _left;
@@ -47,7 +47,7 @@ namespace ParallelManagers {
 
     public:
       PetscParallelManager(Parameters& parameters, FlowField& flowField);
-      ~PetscParallelManager();
+      ~PetscParallelManager() = default;
 
       void communicatePressure();
       void communicateVelocities();

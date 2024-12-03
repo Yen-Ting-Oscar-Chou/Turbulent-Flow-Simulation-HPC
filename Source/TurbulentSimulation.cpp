@@ -12,7 +12,7 @@ TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowFi
   maxViscStencil_(parameters),
   maxViscFieldIterator_(turbulentField_, parameters, maxViscStencil_),
   maxViscBoundaryIterator_(turbulentField_, parameters, maxViscStencil_),
-  petscParallelManager_(parameters, turbulentField_) {};
+  turbulentPetscParallelManager_(parameters, turbulentField_) {};
 
 void TurbulentSimulation::initializeFlowField() {
   Simulation::initializeFlowField();
@@ -45,7 +45,7 @@ void TurbulentSimulation::plotVTK(int timeStep, RealType simulationTime) {
 void TurbulentSimulation::solveTimestep() {
   viscosityIterator_.iterate();
   // TODO communicate viscosity
-  petscParallelManager_.communicateViscosity();
+  turbulentPetscParallelManager_.communicateViscosity();
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
   // Compute FGH

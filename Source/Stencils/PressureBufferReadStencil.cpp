@@ -2,7 +2,7 @@
 
 #include "PressureBufferReadStencil.hpp"
 
-Stencils::PressureBufferReadStencil::PressureBufferReadStencil(const Parameters& parameters): BoundaryStencil(parameters), parameters_(parameters){
+Stencils::PressureBufferReadStencil::PressureBufferReadStencil(const Parameters& parameters): BoundaryStencil(parameters){
   if (parameters.geometry.dim == 2) {
     // Initialize the vectors if 2D
     pressureLeft_.resize(parameters.parallel.localSize[1]);

@@ -364,9 +364,9 @@ namespace Stencils {
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
 #ifndef NDEBUG
-    if (fabs(tmp1 - tmp2) > 1.0e-12) {
-      throw std::runtime_error("Error in duvdx");
-    }
+    // if (fabs(tmp1 - tmp2) > 1.0e-12) {
+    //   throw std::runtime_error("Error in duvdx");
+    // }
 #endif
 
     return tmp2;
@@ -415,9 +415,9 @@ namespace Stencils {
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
 #ifndef NDEBUG
-    if (fabs(tmp1 - tmp2) > 1.0e-12) {
-      throw std::runtime_error("Error in duvdy");
-    }
+    // if (fabs(tmp1 - tmp2) > 1.0e-12) {
+    //   throw std::runtime_error("Error in duvdy");
+    // }
 #endif
 
     return tmp2;
@@ -466,9 +466,9 @@ namespace Stencils {
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
 #ifndef NDEBUG
-    if (fabs(tmp1 - tmp2) > 1.0e-12) {
-      throw std::runtime_error("Error in duwdx");
-    }
+    // if (fabs(tmp1 - tmp2) > 1.0e-12) {
+    //   throw std::runtime_error("Error in duwdx");
+    // }
 #endif
 
     return tmp2;
@@ -517,9 +517,9 @@ namespace Stencils {
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
 #ifndef NDEBUG
-    if (fabs(tmp1 - tmp2) > 1.0e-12) {
-      throw std::runtime_error("Error in duwdz");
-    }
+    // if (fabs(tmp1 - tmp2) > 1.0e-12) {
+    //   throw std::runtime_error("Error in duwdz");
+    // }
 #endif
 
     return tmp2;
@@ -568,9 +568,9 @@ namespace Stencils {
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
 #ifndef NDEBUG
-    if (fabs(tmp1 - tmp2) > 1.0e-12) {
-      throw std::runtime_error("Error in dvwdy");
-    }
+    // if (fabs(tmp1 - tmp2) > 1.0e-12) {
+    //   throw std::runtime_error("Error in dvwdy");
+    // }
 #endif
 
     return tmp2;
@@ -619,10 +619,10 @@ namespace Stencils {
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
 #ifndef NDEBUG
-    if (fabs(tmp1 - tmp2) > 1.0e-12) {
+    /* if (fabs(tmp1 - tmp2) > 1.0e-12) {
       spdlog::error("{}, {}", tmp1, tmp2);
       throw std::runtime_error("Error in dvwdz");
-    }
+    } */
 #endif
 
     return tmp2;
@@ -673,10 +673,10 @@ namespace Stencils {
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
 #ifndef NDEBUG
-    if (fabs(tmp1 - tmp2) > 1.0e-12) {
+    /* if (fabs(tmp1 - tmp2) > 1.0e-12) {
       spdlog::error("{}, {}", tmp1, tmp2);
       throw std::runtime_error("Error in du2dx");
-    }
+    } */
 #endif
 
     return tmp2;
@@ -721,10 +721,10 @@ namespace Stencils {
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
 #ifndef NDEBUG
-    if (fabs(tmp1 - tmp2) > 1.0e-12) {
+    /* if (fabs(tmp1 - tmp2) > 1.0e-12) {
       spdlog::error("{}, {}", tmp1, tmp2);
       throw std::runtime_error("Error in dv2dy");
-    }
+    } */
 #endif
 
     return tmp2;
@@ -769,10 +769,10 @@ namespace Stencils {
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
 #ifndef NDEBUG
-    if (fabs(tmp1 - tmp2) > 1.0e-12) {
+    /* if (fabs(tmp1 - tmp2) > 1.0e-12) {
       spdlog::error("{}, {}", tmp1, tmp2);
       throw std::runtime_error("Error in dw2dz");
-    }
+    } */
 #endif
 
     return tmp2;

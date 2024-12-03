@@ -2,7 +2,7 @@
 
 #include "ViscosityBufferReadStencil.hpp"
 
-Stencils::ViscosityBufferReadStencil::ViscosityBufferReadStencil(const Parameters& parameters): BoundaryStencil(parameters), parameters_(parameters){
+Stencils::ViscosityBufferReadStencil::ViscosityBufferReadStencil(const Parameters& parameters): BoundaryStencil(parameters){
   if (parameters.geometry.dim == 2) {
     // Initialize the vectors if 2D
     viscosityLeft_.resize(parameters.parallel.localSize[1]);

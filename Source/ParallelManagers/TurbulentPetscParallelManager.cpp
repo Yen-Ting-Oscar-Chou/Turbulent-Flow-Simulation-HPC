@@ -7,8 +7,8 @@ ParallelManagers::TurbulentPetscParallelManager::TurbulentPetscParallelManager(P
   _turbulentFlowField(flowField),
   _viscosityBufferFillStencil(parameters),
   _viscosityBufferReadStencil(parameters),
-  _parallelBoundaryViscosityFillIterator(_turbulentFlowField, parameters, _viscosityBufferFillStencil, 2, -1),
-  _parallelBoundaryViscosityReadIterator(_turbulentFlowField, parameters, _viscosityBufferReadStencil, 2, -1) {
+  _parallelBoundaryViscosityFillIterator(_turbulentFlowField, parameters, _viscosityBufferFillStencil, 1, -1),
+  _parallelBoundaryViscosityReadIterator(_turbulentFlowField, parameters, _viscosityBufferReadStencil, 1, -1) {
 }
 
 void ParallelManagers::TurbulentPetscParallelManager::communicateViscosity() {

@@ -9,8 +9,8 @@ ParallelManagers::PetscParallelManager::PetscParallelManager(Parameters& paramet
   _pressureBufferReadStencil(parameters),
   _velocityBufferFillStencil(parameters),
   _velocityBufferReadStencil(parameters),
-  _parallelBoundaryPressureFillIterator(_flowField, parameters, _pressureBufferFillStencil, 1, 0),
-  _parallelBoundaryPressureReadIterator(_flowField, parameters, _pressureBufferReadStencil, 1, 0),
+  _parallelBoundaryPressureFillIterator(_flowField, parameters, _pressureBufferFillStencil, 1, -1),
+  _parallelBoundaryPressureReadIterator(_flowField, parameters, _pressureBufferReadStencil, 1, -1),
   _parallelBoundaryVelocityFillIterator(_flowField, parameters, _velocityBufferFillStencil, 1, 0),
   _parallelBoundaryVelocityReadIterator(_flowField, parameters, _velocityBufferReadStencil, 1, 0) {
 

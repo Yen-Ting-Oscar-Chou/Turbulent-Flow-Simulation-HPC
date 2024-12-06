@@ -7,8 +7,8 @@ ParallelManagers::TurbulentPetscParallelManager::TurbulentPetscParallelManager(P
   _turbulentFlowField(flowField),
   _viscosityBufferFillStencil(parameters),
   _viscosityBufferReadStencil(parameters),
-  _parallelBoundaryViscosityFillIterator(_turbulentFlowField, parameters, _viscosityBufferFillStencil, 1, 0),
-  _parallelBoundaryViscosityReadIterator(_turbulentFlowField, parameters, _viscosityBufferReadStencil, 1, 0) {}
+  _parallelBoundaryViscosityFillIterator(_turbulentFlowField, parameters, _viscosityBufferFillStencil, 1, -1),
+  _parallelBoundaryViscosityReadIterator(_turbulentFlowField, parameters, _viscosityBufferReadStencil, 1, -1) {}
 
 void ParallelManagers::TurbulentPetscParallelManager::communicateObstacleCoordinates(
   std::vector<std::tuple<RealType, RealType>>& coordinatesList2D, std::vector<std::tuple<RealType, RealType, RealType>>& coordinatesList3D

@@ -27,7 +27,7 @@ Stencils::ViscosityBufferFillStencil::ViscosityBufferFillStencil(const Parameter
 }
 
 /* Methods for 2D case */
-// iterate "- 2" due to ghost cells in each direction. 
+// iterate "- 1" due to ghost cells in each direction. 
 void Stencils::ViscosityBufferFillStencil::applyLeftWall(TurbulentFlowField& flowField, int i, int j) {
   viscosityLeft_[j - 1] = flowField.getViscosity().getScalar(i + 1, j);
 }

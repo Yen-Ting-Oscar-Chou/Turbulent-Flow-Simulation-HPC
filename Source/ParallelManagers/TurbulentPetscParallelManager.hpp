@@ -25,5 +25,7 @@ namespace ParallelManagers {
     ~TurbulentPetscParallelManager() = default;
 
     void communicateViscosity();
+
+    void communicateObstacleCoordinates(std::vector<std::tuple<RealType, RealType>>& coordinatesList2D, std::vector<std::tuple<RealType, RealType, RealType>>& coordinatesList3D);
   };
 } // namespace ParallelManagers

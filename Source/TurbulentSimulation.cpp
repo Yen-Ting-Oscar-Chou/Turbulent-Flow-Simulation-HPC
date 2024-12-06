@@ -16,13 +16,14 @@ TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowFi
 
 void TurbulentSimulation::initializeFlowField() {
   Simulation::initializeFlowField();
-  std::list<std::tuple<RealType, RealType, RealType>> coordinateList3D;
-  std::list<std::tuple<RealType, RealType>>           coordinateList2D;
-  Stencils::ObstacleCoordinatesStencil                obstStencil(parameters_, coordinateList2D, coordinateList3D);
-  FieldIterator<FlowField>                            obstIterator(flowField_, parameters_, obstStencil);
-  GlobalBoundaryIterator<FlowField>                   obstBoundaryIterator(flowField_, parameters_, obstStencil);
+  std::vector<std::tuple<RealType, RealType, RealType>> coordinateList3D;
+  std::vector<std::tuple<RealType, RealType>>           coordinateList2D;
+  Stencils::ObstacleCoordinatesStencil                  obstStencil(parameters_, coordinateList2D, coordinateList3D);
+  FieldIterator<FlowField>                              obstIterator(flowField_, parameters_, obstStencil);
+  GlobalBoundaryIterator<FlowField>                     obstBoundaryIterator(flowField_, parameters_, obstStencil);
   obstIterator.iterate();
   obstBoundaryIterator.iterate();
+  turbulentPetscParallelManager_.communicateObstacleCoordinates(coordinateList2D, coordinateList3D);
   if (parameters_.geometry.dim == 2) {
     Stencils::DistanceStencil         distStencil(parameters_, coordinateList2D);
     FieldIterator<TurbulentFlowField> distIterator(turbulentField_, parameters_, distStencil);

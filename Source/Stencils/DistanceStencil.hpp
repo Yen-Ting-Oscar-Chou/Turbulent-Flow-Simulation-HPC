@@ -1,7 +1,5 @@
 #pragma once
 
-#include <list>
-
 #include "FieldStencil.hpp"
 #include "TurbulentFlowField.hpp"
 #include "Parameters.hpp"
@@ -13,12 +11,12 @@ namespace Stencils {
    */
   class DistanceStencil: public FieldStencil<TurbulentFlowField> {
   private:
-    std::list<std::tuple<RealType, RealType>>           coordinatesList2D;
-    std::list<std::tuple<RealType, RealType, RealType>> coordinatesList3D;
+    std::vector<std::tuple<RealType, RealType>>           coordinatesList2D;
+    std::vector<std::tuple<RealType, RealType, RealType>> coordinatesList3D;
 
   public:
-    DistanceStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType>>& coordinatesList);
-    DistanceStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList);
+    DistanceStencil(const Parameters& parameters, std::vector<std::tuple<RealType, RealType>>& coordinatesList);
+    DistanceStencil(const Parameters& parameters, std::vector<std::tuple<RealType, RealType, RealType>>& coordinatesList);
     ~DistanceStencil() override = default;
     void apply(TurbulentFlowField& turbulentField, int i, int j) override;
     void apply(TurbulentFlowField& turbulentField, int i, int j, int k) override;

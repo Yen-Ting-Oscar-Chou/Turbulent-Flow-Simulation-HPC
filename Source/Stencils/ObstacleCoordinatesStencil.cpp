@@ -3,7 +3,7 @@
 #include "ObstacleCoordinatesStencil.hpp"
 
 Stencils::ObstacleCoordinatesStencil::ObstacleCoordinatesStencil(
-  const Parameters& parameters, std::list<std::tuple<RealType, RealType>>& coordinatesList2D, std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList3D
+  const Parameters& parameters, std::vector<std::tuple<RealType, RealType>>& coordinatesList2D, std::vector<std::tuple<RealType, RealType, RealType>>& coordinatesList3D
 ):
   FieldStencil<FlowField>(parameters),
   BoundaryStencil<FlowField>(parameters),

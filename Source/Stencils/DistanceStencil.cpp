@@ -2,11 +2,11 @@
 
 #include "DistanceStencil.hpp"
 
-Stencils::DistanceStencil::DistanceStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType>>& coordinatesList):
+Stencils::DistanceStencil::DistanceStencil(const Parameters& parameters, std::vector<std::tuple<RealType, RealType>>& coordinatesList):
   FieldStencil<TurbulentFlowField>(parameters),
   coordinatesList2D(coordinatesList) {}
 
-Stencils::DistanceStencil::DistanceStencil(const Parameters& parameters, std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList):
+Stencils::DistanceStencil::DistanceStencil(const Parameters& parameters, std::vector<std::tuple<RealType, RealType, RealType>>& coordinatesList):
   FieldStencil<TurbulentFlowField>(parameters),
   coordinatesList3D(coordinatesList) {}
 

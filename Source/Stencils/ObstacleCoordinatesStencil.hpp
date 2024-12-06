@@ -1,7 +1,5 @@
 #pragma once
 
-#include <list>
-
 #include "BoundaryStencil.hpp"
 #include "FieldStencil.hpp"
 #include "FlowField.hpp"
@@ -14,15 +12,15 @@ namespace Stencils {
    */
   class ObstacleCoordinatesStencil: public FieldStencil<FlowField>, public BoundaryStencil<FlowField> {
   private:
-    std::list<std::tuple<RealType, RealType>>&           coordinatesList2D;
-    std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList3D;
+    std::vector<std::tuple<RealType, RealType>>&           coordinatesList2D;
+    std::vector<std::tuple<RealType, RealType, RealType>>& coordinatesList3D;
 
     void addToList(int i, int j);
     void addToList(int i, int j, int k);
 
   public:
     ObstacleCoordinatesStencil(
-      const Parameters& parameters, std::list<std::tuple<RealType, RealType>>& coordinatesList2D, std::list<std::tuple<RealType, RealType, RealType>>& coordinatesList3D
+      const Parameters& parameters, std::vector<std::tuple<RealType, RealType>>& coordinatesList2D, std::vector<std::tuple<RealType, RealType, RealType>>& coordinatesList3D
     );
     ~ObstacleCoordinatesStencil() override = default;
 

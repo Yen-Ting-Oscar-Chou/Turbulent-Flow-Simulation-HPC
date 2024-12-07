@@ -20,7 +20,7 @@ void TurbulentSimulation::initializeFlowField() {
   std::vector<std::tuple<RealType, RealType>>           coordinateList2D;
   Stencils::ObstacleCoordinatesStencil                  obstStencil(parameters_, coordinateList2D, coordinateList3D);
   FieldIterator<FlowField>                              obstIterator(flowField_, parameters_, obstStencil);
-  GlobalBoundaryIterator<FlowField>                     obstBoundaryIterator(flowField_, parameters_, obstStencil);
+  GlobalBoundaryIterator<FlowField>                     obstBoundaryIterator(flowField_, parameters_, obstStencil, 1, 0);
   obstIterator.iterate();
   obstBoundaryIterator.iterate();
   turbulentPetscParallelManager_.communicateObstacleCoordinates(coordinateList2D, coordinateList3D);

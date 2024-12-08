@@ -87,7 +87,7 @@ void Stencils::ObstacleCoordinatesStencil::applyBottomWall([[maybe_unused]] Flow
   if (scenario == "cavity") {
     addToList(i, j, k);
   } else if (scenario == "channel") {
-    addToList(i, j);
+    addToList(i, j, k);
   }
 };
 void Stencils::ObstacleCoordinatesStencil::applyTopWall([[maybe_unused]] FlowField& flowField, int i, int j, int k) {

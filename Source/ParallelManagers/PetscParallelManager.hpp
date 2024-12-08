@@ -17,7 +17,7 @@ namespace ParallelManagers {
 
   class PetscParallelManager {
     private:
-    FlowField& _flowField;
+      FlowField& _flowField;
 
       Stencils::PressureBufferFillStencil _pressureBufferFillStencil;
       Stencils::PressureBufferReadStencil _pressureBufferReadStencil;

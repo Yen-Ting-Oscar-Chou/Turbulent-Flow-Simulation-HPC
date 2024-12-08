@@ -3,7 +3,7 @@
 #include "TurbulentVTKStencil.hpp"
 
 Stencils::TurbulentVTKStencil::TurbulentVTKStencil(const Parameters& parameters):
-  VTKStencil(parameters) {};
+  VTKStencil(parameters) {}
 
 void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, int i, int j) {
   ASSERTION(FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 2);

@@ -12,7 +12,7 @@ TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowFi
   maxViscStencil_(parameters),
   maxViscFieldIterator_(turbulentField_, parameters, maxViscStencil_),
   maxViscBoundaryIterator_(turbulentField_, parameters, maxViscStencil_),
-  turbulentPetscParallelManager_(parameters, turbulentField_) {};
+  turbulentPetscParallelManager_(parameters, turbulentField_) {}
 
 void TurbulentSimulation::initializeFlowField() {
   Simulation::initializeFlowField();

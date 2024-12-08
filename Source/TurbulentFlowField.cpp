@@ -12,7 +12,7 @@ TurbulentFlowField::TurbulentFlowField(const Parameters& parameters):
     parameters.geometry.dim == 2
       ? ScalarField(parameters.parallel.localSize[0] + 3, parameters.parallel.localSize[1] + 3)
       : ScalarField(parameters.parallel.localSize[0] + 3, parameters.parallel.localSize[1] + 3, parameters.parallel.localSize[2] + 3)
-  ) {};
+  ) {}
 
 ScalarField& TurbulentFlowField::getViscosity() { return viscosity_; }
 ScalarField& TurbulentFlowField::getDistance() { return distance_; }

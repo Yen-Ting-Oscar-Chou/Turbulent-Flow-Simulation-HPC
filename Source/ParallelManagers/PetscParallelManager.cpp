@@ -3,7 +3,6 @@
 #include "PetscParallelManager.hpp"
 
 ParallelManagers::PetscParallelManager::PetscParallelManager(Parameters& parameters, FlowField& flowField):
-  _parameters(parameters),
   _flowField(flowField),
   _pressureBufferFillStencil(parameters),
   _pressureBufferReadStencil(parameters),
@@ -12,7 +11,8 @@ ParallelManagers::PetscParallelManager::PetscParallelManager(Parameters& paramet
   _parallelBoundaryPressureFillIterator(_flowField, parameters, _pressureBufferFillStencil, 1, 0),
   _parallelBoundaryPressureReadIterator(_flowField, parameters, _pressureBufferReadStencil, 1, 0),
   _parallelBoundaryVelocityFillIterator(_flowField, parameters, _velocityBufferFillStencil, 1, 0),
-  _parallelBoundaryVelocityReadIterator(_flowField, parameters, _velocityBufferReadStencil, 1, 0) {
+  _parallelBoundaryVelocityReadIterator(_flowField, parameters, _velocityBufferReadStencil, 1, 0),
+  _parameters(parameters) {
 
   _left   = _parameters.parallel.leftNb;
   _right  = _parameters.parallel.rightNb;

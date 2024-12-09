@@ -31,7 +31,7 @@ namespace Stencils {
   class BufferStencilBase : public BoundaryStencil<FlowFieldType>, public BufferBase {
   public:
     explicit BufferStencilBase(const Parameters& parameters)
-      : BoundaryStencil<FlowFieldType>(parameters), parameters_(parameters) {}
+      : BoundaryStencil<FlowFieldType>(parameters) {}
 
     ~BufferStencilBase() override = default;
 
@@ -46,9 +46,6 @@ namespace Stencils {
     void applyTopWall(FlowFieldType& flowField, int i, int j, int k) override = 0;
     void applyFrontWall(FlowFieldType& flowField, int i, int j, int k) override = 0;
     void applyBackWall(FlowFieldType& flowField, int i, int j, int k) override = 0;
-
-  protected:
-    const Parameters& parameters_;
   };
 }
 

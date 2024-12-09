@@ -2,23 +2,23 @@
 
 #include "ViscosityBufferReadStencil.hpp"
 
-Stencils::ViscosityBufferReadStencil::ViscosityBufferReadStencil(const Parameters& parameters): BoundaryStencil(parameters){
+Stencils::ViscosityBufferReadStencil::ViscosityBufferReadStencil(const Parameters& parameters): BufferStencilBase(parameters){
   if (parameters.geometry.dim == 2) {
     // Initialize the vectors if 2D
-    viscosityLeft_.resize(parameters.parallel.localSize[1] + 2);
-    viscosityRight_.resize(parameters.parallel.localSize[1] + 2);
-    viscosityBottom_.resize(parameters.parallel.localSize[0] + 2);
-    viscosityTop_.resize(parameters.parallel.localSize[0] + 2);
-    viscosityFront_.resize(0);
-    viscosityBack_.resize(0);
+    bufferLeft_.resize(parameters.parallel.localSize[1] + 2);
+    bufferRight_.resize(parameters.parallel.localSize[1] + 2);
+    bufferBottom_.resize(parameters.parallel.localSize[0] + 2);
+    bufferTop_.resize(parameters.parallel.localSize[0] + 2);
+    bufferFront_.resize(0);
+    bufferBack_.resize(0);
   } else if (parameters.geometry.dim == 3) {
     // Initialize the vectors if 3D
-    viscosityLeft_.resize((parameters.parallel.localSize[1] + 2)* (parameters.parallel.localSize[2] + 2));
-    viscosityRight_.resize((parameters.parallel.localSize[1] + 2) * (parameters.parallel.localSize[2] + 2));
-    viscosityBottom_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[2] + 2));
-    viscosityTop_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[2] + 2));
-    viscosityFront_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[1] + 2));
-    viscosityBack_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[1] + 2));
+    bufferLeft_.resize((parameters.parallel.localSize[1] + 2)* (parameters.parallel.localSize[2] + 2));
+    bufferRight_.resize((parameters.parallel.localSize[1] + 2) * (parameters.parallel.localSize[2] + 2));
+    bufferBottom_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[2] + 2));
+    bufferTop_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[2] + 2));
+    bufferFront_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[1] + 2));
+    bufferBack_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[1] + 2));
   } else {
     throw std::invalid_argument("Unsupported dimensionality: must be 2 or 3.");
   }
@@ -26,57 +26,38 @@ Stencils::ViscosityBufferReadStencil::ViscosityBufferReadStencil(const Parameter
 // Write the viscosity values from a 1-D array to the correct flowField boundaries.
 // 2D case
 void Stencils::ViscosityBufferReadStencil::applyLeftWall(TurbulentFlowField& flowField, int i, int j) {
-  flowField.getViscosity().getScalar(i, j) = viscosityLeft_[j - 1];
+  flowField.getViscosity().getScalar(i, j) = bufferLeft_[j - 1];
 }
 
 void Stencils::ViscosityBufferReadStencil::applyRightWall(TurbulentFlowField& flowField, int i, int j) {
-  flowField.getViscosity().getScalar(i, j) = viscosityRight_[j - 1];
+  flowField.getViscosity().getScalar(i, j) = bufferRight_[j - 1];
 }
 
 void Stencils::ViscosityBufferReadStencil::applyBottomWall(TurbulentFlowField& flowField, int i, int j) {
-  flowField.getViscosity().getScalar(i, j) = viscosityBottom_[i - 1];
+  flowField.getViscosity().getScalar(i, j) = bufferBottom_[i - 1];
   
 }
 
 void Stencils::ViscosityBufferReadStencil::applyTopWall(TurbulentFlowField& flowField, int i, int j) {
-  flowField.getViscosity().getScalar(i, j) = viscosityTop_[i - 1];
+  flowField.getViscosity().getScalar(i, j) = bufferTop_[i - 1];
 }
 
 // 3D case
 void Stencils::ViscosityBufferReadStencil::applyLeftWall(TurbulentFlowField& flowField, int i, int j, int k) {
-  flowField.getViscosity().getScalar(i, j, k) = viscosityLeft_[j - 1 + (flowField.getNy() + 2) * (k - 1)];
+  flowField.getViscosity().getScalar(i, j, k) = bufferLeft_[j - 1 + (flowField.getNy() + 2) * (k - 1)];
 }
 void Stencils::ViscosityBufferReadStencil::applyRightWall(TurbulentFlowField& flowField, int i, int j, int k) {
-  flowField.getViscosity().getScalar(i, j, k) = viscosityRight_[j - 1 + (flowField.getNy() + 2) * (k - 1)];
+  flowField.getViscosity().getScalar(i, j, k) = bufferRight_[j - 1 + (flowField.getNy() + 2) * (k - 1)];
 }
 void Stencils::ViscosityBufferReadStencil::applyBottomWall(TurbulentFlowField& flowField, int i, int j, int k) {
-  flowField.getViscosity().getScalar(i, j, k) = viscosityBottom_[i - 1 + (flowField.getNx() + 2) * (k - 1)];
+  flowField.getViscosity().getScalar(i, j, k) = bufferBottom_[i - 1 + (flowField.getNx() + 2) * (k - 1)];
 }
 void Stencils::ViscosityBufferReadStencil::applyTopWall(TurbulentFlowField& flowField, int i, int j, int k) {
-  flowField.getViscosity().getScalar(i, j, k) = viscosityTop_[i - 1 + (flowField.getNx() + 2) * (k - 1)];
+  flowField.getViscosity().getScalar(i, j, k) = bufferTop_[i - 1 + (flowField.getNx() + 2) * (k - 1)];
 }
 void Stencils::ViscosityBufferReadStencil::applyFrontWall(TurbulentFlowField& flowField, int i, int j, int k) {
-  flowField.getViscosity().getScalar(i, j, k) = viscosityFront_[i - 1 + (flowField.getNx() + 2) * (j - 1)];
+  flowField.getViscosity().getScalar(i, j, k) = bufferFront_[i - 1 + (flowField.getNx() + 2) * (j - 1)];
 }
 void Stencils::ViscosityBufferReadStencil::applyBackWall(TurbulentFlowField& flowField, int i, int j, int k) {
-  flowField.getViscosity().getScalar(i, j, k) = viscosityBack_[i - 1 + (flowField.getNx() + 2) * (j - 1)];
-}
-
-std::vector<RealType>& Stencils::ViscosityBufferReadStencil::getviscosityLeft(){
-  return viscosityLeft_;
-}
-std::vector<RealType>& Stencils::ViscosityBufferReadStencil::getviscosityRight(){
-  return viscosityRight_;
-}
-std::vector<RealType>& Stencils::ViscosityBufferReadStencil::getviscosityBottom(){
-  return viscosityBottom_;
-}
-std::vector<RealType>& Stencils::ViscosityBufferReadStencil::getviscosityTop(){
-  return viscosityTop_;
-}
-std::vector<RealType>& Stencils::ViscosityBufferReadStencil::getviscosityFront(){
-  return viscosityFront_;
-}
-std::vector<RealType>& Stencils::ViscosityBufferReadStencil::getviscosityBack(){
-  return viscosityBack_;
+  flowField.getViscosity().getScalar(i, j, k) = bufferBack_[i - 1 + (flowField.getNx() + 2) * (j - 1)];
 }

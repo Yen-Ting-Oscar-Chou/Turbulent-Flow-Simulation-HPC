@@ -2,23 +2,23 @@
 
 #include "VelocityBufferReadStencil.hpp"
 
-Stencils::VelocityBufferReadStencil::VelocityBufferReadStencil(const Parameters& parameters):BoundaryStencil(parameters) {
+Stencils::VelocityBufferReadStencil::VelocityBufferReadStencil(const Parameters& parameters):BufferStencilBase<FlowField>(parameters) {
   if (parameters.geometry.dim == 2) {
     // Initialize the vectors if 2D
-    velocityLeft_.resize((parameters.parallel.localSize[1] + 2) * 2);
-    velocityRight_.resize((parameters.parallel.localSize[1] + 2) * 2);
-    velocityBottom_.resize((parameters.parallel.localSize[0] + 2) * 2);
-    velocityTop_.resize((parameters.parallel.localSize[0] + 2) * 2);
-    velocityFront_.resize(0);
-    velocityBack_.resize(0);
+    bufferLeft_.resize((parameters.parallel.localSize[1] + 2) * 2);
+    bufferRight_.resize((parameters.parallel.localSize[1] + 2) * 2);
+    bufferBottom_.resize((parameters.parallel.localSize[0] + 2) * 2);
+    bufferTop_.resize((parameters.parallel.localSize[0] + 2) * 2);
+    bufferFront_.resize(0);
+    bufferBack_.resize(0);
   } else if (parameters.geometry.dim == 3) {
     // Initialize the vectors if 3D
-    velocityLeft_.resize((parameters.parallel.localSize[1] + 2) * (parameters.parallel.localSize[2] + 2) * 3);
-    velocityRight_.resize((parameters.parallel.localSize[1] + 2) * (parameters.parallel.localSize[2] + 2) * 3);
-    velocityBottom_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[2] + 2) * 3);
-    velocityTop_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[2] + 2) * 3);
-    velocityFront_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[1] + 2) * 3);
-    velocityBack_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[1] + 2) * 3);
+    bufferLeft_.resize((parameters.parallel.localSize[1] + 2) * (parameters.parallel.localSize[2] + 2) * 3);
+    bufferRight_.resize((parameters.parallel.localSize[1] + 2) * (parameters.parallel.localSize[2] + 2) * 3);
+    bufferBottom_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[2] + 2) * 3);
+    bufferTop_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[2] + 2) * 3);
+    bufferFront_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[1] + 2) * 3);
+    bufferBack_.resize((parameters.parallel.localSize[0] + 2) * (parameters.parallel.localSize[1] + 2) * 3);
   } else {
     throw std::invalid_argument("Unsupported dimensionality: must be 2 or 3.");
   }
@@ -26,72 +26,53 @@ Stencils::VelocityBufferReadStencil::VelocityBufferReadStencil(const Parameters&
 // Write the velocity values from a 1-D array to the correct flowField boundaries.
 // 2D
 void Stencils::VelocityBufferReadStencil::applyLeftWall(FlowField& flowField, int i, int j) {
-  flowField.getVelocity().getVector(i - 1, j)[0] = velocityLeft_[2 * (j - 1)];
-  flowField.getVelocity().getVector(i, j)[1] = velocityLeft_[2 * (j - 1) + 1];
+  flowField.getVelocity().getVector(i - 1, j)[0] = bufferLeft_[2 * (j - 1)];
+  flowField.getVelocity().getVector(i, j)[1] = bufferLeft_[2 * (j - 1) + 1];
 }
 
 void Stencils::VelocityBufferReadStencil::applyRightWall(FlowField& flowField, int i, int j) {
-  flowField.getVelocity().getVector(i, j)[0] = velocityRight_[2 * (j - 1)];
-  flowField.getVelocity().getVector(i, j)[1] = velocityRight_[2 * (j - 1) + 1];
+  flowField.getVelocity().getVector(i, j)[0] = bufferRight_[2 * (j - 1)];
+  flowField.getVelocity().getVector(i, j)[1] = bufferRight_[2 * (j - 1) + 1];
 }
 
 void Stencils::VelocityBufferReadStencil::applyBottomWall(FlowField& flowField, int i, int j) {
-  flowField.getVelocity().getVector(i, j)[0] = velocityBottom_[2 * (i - 1)];
-  flowField.getVelocity().getVector(i, j - 1)[1] = velocityBottom_[2 * (i - 1) + 1];
+  flowField.getVelocity().getVector(i, j)[0] = bufferBottom_[2 * (i - 1)];
+  flowField.getVelocity().getVector(i, j - 1)[1] = bufferBottom_[2 * (i - 1) + 1];
 }
 
 void Stencils::VelocityBufferReadStencil::applyTopWall(FlowField& flowField, int i, int j) {
-  flowField.getVelocity().getVector(i, j)[0] = velocityTop_[2 * (i - 1)];
-  flowField.getVelocity().getVector(i, j)[1] = velocityTop_[2 * (i - 1) + 1];
+  flowField.getVelocity().getVector(i, j)[0] = bufferTop_[2 * (i - 1)];
+  flowField.getVelocity().getVector(i, j)[1] = bufferTop_[2 * (i - 1) + 1];
 }
-// 3D
 
+// 3D
 void Stencils::VelocityBufferReadStencil::applyLeftWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getVelocity().getVector(i - 1, j, k)[0] = velocityLeft_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1))];
-  flowField.getVelocity().getVector(i, j, k)[1] = velocityLeft_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1)) + 1];
-  flowField.getVelocity().getVector(i, j, k)[2] = velocityLeft_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1)) + 2];
+  flowField.getVelocity().getVector(i - 1, j, k)[0] = bufferLeft_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1))];
+  flowField.getVelocity().getVector(i, j, k)[1] = bufferLeft_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1)) + 1];
+  flowField.getVelocity().getVector(i, j, k)[2] = bufferLeft_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1)) + 2];
 }
 void Stencils::VelocityBufferReadStencil::applyRightWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getVelocity().getVector(i, j, k)[0] = velocityRight_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1))];
-  flowField.getVelocity().getVector(i, j, k)[1] = velocityRight_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1)) + 1];
-  flowField.getVelocity().getVector(i, j, k)[2] = velocityRight_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1)) + 2];
+  flowField.getVelocity().getVector(i, j, k)[0] = bufferRight_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1))];
+  flowField.getVelocity().getVector(i, j, k)[1] = bufferRight_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1)) + 1];
+  flowField.getVelocity().getVector(i, j, k)[2] = bufferRight_[3 * (j - 1 + (flowField.getCellsY() - 1) * (k - 1)) + 2];
 }
 void Stencils::VelocityBufferReadStencil::applyBottomWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getVelocity().getVector(i, j, k)[0] = velocityBottom_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1))];
-  flowField.getVelocity().getVector(i, j - 1, k)[1] = velocityBottom_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1)) + 1];
-  flowField.getVelocity().getVector(i, j, k)[2] = velocityBottom_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1)) + 2];
+  flowField.getVelocity().getVector(i, j, k)[0] = bufferBottom_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1))];
+  flowField.getVelocity().getVector(i, j - 1, k)[1] = bufferBottom_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1)) + 1];
+  flowField.getVelocity().getVector(i, j, k)[2] = bufferBottom_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1)) + 2];
 }
 void Stencils::VelocityBufferReadStencil::applyTopWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getVelocity().getVector(i, j, k)[0] = velocityTop_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1))];
-  flowField.getVelocity().getVector(i, j, k)[1] = velocityTop_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1)) + 1];
-  flowField.getVelocity().getVector(i, j, k)[2] = velocityTop_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1)) + 2];
+  flowField.getVelocity().getVector(i, j, k)[0] = bufferTop_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1))];
+  flowField.getVelocity().getVector(i, j, k)[1] = bufferTop_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1)) + 1];
+  flowField.getVelocity().getVector(i, j, k)[2] = bufferTop_[3 * (i - 1 + (flowField.getCellsX() - 1) * (k - 1)) + 2];
 }
 void Stencils::VelocityBufferReadStencil::applyFrontWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getVelocity().getVector(i, j, k)[0] = velocityFront_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1))];
-  flowField.getVelocity().getVector(i, j, k)[1] = velocityFront_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1)) + 1];
-  flowField.getVelocity().getVector(i, j, k - 1)[2] = velocityFront_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1)) + 2];
+  flowField.getVelocity().getVector(i, j, k)[0] = bufferFront_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1))];
+  flowField.getVelocity().getVector(i, j, k)[1] = bufferFront_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1)) + 1];
+  flowField.getVelocity().getVector(i, j, k - 1)[2] = bufferFront_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1)) + 2];
 }
 void Stencils::VelocityBufferReadStencil::applyBackWall(FlowField& flowField, int i, int j, int k) {
-  flowField.getVelocity().getVector(i, j, k)[0] = velocityBack_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1))];
-  flowField.getVelocity().getVector(i, j, k)[1] = velocityBack_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1)) + 1];
-  flowField.getVelocity().getVector(i, j, k)[2] = velocityBack_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1)) + 2];
-}
-
-std::vector<RealType>& Stencils::VelocityBufferReadStencil::getvelocityLeft(){
-  return velocityLeft_;
-}
-std::vector<RealType>& Stencils::VelocityBufferReadStencil::getvelocityRight(){
-  return velocityRight_;
-}
-std::vector<RealType>& Stencils::VelocityBufferReadStencil::getvelocityTop(){
-  return velocityTop_;
-}
-std::vector<RealType>& Stencils::VelocityBufferReadStencil::getvelocityBottom(){
-  return velocityBottom_;
-}
-std::vector<RealType>& Stencils::VelocityBufferReadStencil::getvelocityFront(){
-  return velocityFront_;
-}
-std::vector<RealType>& Stencils::VelocityBufferReadStencil::getvelocityBack(){
-  return velocityBack_;
+  flowField.getVelocity().getVector(i, j, k)[0] = bufferBack_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1))];
+  flowField.getVelocity().getVector(i, j, k)[1] = bufferBack_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1)) + 1];
+  flowField.getVelocity().getVector(i, j, k)[2] = bufferBack_[3 * (i - 1 + (flowField.getCellsX() - 1) * (j - 1)) + 2];
 }

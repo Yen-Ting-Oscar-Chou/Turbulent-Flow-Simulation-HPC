@@ -1,16 +1,18 @@
 #pragma once
 
-#include "Iterators.hpp"
-#include "FlowField.hpp"
-#include "Parameters.hpp"
-#include "BoundaryStencil.hpp"
-#include "Definitions.hpp"
 #include <vector>
 
+#include "BoundaryStencil.hpp"
+#include "BufferBase.hpp"
+#include "Definitions.hpp"
+#include "FlowField.hpp"
+#include "Iterators.hpp"
+#include "Parameters.hpp"
+
 namespace Stencils {
-  class VelocityBufferReadStencil: public BoundaryStencil<FlowField> {
+  class VelocityBufferReadStencil: public BufferStencilBase<FlowField> {
   public:
-      VelocityBufferReadStencil(const Parameters& parameters);
+      explicit VelocityBufferReadStencil(const Parameters& parameters);
       ~VelocityBufferReadStencil() override = default;
 
       void applyLeftWall(FlowField& flowField, int i, int j) override;
@@ -24,21 +26,6 @@ namespace Stencils {
       void applyTopWall(FlowField& flowField, int i, int j, int k) override;
       void applyFrontWall(FlowField& flowField, int i, int j, int k) override;
       void applyBackWall(FlowField& flowField, int i, int j, int k) override;
-
-      std::vector<RealType>& getvelocityLeft();
-      std::vector<RealType>& getvelocityRight();
-      std::vector<RealType>& getvelocityTop();
-      std::vector<RealType>& getvelocityBottom();
-      std::vector<RealType>& getvelocityFront();
-      std::vector<RealType>& getvelocityBack();
-    private:
-      std::vector<RealType> velocityLeft_;
-      std::vector<RealType> velocityRight_;
-      std::vector<RealType> velocityBottom_;
-      std::vector<RealType> velocityTop_;
-      std::vector<RealType> velocityFront_;
-      std::vector<RealType> velocityBack_;
-
   };
 
 } // namespace Stencils

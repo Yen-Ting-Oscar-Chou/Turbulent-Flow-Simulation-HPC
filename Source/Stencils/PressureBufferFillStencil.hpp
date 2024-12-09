@@ -1,14 +1,16 @@
 #pragma once
 
-#include "Iterators.hpp"
-#include "FlowField.hpp"
-#include "Parameters.hpp"
 #include <vector>
 
+#include "BufferBase.hpp"
+#include "FlowField.hpp"
+#include "Iterators.hpp"
+#include "Parameters.hpp"
+
 namespace Stencils {
-  class PressureBufferFillStencil: public BoundaryStencil<FlowField> {
+  class PressureBufferFillStencil: public BufferStencilBase<FlowField> {
   public:
-    PressureBufferFillStencil(const Parameters& parameters);
+    explicit PressureBufferFillStencil(const Parameters& parameters);
 
     ~PressureBufferFillStencil() override = default;
 
@@ -25,21 +27,5 @@ namespace Stencils {
     void applyTopWall(FlowField& flowField, int i, int j, int k) override;
     void applyFrontWall(FlowField& flowField, int i, int j, int k) override;
     void applyBackWall(FlowField& flowField, int i, int j, int k) override;
-
-    std::vector<RealType>& getpressureLeft();
-    std::vector<RealType>& getpressureRight();
-    std::vector<RealType>& getpressureBottom();
-    std::vector<RealType>& getpressureTop();
-    std::vector<RealType>& getpressureFront();
-    std::vector<RealType>& getpressureBack();
-
-  private:
-    std::vector<RealType> pressureLeft_;
-    std::vector<RealType> pressureRight_;
-    std::vector<RealType> pressureBottom_;
-    std::vector<RealType> pressureTop_;
-    std::vector<RealType> pressureFront_;
-    std::vector<RealType> pressureBack_;
-
   };
 } // namespace Stencils

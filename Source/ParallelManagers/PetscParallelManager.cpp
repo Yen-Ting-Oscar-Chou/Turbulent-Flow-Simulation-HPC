@@ -29,14 +29,14 @@ void ParallelManagers::PetscParallelManager::communicateVelocities() {
   _parallelBoundaryVelocityFillIterator.iterate();
   // Put recv before send to avoid exceptions
   MPI_Irecv(
-    _velocityBufferReadStencil.getvelocityLeft().data(), _velocityBufferReadStencil.getvelocityLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _velocityBufferReadStencil.getBufferLeft().data(), _velocityBufferReadStencil.getBufferLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Irecv(
-    _velocityBufferReadStencil.getvelocityRight().data(), _velocityBufferReadStencil.getvelocityRight().size(), MY_MPI_FLOAT, _right, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _velocityBufferReadStencil.getBufferRight().data(), _velocityBufferReadStencil.getBufferRight().size(), MY_MPI_FLOAT, _right, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Irecv(
-    _velocityBufferReadStencil.getvelocityBottom().data(),
-    _velocityBufferReadStencil.getvelocityBottom().size(),
+    _velocityBufferReadStencil.getBufferBottom().data(),
+    _velocityBufferReadStencil.getBufferBottom().size(),
     MY_MPI_FLOAT,
     _bottom,
     1,
@@ -44,24 +44,24 @@ void ParallelManagers::PetscParallelManager::communicateVelocities() {
     &requests.at(counter++)
   );
   MPI_Irecv(
-    _velocityBufferReadStencil.getvelocityTop().data(), _velocityBufferReadStencil.getvelocityTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _velocityBufferReadStencil.getBufferTop().data(), _velocityBufferReadStencil.getBufferTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Irecv(
-    _velocityBufferReadStencil.getvelocityFront().data(), _velocityBufferReadStencil.getvelocityFront().size(), MY_MPI_FLOAT, _front, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _velocityBufferReadStencil.getBufferFront().data(), _velocityBufferReadStencil.getBufferFront().size(), MY_MPI_FLOAT, _front, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Irecv(
-    _velocityBufferReadStencil.getvelocityBack().data(), _velocityBufferReadStencil.getvelocityBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _velocityBufferReadStencil.getBufferBack().data(), _velocityBufferReadStencil.getBufferBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
 
   MPI_Isend(
-    _velocityBufferFillStencil.getvelocityLeft().data(), _velocityBufferFillStencil.getvelocityLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _velocityBufferFillStencil.getBufferLeft().data(), _velocityBufferFillStencil.getBufferLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Isend(
-    _velocityBufferFillStencil.getvelocityRight().data(), _velocityBufferFillStencil.getvelocityRight().size(), MY_MPI_FLOAT, _right, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _velocityBufferFillStencil.getBufferRight().data(), _velocityBufferFillStencil.getBufferRight().size(), MY_MPI_FLOAT, _right, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Isend(
-    _velocityBufferFillStencil.getvelocityBottom().data(),
-    _velocityBufferFillStencil.getvelocityBottom().size(),
+    _velocityBufferFillStencil.getBufferBottom().data(),
+    _velocityBufferFillStencil.getBufferBottom().size(),
     MY_MPI_FLOAT,
     _bottom,
     1,
@@ -69,13 +69,13 @@ void ParallelManagers::PetscParallelManager::communicateVelocities() {
     &requests.at(counter++)
   );
   MPI_Isend(
-    _velocityBufferFillStencil.getvelocityTop().data(), _velocityBufferFillStencil.getvelocityTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _velocityBufferFillStencil.getBufferTop().data(), _velocityBufferFillStencil.getBufferTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Isend(
-    _velocityBufferFillStencil.getvelocityFront().data(), _velocityBufferFillStencil.getvelocityFront().size(), MY_MPI_FLOAT, _front, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _velocityBufferFillStencil.getBufferFront().data(), _velocityBufferFillStencil.getBufferFront().size(), MY_MPI_FLOAT, _front, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Isend(
-    _velocityBufferFillStencil.getvelocityBack().data(), _velocityBufferFillStencil.getvelocityBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _velocityBufferFillStencil.getBufferBack().data(), _velocityBufferFillStencil.getBufferBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
 
   MPI_Waitall(counter, requests.data(), MPI_STATUSES_IGNORE);
@@ -91,14 +91,14 @@ void ParallelManagers::PetscParallelManager::communicatePressure() {
   _parallelBoundaryPressureFillIterator.iterate();
   // Put recv before send to avoid exceptions
   MPI_Irecv(
-    _pressureBufferReadStencil.getpressureLeft().data(), _pressureBufferReadStencil.getpressureLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _pressureBufferReadStencil.getBufferLeft().data(), _pressureBufferReadStencil.getBufferLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Irecv(
-    _pressureBufferReadStencil.getpressureRight().data(), _pressureBufferReadStencil.getpressureRight().size(), MY_MPI_FLOAT, _right, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _pressureBufferReadStencil.getBufferRight().data(), _pressureBufferReadStencil.getBufferRight().size(), MY_MPI_FLOAT, _right, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Irecv(
-    _pressureBufferReadStencil.getpressureBottom().data(),
-    _pressureBufferReadStencil.getpressureBottom().size(),
+    _pressureBufferReadStencil.getBufferBottom().data(),
+    _pressureBufferReadStencil.getBufferBottom().size(),
     MY_MPI_FLOAT,
     _bottom,
     1,
@@ -106,24 +106,24 @@ void ParallelManagers::PetscParallelManager::communicatePressure() {
     &requests.at(counter++)
   );
   MPI_Irecv(
-    _pressureBufferReadStencil.getpressureTop().data(), _pressureBufferReadStencil.getpressureTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _pressureBufferReadStencil.getBufferTop().data(), _pressureBufferReadStencil.getBufferTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Irecv(
-    _pressureBufferReadStencil.getpressureFront().data(), _pressureBufferReadStencil.getpressureFront().size(), MY_MPI_FLOAT, _front, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _pressureBufferReadStencil.getBufferFront().data(), _pressureBufferReadStencil.getBufferFront().size(), MY_MPI_FLOAT, _front, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Irecv(
-    _pressureBufferReadStencil.getpressureBack().data(), _pressureBufferReadStencil.getpressureBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _pressureBufferReadStencil.getBufferBack().data(), _pressureBufferReadStencil.getBufferBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
 
   MPI_Isend(
-    _pressureBufferFillStencil.getpressureLeft().data(), _pressureBufferFillStencil.getpressureLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _pressureBufferFillStencil.getBufferLeft().data(), _pressureBufferFillStencil.getBufferLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Isend(
-    _pressureBufferFillStencil.getpressureRight().data(), _pressureBufferFillStencil.getpressureRight().size(), MY_MPI_FLOAT, _right, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _pressureBufferFillStencil.getBufferRight().data(), _pressureBufferFillStencil.getBufferRight().size(), MY_MPI_FLOAT, _right, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Isend(
-    _pressureBufferFillStencil.getpressureBottom().data(),
-    _pressureBufferFillStencil.getpressureBottom().size(),
+    _pressureBufferFillStencil.getBufferBottom().data(),
+    _pressureBufferFillStencil.getBufferBottom().size(),
     MY_MPI_FLOAT,
     _bottom,
     1,
@@ -131,13 +131,13 @@ void ParallelManagers::PetscParallelManager::communicatePressure() {
     &requests.at(counter++)
   );
   MPI_Isend(
-    _pressureBufferFillStencil.getpressureTop().data(), _pressureBufferFillStencil.getpressureTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _pressureBufferFillStencil.getBufferTop().data(), _pressureBufferFillStencil.getBufferTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Isend(
-    _pressureBufferFillStencil.getpressureFront().data(), _pressureBufferFillStencil.getpressureFront().size(), MY_MPI_FLOAT, _front, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _pressureBufferFillStencil.getBufferFront().data(), _pressureBufferFillStencil.getBufferFront().size(), MY_MPI_FLOAT, _front, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Isend(
-    _pressureBufferFillStencil.getpressureBack().data(), _pressureBufferFillStencil.getpressureBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _pressureBufferFillStencil.getBufferBack().data(), _pressureBufferFillStencil.getBufferBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
 
   MPI_Waitall(counter, requests.data(), MPI_STATUSES_IGNORE);

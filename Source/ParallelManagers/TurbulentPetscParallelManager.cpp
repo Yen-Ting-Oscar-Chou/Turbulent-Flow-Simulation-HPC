@@ -137,11 +137,11 @@ void ParallelManagers::TurbulentPetscParallelManager::communicateViscosity() {
   _parallelBoundaryViscosityFillIterator.iterate();
 
   MPI_Irecv(
-    _viscosityBufferReadStencil.getviscosityLeft().data(), _viscosityBufferReadStencil.getviscosityLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _viscosityBufferReadStencil.getBufferLeft().data(), _viscosityBufferReadStencil.getBufferLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Irecv(
-    _viscosityBufferReadStencil.getviscosityRight().data(),
-    _viscosityBufferReadStencil.getviscosityRight().size(),
+    _viscosityBufferReadStencil.getBufferRight().data(),
+    _viscosityBufferReadStencil.getBufferRight().size(),
     MY_MPI_FLOAT,
     _right,
     1,
@@ -149,8 +149,8 @@ void ParallelManagers::TurbulentPetscParallelManager::communicateViscosity() {
     &requests.at(counter++)
   );
   MPI_Irecv(
-    _viscosityBufferReadStencil.getviscosityBottom().data(),
-    _viscosityBufferReadStencil.getviscosityBottom().size(),
+    _viscosityBufferReadStencil.getBufferBottom().data(),
+    _viscosityBufferReadStencil.getBufferBottom().size(),
     MY_MPI_FLOAT,
     _bottom,
     1,
@@ -158,11 +158,11 @@ void ParallelManagers::TurbulentPetscParallelManager::communicateViscosity() {
     &requests.at(counter++)
   );
   MPI_Irecv(
-    _viscosityBufferReadStencil.getviscosityTop().data(), _viscosityBufferReadStencil.getviscosityTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _viscosityBufferReadStencil.getBufferTop().data(), _viscosityBufferReadStencil.getBufferTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Irecv(
-    _viscosityBufferReadStencil.getviscosityFront().data(),
-    _viscosityBufferReadStencil.getviscosityFront().size(),
+    _viscosityBufferReadStencil.getBufferFront().data(),
+    _viscosityBufferReadStencil.getBufferFront().size(),
     MY_MPI_FLOAT,
     _front,
     1,
@@ -170,15 +170,15 @@ void ParallelManagers::TurbulentPetscParallelManager::communicateViscosity() {
     &requests.at(counter++)
   );
   MPI_Irecv(
-    _viscosityBufferReadStencil.getviscosityBack().data(), _viscosityBufferReadStencil.getviscosityBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _viscosityBufferReadStencil.getBufferBack().data(), _viscosityBufferReadStencil.getBufferBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
 
   MPI_Isend(
-    _viscosityBufferFillStencil.getviscosityLeft().data(), _viscosityBufferFillStencil.getviscosityLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _viscosityBufferFillStencil.getBufferLeft().data(), _viscosityBufferFillStencil.getBufferLeft().size(), MY_MPI_FLOAT, _left, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Isend(
-    _viscosityBufferFillStencil.getviscosityRight().data(),
-    _viscosityBufferFillStencil.getviscosityRight().size(),
+    _viscosityBufferFillStencil.getBufferRight().data(),
+    _viscosityBufferFillStencil.getBufferRight().size(),
     MY_MPI_FLOAT,
     _right,
     1,
@@ -186,8 +186,8 @@ void ParallelManagers::TurbulentPetscParallelManager::communicateViscosity() {
     &requests.at(counter++)
   );
   MPI_Isend(
-    _viscosityBufferFillStencil.getviscosityBottom().data(),
-    _viscosityBufferFillStencil.getviscosityBottom().size(),
+    _viscosityBufferFillStencil.getBufferBottom().data(),
+    _viscosityBufferFillStencil.getBufferBottom().size(),
     MY_MPI_FLOAT,
     _bottom,
     1,
@@ -195,11 +195,11 @@ void ParallelManagers::TurbulentPetscParallelManager::communicateViscosity() {
     &requests.at(counter++)
   );
   MPI_Isend(
-    _viscosityBufferFillStencil.getviscosityTop().data(), _viscosityBufferFillStencil.getviscosityTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _viscosityBufferFillStencil.getBufferTop().data(), _viscosityBufferFillStencil.getBufferTop().size(), MY_MPI_FLOAT, _top, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
   MPI_Isend(
-    _viscosityBufferFillStencil.getviscosityFront().data(),
-    _viscosityBufferFillStencil.getviscosityFront().size(),
+    _viscosityBufferFillStencil.getBufferFront().data(),
+    _viscosityBufferFillStencil.getBufferFront().size(),
     MY_MPI_FLOAT,
     _front,
     1,
@@ -207,7 +207,7 @@ void ParallelManagers::TurbulentPetscParallelManager::communicateViscosity() {
     &requests.at(counter++)
   );
   MPI_Isend(
-    _viscosityBufferFillStencil.getviscosityBack().data(), _viscosityBufferFillStencil.getviscosityBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
+    _viscosityBufferFillStencil.getBufferBack().data(), _viscosityBufferFillStencil.getBufferBack().size(), MY_MPI_FLOAT, _back, 1, PETSC_COMM_WORLD, &requests.at(counter++)
   );
 
   MPI_Waitall(counter, requests.data(), MPI_STATUSES_IGNORE);

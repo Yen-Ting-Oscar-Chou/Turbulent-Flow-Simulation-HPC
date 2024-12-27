@@ -30,8 +30,15 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 file(WRITE "${PROJECT_BINARY_DIR}/.gitignore" "*")
 
-find_program(CLANG_CXX_BIN "clang++" REQUIRED)
-set(CMAKE_CXX_COMPILER ${CLANG_CXX_BIN})
+option(ENABLE_NV "Enable the NVHPC Compiler" OFF)
+if(ENABLE_NV)
+  find_program(NVHPC_CXX_BIN "nvc++" REQUIRED)
+  set(CMAKE_CXX_COMPILER ${NVHPC_CXX_BIN})
+else()
+  find_program(CLANG_CXX_BIN "clang++" REQUIRED)
+  set(CMAKE_CXX_COMPILER ${CLANG_CXX_BIN})
+endif()
+
 set(DEFAULT_CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -59,24 +66,35 @@ endif()
 add_library(NS-EOF-Interface INTERFACE)
 target_compile_features(NS-EOF-Interface INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
-option(GPU "Enable GPU offloading with clang" OFF)
-if(GPU)
-target_compile_options(NS-EOF-Interface INTERFACE
-  -W
-  -Wall
-  -Wextra
-  -Wpedantic
-  -fopenmp-targets=nvptx64-nvidia-cuda
-  --cuda-path=$CUDA_HOME
-  -fopenmp
-)
+option(GPU "Enable GPU offloading with clang" ON)
+
+if(ENABLE_NV)
+  set(GPU ON)
+  target_compile_options(NS-EOF-Interface INTERFACE
+    -W
+    -Wall
+    -Wextra
+    -Wpedantic
+    -mp=gpu
+  )
+elseif(GPU)
+  message(STATUS "GPU offloading enabled")
+  target_compile_options(NS-EOF-Interface INTERFACE
+    -W
+    -Wall
+    -Wextra
+    -Wpedantic
+    -fopenmp-targets=nvptx64-nvidia-cuda
+    --cuda-path=$CUDA_HOME
+    -fopenmp
+  )
 else()
-target_compile_options(NS-EOF-Interface INTERFACE
-  -W
-  -Wall
-  -Wextra
-  -Wpedantic
-)
+  target_compile_options(NS-EOF-Interface INTERFACE
+    -W
+    -Wall
+    -Wextra
+    -Wpedantic
+  )
 endif()
 
 option(ENABLE_SINGLE_PRECISION "Enable single floating-point precision" OFF)

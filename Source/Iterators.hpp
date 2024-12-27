@@ -4,6 +4,8 @@
 
 #include "Stencils/BoundaryStencil.hpp"
 #include "Stencils/FieldStencil.hpp"
+#include "FlowField.hpp"
+#include "TurbulentFlowField.hpp"
 
 /** Iterator class
  *
@@ -12,10 +14,11 @@
 template <class FlowFieldType>
 class Iterator {
 protected:
-  FlowFieldType&    flowField_;
   const Parameters& parameters_;
 
 public:
+  FlowFieldType&    flowField_;
+  
   Iterator(FlowFieldType& flowfield, const Parameters& parameters):
     flowField_(flowfield),
     parameters_(parameters) {}
@@ -135,5 +138,3 @@ public:
 
   virtual void iterate() override;
 };
-
-#include "Iterators.cpph"

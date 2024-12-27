@@ -1,11 +1,9 @@
+#include "StdAfx.hpp"
+
+#include "Iterators.hpp"
+
 template <class FlowFieldType>
-FieldIterator<FlowFieldType>::FieldIterator(
-  FlowFieldType&                         flowField,
-  const Parameters&                      parameters,
-  Stencils::FieldStencil<FlowFieldType>& stencil,
-  int                                    lowOffset,
-  int                                    highOffset
-):
+FieldIterator<FlowFieldType>::FieldIterator(FlowFieldType& flowField, const Parameters& parameters, Stencils::FieldStencil<FlowFieldType>& stencil, int lowOffset, int highOffset):
   Iterator<FlowFieldType>(flowField, parameters),
   stencil_(stencil),
   lowOffset_(lowOffset),
@@ -16,11 +14,21 @@ void FieldIterator<FlowFieldType>::iterate() {
   const int cellsX = Iterator<FlowFieldType>::flowField_.getCellsX();
   const int cellsY = Iterator<FlowFieldType>::flowField_.getCellsY();
   const int cellsZ = Iterator<FlowFieldType>::flowField_.getCellsZ();
-  // The index k can be used for the 2D and 3D cases.
 
+  // int localLowOffset = lowOffset_;
+  // int localHighOffset = highOffset_;
+  // auto localStencil = &stencil_;
+  // auto localVector = Iterator<FlowFieldType>::flowField_.getVelocity().data_;
+  // int size = Iterator<FlowFieldType>::flowField_.getVelocity().size_;
+  // std::cout << size << std::endl;
+  // std::cout << localVector[0] << std::endl;
+
+  // The index k can be used for the 2D and 3D cases.
   if (Iterator<FlowFieldType>::parameters_.geometry.dim == 2) {
     // Loop without lower boundaries. These will be dealt with by the global boundary stencils
     // or by the subdomain boundary iterators.
+
+    // #pragma omp target teams distribute parallel for collapse(2) map(to: cellsX, cellsY, localLowOffset, localHighOffset, localStencil) map(tofrom: localVector[0:size])
     for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
       for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
         stencil_.apply(Iterator<FlowFieldType>::flowField_, i, j);
@@ -41,11 +49,7 @@ void FieldIterator<FlowFieldType>::iterate() {
 
 template <class FlowFieldType>
 GlobalBoundaryIterator<FlowFieldType>::GlobalBoundaryIterator(
-  FlowFieldType&                            flowField,
-  const Parameters&                         parameters,
-  Stencils::BoundaryStencil<FlowFieldType>& stencil,
-  int                                       lowOffset,
-  int                                       highOffset
+  FlowFieldType& flowField, const Parameters& parameters, Stencils::BoundaryStencil<FlowFieldType>& stencil, int lowOffset, int highOffset
 ):
   Iterator<FlowFieldType>(flowField, parameters),
   lowOffset_(lowOffset),
@@ -119,9 +123,7 @@ void GlobalBoundaryIterator<FlowFieldType>::iterate() {
 
     if (Iterator<FlowFieldType>::parameters_.parallel.rightNb < 0) {
       for (int j = lowOffset_; j < Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_; j++) {
-        rightWallStencil_.applyRightWall(
-          Iterator<FlowFieldType>::flowField_, Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_ - 1, j
-        );
+        rightWallStencil_.applyRightWall(Iterator<FlowFieldType>::flowField_, Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_ - 1, j);
       }
     }
 
@@ -133,9 +135,7 @@ void GlobalBoundaryIterator<FlowFieldType>::iterate() {
 
     if (Iterator<FlowFieldType>::parameters_.parallel.topNb < 0) {
       for (int i = lowOffset_; i < Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_; i++) {
-        topWallStencil_.applyTopWall(
-          Iterator<FlowFieldType>::flowField_, i, Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_ - 1
-        );
+        topWallStencil_.applyTopWall(Iterator<FlowFieldType>::flowField_, i, Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_ - 1);
       }
     }
   }
@@ -152,9 +152,7 @@ void GlobalBoundaryIterator<FlowFieldType>::iterate() {
     if (Iterator<FlowFieldType>::parameters_.parallel.rightNb < 0) {
       for (int j = lowOffset_; j < Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_; j++) {
         for (int k = lowOffset_; k < Iterator<FlowFieldType>::flowField_.getCellsZ() + highOffset_; k++) {
-          rightWallStencil_.applyRightWall(
-            Iterator<FlowFieldType>::flowField_, Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_ - 1, j, k
-          );
+          rightWallStencil_.applyRightWall(Iterator<FlowFieldType>::flowField_, Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_ - 1, j, k);
         }
       }
     }
@@ -170,9 +168,7 @@ void GlobalBoundaryIterator<FlowFieldType>::iterate() {
     if (Iterator<FlowFieldType>::parameters_.parallel.topNb < 0) {
       for (int i = lowOffset_; i < Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_; i++) {
         for (int k = lowOffset_; k < Iterator<FlowFieldType>::flowField_.getCellsZ() + highOffset_; k++) {
-          topWallStencil_.applyTopWall(
-            Iterator<FlowFieldType>::flowField_, i, Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_ - 1, k
-          );
+          topWallStencil_.applyTopWall(Iterator<FlowFieldType>::flowField_, i, Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_ - 1, k);
         }
       }
     }
@@ -188,9 +184,7 @@ void GlobalBoundaryIterator<FlowFieldType>::iterate() {
     if (Iterator<FlowFieldType>::parameters_.parallel.backNb < 0) {
       for (int i = lowOffset_; i < Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_; i++) {
         for (int j = lowOffset_; j < Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_; j++) {
-          backWallStencil_.applyBackWall(
-            Iterator<FlowFieldType>::flowField_, i, j, Iterator<FlowFieldType>::flowField_.getCellsZ() + highOffset_ - 1
-          );
+          backWallStencil_.applyBackWall(Iterator<FlowFieldType>::flowField_, i, j, Iterator<FlowFieldType>::flowField_.getCellsZ() + highOffset_ - 1);
         }
       }
     }
@@ -199,11 +193,7 @@ void GlobalBoundaryIterator<FlowFieldType>::iterate() {
 
 template <class FlowFieldType>
 ParallelBoundaryIterator<FlowFieldType>::ParallelBoundaryIterator(
-  FlowFieldType&                            flowField,
-  const Parameters&                         parameters,
-  Stencils::BoundaryStencil<FlowFieldType>& stencil,
-  int                                       lowOffset,
-  int                                       highOffset
+  FlowFieldType& flowField, const Parameters& parameters, Stencils::BoundaryStencil<FlowFieldType>& stencil, int lowOffset, int highOffset
 ):
   Iterator<FlowFieldType>(flowField, parameters),
   stencil_(stencil),
@@ -221,9 +211,7 @@ void ParallelBoundaryIterator<FlowFieldType>::iterate() {
 
     if (Iterator<FlowFieldType>::parameters_.parallel.rightNb >= 0) {
       for (int j = lowOffset_; j < Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_; j++) {
-        stencil_.applyRightWall(
-          Iterator<FlowFieldType>::flowField_, Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_ - 1, j
-        );
+        stencil_.applyRightWall(Iterator<FlowFieldType>::flowField_, Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_ - 1, j);
       }
     }
 
@@ -235,9 +223,7 @@ void ParallelBoundaryIterator<FlowFieldType>::iterate() {
 
     if (Iterator<FlowFieldType>::parameters_.parallel.topNb >= 0) {
       for (int i = lowOffset_; i < Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_; i++) {
-        stencil_.applyTopWall(
-          Iterator<FlowFieldType>::flowField_, i, Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_ - 1
-        );
+        stencil_.applyTopWall(Iterator<FlowFieldType>::flowField_, i, Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_ - 1);
       }
     }
   }
@@ -254,9 +240,7 @@ void ParallelBoundaryIterator<FlowFieldType>::iterate() {
     if (Iterator<FlowFieldType>::parameters_.parallel.rightNb >= 0) {
       for (int j = lowOffset_; j < Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_; j++) {
         for (int k = lowOffset_; k < Iterator<FlowFieldType>::flowField_.getCellsZ() + highOffset_; k++) {
-          stencil_.applyRightWall(
-            Iterator<FlowFieldType>::flowField_, Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_ - 1, j, k
-          );
+          stencil_.applyRightWall(Iterator<FlowFieldType>::flowField_, Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_ - 1, j, k);
         }
       }
     }
@@ -272,9 +256,7 @@ void ParallelBoundaryIterator<FlowFieldType>::iterate() {
     if (Iterator<FlowFieldType>::parameters_.parallel.topNb >= 0) {
       for (int i = lowOffset_; i < Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_; i++) {
         for (int k = lowOffset_; k < Iterator<FlowFieldType>::flowField_.getCellsZ() + highOffset_; k++) {
-          stencil_.applyTopWall(
-            Iterator<FlowFieldType>::flowField_, i, Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_ - 1, k
-          );
+          stencil_.applyTopWall(Iterator<FlowFieldType>::flowField_, i, Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_ - 1, k);
         }
       }
     }
@@ -290,11 +272,16 @@ void ParallelBoundaryIterator<FlowFieldType>::iterate() {
     if (Iterator<FlowFieldType>::parameters_.parallel.backNb >= 0) {
       for (int i = lowOffset_; i < Iterator<FlowFieldType>::flowField_.getCellsX() + highOffset_; i++) {
         for (int j = lowOffset_; j < Iterator<FlowFieldType>::flowField_.getCellsY() + highOffset_; j++) {
-          stencil_.applyBackWall(
-            Iterator<FlowFieldType>::flowField_, i, j, Iterator<FlowFieldType>::flowField_.getCellsZ() + highOffset_ - 1
-          );
+          stencil_.applyBackWall(Iterator<FlowFieldType>::flowField_, i, j, Iterator<FlowFieldType>::flowField_.getCellsZ() + highOffset_ - 1);
         }
       }
     }
   }
 }
+
+template class FieldIterator<FlowField>;
+template class FieldIterator<TurbulentFlowField>;
+template class GlobalBoundaryIterator<FlowField>;
+template class GlobalBoundaryIterator<TurbulentFlowField>;
+template class ParallelBoundaryIterator<FlowField>;
+template class ParallelBoundaryIterator<TurbulentFlowField>;

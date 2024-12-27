@@ -94,6 +94,9 @@ int main(int argc, char* argv[]) {
     flowField = turbulentFlowField;
     simulation = turbulentSimulation;
   } else if (parameters.simulation.type == "dns") {
+    #ifdef GPU
+      throw std::runtime_error("GPUs are only supported for simulations of type turbulence!");
+    #endif
     if (rank == 0) {
       spdlog::info("Start DNS simulation in {}D", parameters.geometry.dim);
     }
@@ -120,10 +123,11 @@ int main(int argc, char* argv[]) {
   int      timeSteps  = 0;
 
   // Plot initial state
-  simulation->plotVTK(timeSteps, time);
+  //simulation->plotVTK(timeSteps, time);
 
   Clock clock;
   // Time loop
+  // TODO #pragma map to gpu and backwards
   while (time < parameters.simulation.finalTime) {
     simulation->solveTimestep();
 
@@ -135,15 +139,16 @@ int main(int argc, char* argv[]) {
       timeStdOut += parameters.stdOut.interval;
     }
 
-    if (timeVtk <= time) {
-      simulation->plotVTK(timeSteps, time);
-      timeVtk += parameters.vtk.interval;
-    }
+    // TODO #pragma map from gpu to cpu and back afterwards
+    // if (timeVtk <= time) {
+    //   simulation->plotVTK(timeSteps, time);
+    //   timeVtk += parameters.vtk.interval;
+    // }
   }
   spdlog::info("Finished simulation with a duration of {}ns", clock.getTime());
 
   // Plot final solution
-  simulation->plotVTK(timeSteps, time);
+  //simulation->plotVTK(timeSteps, time);
 
   delete simulation;
   simulation = NULL;

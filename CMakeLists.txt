@@ -71,6 +71,7 @@ target_compile_options(NS-EOF-Interface INTERFACE
   -Wextra
   -Wpedantic
   -mp=gpu
+  -DGPU
 )
 else()
 target_compile_options(NS-EOF-Interface INTERFACE

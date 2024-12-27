@@ -30,7 +30,13 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 file(WRITE "${PROJECT_BINARY_DIR}/.gitignore" "*")
 
-include(GNUInstallDirs)
+option(ENABLE_NV "Enable the NVHPC Compiler" ON)
+if(ENABLE_NV)
+find_program(NVHPC_CXX_BIN "nvc++" REQUIRED)
+ set(CMAKE_CXX_COMPILER ${NVHPC_CXX_BIN})
+else()
+ include(GNUInstallDirs)
+endif()
 set(DEFAULT_CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR})
@@ -58,12 +64,22 @@ endif()
 add_library(NS-EOF-Interface INTERFACE)
 target_compile_features(NS-EOF-Interface INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
+if(ENABLE_NV)
+target_compile_options(NS-EOF-Interface INTERFACE
+  -W
+  -Wall
+  -Wextra
+  -Wpedantic
+  -mp=gpu
+)
+else()
 target_compile_options(NS-EOF-Interface INTERFACE
   -W
   -Wall
   -Wextra
   -Wpedantic
 )
+endif()
 
 option(ENABLE_SINGLE_PRECISION "Enable single floating-point precision" OFF)
 if(ENABLE_SINGLE_PRECISION)
@@ -91,4 +107,3 @@ target_link_libraries(NS-EOF-Interface INTERFACE
 
 add_subdirectory(Source)
 add_subdirectory(Tests)
-

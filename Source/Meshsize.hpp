@@ -35,6 +35,8 @@ public:
   virtual RealType getDyMin() const = 0;
   virtual RealType getDzMin() const = 0;
 };
+#pragma omp declare mapper(Meshsize m) \
+  map(to: m)
 
 /** Implements a uniform, equidistant grid spacing */
 class UniformMeshsize: public Meshsize {
@@ -83,6 +85,8 @@ public:
   inline virtual RealType getDyMin() const override { return dy_; }
   inline virtual RealType getDzMin() const override { return dz_; }
 };
+#pragma omp declare mapper(UniformMeshsize m) \
+  map(to: m)
 
 /**
  * Implements a stretched mesh for e.g. channel flow. For each dimension, a stretching of the mesh can be introduced
@@ -212,3 +216,5 @@ public:
   inline virtual RealType getDyMin() const override { return dyMin_; }
   inline virtual RealType getDzMin() const override { return dzMin_; }
 };
+#pragma omp declare mapper(TanhMeshStretching m) \
+  map(to: m)

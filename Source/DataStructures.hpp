@@ -11,16 +11,16 @@
 template <class DataType>
 class Field {
 protected:
-  //! Pointer to the data array
-  DataType* data_;
 
   const int sizeX_;      //! Size of the field in x direction, including ghost layers
   const int sizeY_;      //! Size of the field in y direction, including ghost layers
   const int sizeZ_;      //! Size of the field in z direction, including ghost layers
-  const int components_; //! Number of components per position
-  const int size_;       //! Total size of the data array
 
 public:
+  //! Pointer to the data array
+  DataType* data_;
+  const int components_; //! Number of components per position
+  const int size_;       //! Total size of the data array
   /** Constructor for the field
    *
    * General constructor. Takes the three arguments even if the matrix is
@@ -136,6 +136,11 @@ public:
    */
   void show(const std::string title = "");
 };
+#pragma omp declare mapper(ScalarFieldMap: ScalarField s)  \
+ map(tofrom: s, s.data_[0 : s.size_])
+
+// #pragma omp declare mapper(ScalarField s) \
+//   map(tofrom : s, s.data_[0 : s.size_])
 
 /** Vector field representation
  *
@@ -186,6 +191,8 @@ public:
    */
   void show(const std::string title = "");
 };
+#pragma omp declare mapper(VectorFieldMap: VectorField v)  \
+ map(tofrom: v, v.data_[0 : v.size_])
 
 /** Integer field
  *
@@ -224,3 +231,5 @@ public:
 
   void show(const std::string title = "");
 };
+#pragma omp declare mapper(IntScalarMap: IntScalarField i)  \
+ map(tofrom: i, i.data_[0 : i.size_])

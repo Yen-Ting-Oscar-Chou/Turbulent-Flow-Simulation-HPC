@@ -17,6 +17,7 @@ private:
   const int cellsY_;
   const int cellsZ_;
 
+public:
   ScalarField pressure_; //! Scalar field representing the pressure
   VectorField velocity_; //! Multicomponent field representing velocity
 
@@ -25,7 +26,6 @@ private:
   VectorField FGH_;
   ScalarField RHS_; //! Right hand side for the Poisson equation
 
-public:
   /** Constructor for the 2D flow field
    *
    * Constructor for the flow field. Allocates all the fields and sets
@@ -92,3 +92,7 @@ public:
   void getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j);
   void getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j, int k);
 };
+#pragma omp declare mapper(FlowFieldMap: FlowField f) \
+  map(mapper(ScalarFieldMap), tofrom: f.pressure_, f.RHS_) \
+  map(mapper(VectorFieldMap), tofrom: f.velocity_, f.FGH_) \
+  map(mapper(IntScalarMap), tofrom: f.flags_)

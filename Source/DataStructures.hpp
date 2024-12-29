@@ -137,10 +137,7 @@ public:
   void show(const std::string title = "");
 };
 #pragma omp declare mapper(ScalarFieldMap: ScalarField s)  \
- map(tofrom: s, s.data_[0 : s.size_])
-
-// #pragma omp declare mapper(ScalarField s) \
-//   map(tofrom : s, s.data_[0 : s.size_])
+ map(tofrom: s, s.data_[0 : s.size_]) 
 
 /** Vector field representation
  *
@@ -232,4 +229,4 @@ public:
   void show(const std::string title = "");
 };
 #pragma omp declare mapper(IntScalarMap: IntScalarField i)  \
- map(tofrom: i, i.data_[0 : i.size_])
+ map(tofrom: i, i.data_[0 : i.size_]) 

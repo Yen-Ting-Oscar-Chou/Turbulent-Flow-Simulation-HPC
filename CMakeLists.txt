@@ -94,6 +94,8 @@ elseif(NOT ENABLE_NV AND GPU)
     -fopenmp-targets=nvptx64-nvidia-cuda
     --cuda-path=$ENV{CUDA_HOME}
     -fopenmp
+    -Wno-openmp-mapping
+    -g
   )
   target_link_options(NS-EOF-Interface INTERFACE
     -fopenmp

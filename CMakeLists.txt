@@ -17,7 +17,7 @@ set(CMAKE_C_STANDARD 17 CACHE STRING "")
 set(CMAKE_C_STANDARD_REQUIRED TRUE)
 set(CMAKE_C_EXTENSIONS OFF)
 
-set(CMAKE_CXX_STANDARD 20 CACHE STRING "")
+set(CMAKE_CXX_STANDARD 17 CACHE STRING "")
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
@@ -30,7 +30,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 file(WRITE "${PROJECT_BINARY_DIR}/.gitignore" "*")
 
-option(ENABLE_NV "Enable the NVHPC Compiler" OFF)
+option(ENABLE_NV "Enable the NVHPC Compiler and GPU Offloading" OFF)
 if(ENABLE_NV)
   find_program(NVHPC_CXX_BIN "nvc++" REQUIRED)
   set(CMAKE_CXX_COMPILER ${NVHPC_CXX_BIN})
@@ -66,34 +66,39 @@ endif()
 add_library(NS-EOF-Interface INTERFACE)
 target_compile_features(NS-EOF-Interface INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
-option(GPU "Enable GPU offloading with clang" ON)
+target_compile_options(NS-EOF-Interface INTERFACE
+    -W
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wno-gnu-zero-variadic-macro-arguments
+)
+
+option(GPU "Enable GPU offloading" ON)
 
 if(ENABLE_NV)
   set(GPU ON)
   target_compile_options(NS-EOF-Interface INTERFACE
-    -W
-    -Wall
-    -Wextra
-    -Wpedantic
     -mp=gpu
   )
-elseif(GPU)
+elseif(NOT ENABLE_NV AND GPU)
   message(STATUS "GPU offloading enabled")
+
+  set(C_INCLUDE_PATH $(llvm-config --includedir))
+  set(CPLUS_INCLUDE_PATH $(llvm-config --includedir))
+  set(LIBRARY_PATH $(llvm-config --libdir))
+  find_package(OpenMP REQUIRED)
+  target_link_libraries(NS-EOF-Interface INTERFACE OpenMP::OpenMP_CXX)
+
   target_compile_options(NS-EOF-Interface INTERFACE
-    -W
-    -Wall
-    -Wextra
-    -Wpedantic
     -fopenmp-targets=nvptx64-nvidia-cuda
-    --cuda-path=$CUDA_HOME
+    --cuda-path=$ENV{CUDA_HOME}
     -fopenmp
   )
-else()
-  target_compile_options(NS-EOF-Interface INTERFACE
-    -W
-    -Wall
-    -Wextra
-    -Wpedantic
+  target_link_options(NS-EOF-Interface INTERFACE
+    -fopenmp
+    -fopenmp-targets=nvptx64-nvidia-cuda
+    --cuda-path=$ENV{CUDA_HOME}
   )
 endif()
 

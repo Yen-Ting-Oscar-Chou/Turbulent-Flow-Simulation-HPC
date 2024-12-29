@@ -94,9 +94,9 @@ int main(int argc, char* argv[]) {
     flowField = turbulentFlowField;
     simulation = turbulentSimulation;
   } else if (parameters.simulation.type == "dns") {
-    #ifdef GPU
-      throw std::runtime_error("GPUs are only supported for simulations of type turbulence!");
-    #endif
+    // #ifdef GPU
+    //   throw std::runtime_error("GPUs are only supported for simulations of type turbulence!");
+    // #endif
     if (rank == 0) {
       spdlog::info("Start DNS simulation in {}D", parameters.geometry.dim);
     }

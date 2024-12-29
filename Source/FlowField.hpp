@@ -93,6 +93,6 @@ public:
   void getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j, int k);
 };
 #pragma omp declare mapper(FlowFieldMap: FlowField f) \
-  map(mapper(ScalarFieldMap), tofrom: f.pressure_, f.RHS_) \
-  map(mapper(VectorFieldMap), tofrom: f.velocity_, f.FGH_) \
-  map(mapper(IntScalarMap), tofrom: f.flags_)
+  map(tofrom: f.pressure_, f.RHS_) \
+  map(tofrom: f.velocity_, f.FGH_) \
+  map(tofrom: f.flags_)

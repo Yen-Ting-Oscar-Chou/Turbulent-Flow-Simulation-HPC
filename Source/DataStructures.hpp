@@ -45,7 +45,7 @@ public:
     }
   }
 
-  virtual ~Field() {
+  ~Field() {
     if (data_ != NULL) {
       delete[] data_;
       data_ = NULL;
@@ -116,6 +116,7 @@ public:
    */
   ScalarField(int Nx, int Ny, int Nz);
 
+#pragma omp declare target
   /** Acces to element in scalar field
    *
    * Returns a reference to an element of the scalar field, so that it
@@ -126,6 +127,7 @@ public:
    * @param k z index. Not required for arrays of dimension two.
    */
   RealType& getScalar(int i, int j, int k = 0);
+#pragma omp end declare target
 
   /** Prints the contents of the field
    *
@@ -136,8 +138,6 @@ public:
    */
   void show(const std::string title = "");
 };
-#pragma omp declare mapper(ScalarField s)  \
- map(tofrom: s, s.data_[0 : s.size_]) 
 
 /** Vector field representation
  *
@@ -168,6 +168,8 @@ public:
    */
   VectorField(int Nx, int Ny, int Nz);
 
+
+#pragma omp declare target
   /** Non constant acces to an element in the vector field
    *
    * Returns a pointer to the position in the array that can be used to
@@ -178,6 +180,7 @@ public:
    * @param k z index
    */
   RealType* getVector(int i, int j, int k = 0);
+#pragma omp end declare target
 
   /** Prints the contents of the field
    *
@@ -188,8 +191,6 @@ public:
    */
   void show(const std::string title = "");
 };
-#pragma omp declare mapper(VectorField v)  \
- map(tofrom: v, v.data_[0 : v.size_])
 
 /** Integer field
  *
@@ -216,6 +217,7 @@ public:
    */
   IntScalarField(int Nx, int Ny, int Nz);
 
+#pragma omp declare target
   /** Access field values
    *
    * Returns a reference to the element with the given index
@@ -225,8 +227,7 @@ public:
    * @param k Z index
    */
   int& getValue(int i, int j, int k = 0);
+#pragma omp end declare target
 
   void show(const std::string title = "");
 };
-#pragma omp declare mapper(IntScalarField i)  \
- map(tofrom: i, i.data_[0 : i.size_]) 

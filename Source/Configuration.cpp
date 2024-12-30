@@ -409,11 +409,11 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
       node = confFile.FirstChildElement()->FirstChildElement("deltaMixLen");
       readStringMandatory(deltaMixLen, node);
       if (deltaMixLen == "turbulence") {
-        parameters.turbulence.deltaMixLen = deltaTurbulent;
+        parameters.turbulence.deltaMixLen = TURBULENT;
       } else if (deltaMixLen == "laminar") {
-        parameters.turbulence.deltaMixLen = deltaLaminar;
+        parameters.turbulence.deltaMixLen = LAMINAR;
       } else if (deltaMixLen == "zero") {
-        parameters.turbulence.deltaMixLen = deltaZero;
+        parameters.turbulence.deltaMixLen = ZERO;
       } else {
         throw std::runtime_error("Error loading delta for mixing lengths");
       }
@@ -481,11 +481,11 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
     broadcastString(deltaMixLen, communicator);
     if (rank != 0) {
       if (deltaMixLen == "turbulence") {
-        parameters.turbulence.deltaMixLen = deltaTurbulent;
+        parameters.turbulence.deltaMixLen = TURBULENT;
       } else if (deltaMixLen == "laminar") {
-        parameters.turbulence.deltaMixLen = deltaLaminar;
+        parameters.turbulence.deltaMixLen = LAMINAR;
       } else if (deltaMixLen == "zero") {
-        parameters.turbulence.deltaMixLen = deltaZero;
+        parameters.turbulence.deltaMixLen = ZERO;
       } else {
         throw std::runtime_error("Error loading delta for mixing lengths");
       }

@@ -22,8 +22,11 @@ void Stencils::ViscosityStencil::apply(TurbulentFlowField& turbulentField, int i
   computeGlobalCoordinates(coords, parameters_, i, j);
   const RealType x = std::fabs(coords[0]);
 
-  const RealType re           = parameters_.flow.Re;
-  const RealType mixingLength = std::min(KAPPA * distance, 0.09 * parameters_.turbulence.deltaMixLen(x, re));
+  const RealType       re             = parameters_.flow.Re;
+  const TurbulenceType turbulenceType = parameters_.turbulence.deltaMixLen;
+  const RealType       deltaMixLen    = (turbulenceType == ZERO) * deltaZero(x, re) + (turbulenceType == LAMINAR) * deltaLaminar(x, re)
+                               + (turbulenceType == TURBULENT) * deltaTurbulent(x, re);
+  const RealType mixingLength = std::min(KAPPA * distance, 0.09 * deltaMixLen);
 
   // S_ij S_ij = S11^2 + S_22^2 + 2S_12^2
   // (dudx)^2 + (dvdy)^2 + (dudy + dvdx)^2
@@ -60,7 +63,10 @@ void Stencils::ViscosityStencil::apply(TurbulentFlowField& turbulentField, int i
   const RealType x = std::fabs(coords[0]);
 
   const RealType re           = parameters_.flow.Re;
-  const RealType mixingLength = std::min(KAPPA * distance, 0.09 * parameters_.turbulence.deltaMixLen(x, re));
+  const TurbulenceType turbulenceType = parameters_.turbulence.deltaMixLen;
+  const RealType       deltaMixLen    = (turbulenceType == ZERO) * deltaZero(x, re) + (turbulenceType == LAMINAR) * deltaLaminar(x, re)
+                               + (turbulenceType == TURBULENT) * deltaTurbulent(x, re);
+  const RealType mixingLength = std::min(KAPPA * distance, 0.09 * deltaMixLen);
 
   const RealType S_11    = dudx(localVelocity_, localMeshsize_);
   const RealType S_22    = dvdy(localVelocity_, localMeshsize_);

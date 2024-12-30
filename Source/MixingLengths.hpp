@@ -3,6 +3,14 @@
 #include "Definitions.hpp"
 #include <cmath>
 
+enum TurbulenceType {
+  ZERO, // Also used for the case of non-moving wall
+  LAMINAR,
+  TURBULENT
+};
+
+#pragma omp declare target
+
 inline RealType ReX(const RealType x, const RealType Re) {
     return Re * x;
 }
@@ -19,3 +27,5 @@ inline RealType deltaTurbulent(const RealType x, const RealType Re) {
     const RealType rex = ReX(x, Re);
     return 0.382 * x / (std::pow(rex, 1 / 5));
 }
+
+#pragma omp end declare target

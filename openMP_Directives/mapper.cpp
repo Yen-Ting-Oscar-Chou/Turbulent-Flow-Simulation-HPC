@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+#include <cmath>
 
 
 #define N 100000
@@ -35,19 +36,22 @@ private:
   int aggNum_;
 
 public:
+  Component* ptr_ = NULL;
   size_t  len_;
   double* data_;
   Component comp_;
+
   Aggregate(int num, size_t len, Component& comp):
     aggNum_(num),
     len_(len),
     comp_(comp) {
     data_ = new double[len_];
+    ptr_ = new Component(num, len);
   }
 
   int getAggregateNumber() { return aggNum_; }
 };
-#pragma omp declare mapper(Aggregate a) map(a, a.data_[0 : a.len_]) map(a.comp_, a.comp_.data_[0 : a.comp_.len_])
+#pragma omp declare mapper(Aggregate a) map(a, a.data_[0 : a.len_], a.ptr_[0:1]) map(a.comp_, a.comp_.data_[0 : a.comp_.len_])
 
 class Runner {
 private:
@@ -65,7 +69,7 @@ public:
   // virtual void data_process(Aggregate& agg, int i) {
   void data_process(Aggregate& agg, int i) {
     agg.getAggregateNumber();
-    agg.comp_.data_[i] = agg.comp_.getComponentNumber() * i + 1;
+    agg.comp_.data_[i] = agg.ptr_->len_;
     return;
   }
 

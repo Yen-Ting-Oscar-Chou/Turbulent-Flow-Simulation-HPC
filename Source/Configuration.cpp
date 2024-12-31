@@ -114,11 +114,13 @@ Configuration::Configuration(const std::string& filename) { filename_ = filename
 
 void Configuration::setFileName(const std::string& filename) { filename_ = filename; }
 
-void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& communicator) {
+Parameters Configuration::loadParameters(const MPI_Comm& communicator) {
   tinyxml2::XMLDocument confFile;
   tinyxml2::XMLElement* node;
   tinyxml2::XMLElement* subNode;
-  std::string deltaMixLen = "";
+  std::string           deltaMixLen = "";
+  GeometricParameters   geometricParameters;
+  ParallelParameters    parallelParameters;
 
   int rank = -1;
   MPI_Comm_rank(communicator, &rank);
@@ -141,56 +143,56 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
       throw std::runtime_error("Error loading geometry properties");
     }
 
-    readIntMandatory(parameters.geometry.sizeX, node, "sizeX");
-    readIntMandatory(parameters.geometry.sizeY, node, "sizeY");
-    readIntOptional(parameters.geometry.sizeZ, node, "sizeZ");
+    readIntMandatory(geometricParameters.sizeX, node, "sizeX");
+    readIntMandatory(geometricParameters.sizeY, node, "sizeY");
+    readIntOptional(geometricParameters.sizeZ, node, "sizeZ");
 
-    if (parameters.geometry.sizeX < 2 || parameters.geometry.sizeY < 2 || parameters.geometry.sizeZ < 0) {
+    if (geometricParameters.sizeX < 2 || geometricParameters.sizeY < 2 || geometricParameters.sizeZ < 0) {
       throw std::runtime_error("Invalid size specified in configuration file");
     }
 
-    parameters.geometry.dim = 0;
-    if (node->QueryIntAttribute("dim", &(parameters.geometry.dim)) != tinyxml2::XML_WRONG_ATTRIBUTE_TYPE) {
-      if (parameters.geometry.dim == 0) {
-        if (parameters.geometry.sizeZ == 0) {
-          parameters.geometry.sizeZ = 1;
-          parameters.geometry.dim   = 2;
+    geometricParameters.dim = 0;
+    if (node->QueryIntAttribute("dim", &(geometricParameters.dim)) != tinyxml2::XML_WRONG_ATTRIBUTE_TYPE) {
+      if (geometricParameters.dim == 0) {
+        if (geometricParameters.sizeZ == 0) {
+          geometricParameters.sizeZ = 1;
+          geometricParameters.dim   = 2;
         } else {
-          parameters.geometry.dim = 3;
+          geometricParameters.dim = 3;
         }
       }
     }
 
-    if (parameters.geometry.dim == 3 && parameters.geometry.sizeZ == 1) {
+    if (geometricParameters.dim == 3 && geometricParameters.sizeZ == 1) {
       throw std::runtime_error("Inconsistent data: 3D geometry specified with Z size zero");
     }
 
-    if (parameters.geometry.dim == 2 && parameters.geometry.sizeZ != 1) {
-      parameters.geometry.sizeZ = 1;
+    if (geometricParameters.dim == 2 && geometricParameters.sizeZ != 1) {
+      geometricParameters.sizeZ = 1;
     }
 
     // Determine the sizes of the cells
-    readFloatMandatory(parameters.geometry.lengthX, node, "lengthX");
-    readFloatMandatory(parameters.geometry.lengthY, node, "lengthY");
-    readFloatMandatory(parameters.geometry.lengthZ, node, "lengthZ");
+    readFloatMandatory(geometricParameters.lengthX, node, "lengthX");
+    readFloatMandatory(geometricParameters.lengthY, node, "lengthY");
+    readFloatMandatory(geometricParameters.lengthZ, node, "lengthZ");
     // Read geometry->meshsize parameters
     std::string meshsizeType = "";
     subNode                  = node->FirstChildElement("mesh");
     readStringMandatory(meshsizeType, subNode);
     if (meshsizeType == "uniform") {
-      parameters.geometry.meshsizeType = Uniform;
+      geometricParameters.meshsizeType = Uniform;
     } else if (meshsizeType == "stretched") {
-      parameters.geometry.meshsizeType = TanhStretching;
+      geometricParameters.meshsizeType = TanhStretching;
       bool buffer                      = false;
       readBoolMandatory(buffer, node, "stretchX");
-      parameters.geometry.stretchX = static_cast<int>(buffer);
+      geometricParameters.stretchX = static_cast<int>(buffer);
       readBoolMandatory(buffer, node, "stretchY");
-      parameters.geometry.stretchY = static_cast<int>(buffer);
-      if (parameters.geometry.dim == 3) {
+      geometricParameters.stretchY = static_cast<int>(buffer);
+      if (geometricParameters.dim == 3) {
         readBoolMandatory(buffer, node, "stretchZ");
-        parameters.geometry.stretchZ = static_cast<int>(buffer);
+        geometricParameters.stretchZ = static_cast<int>(buffer);
       } else {
-        parameters.geometry.stretchZ = false;
+        geometricParameters.stretchZ = false;
       }
     } else {
       throw std::runtime_error("Unknown 'mesh'!");
@@ -198,8 +200,62 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
 
     // Now, the size of the elements should be set
 
-    dim_ = parameters.geometry.dim;
+    dim_ = geometricParameters.dim;
 
+    //--------------------------------------------------
+    // Parallel parameters
+    //--------------------------------------------------
+    node = confFile.FirstChildElement()->FirstChildElement("parallel");
+
+    if (node == NULL) {
+      throw std::runtime_error("Error loading parallel parameters");
+    }
+
+    readIntOptional(parallelParameters.numProcessors[0], node, "numProcessorsX", 1);
+    readIntOptional(parallelParameters.numProcessors[1], node, "numProcessorsY", 1);
+    readIntOptional(parallelParameters.numProcessors[2], node, "numProcessorsZ", 1);
+
+    // Start neighbors on null in case that no parallel configuration is used later.
+    parallelParameters.leftNb   = MPI_PROC_NULL;
+    parallelParameters.rightNb  = MPI_PROC_NULL;
+    parallelParameters.bottomNb = MPI_PROC_NULL;
+    parallelParameters.topNb    = MPI_PROC_NULL;
+    parallelParameters.frontNb  = MPI_PROC_NULL;
+    parallelParameters.backNb   = MPI_PROC_NULL;
+
+    // Yet more parameters initialized in case that no parallel configuration is applied
+    parallelParameters.localSize[0] = geometricParameters.sizeX;
+    parallelParameters.localSize[1] = geometricParameters.sizeY;
+    parallelParameters.localSize[2] = geometricParameters.sizeZ;
+
+    parallelParameters.firstCorner[0] = 0;
+    parallelParameters.firstCorner[1] = 0;
+    parallelParameters.firstCorner[2] = 0;
+
+    // VTK output is named after the rank, so we define it here, again, in case that it's not
+    // initialized anywhere else.
+    parallelParameters.rank = rank;
+  }
+
+  MPI_Bcast(&(geometricParameters.sizeX), 1, MPI_INT, 0, communicator);
+  MPI_Bcast(&(geometricParameters.sizeY), 1, MPI_INT, 0, communicator);
+  MPI_Bcast(&(geometricParameters.sizeZ), 1, MPI_INT, 0, communicator);
+
+  MPI_Bcast(&(geometricParameters.dim), 1, MPI_INT, 0, communicator);
+
+  MPI_Bcast(&(geometricParameters.meshsizeType), 1, MPI_INT, 0, communicator);
+  MPI_Bcast(&(geometricParameters.stretchX), 1, MPI_INT, 0, communicator);
+  MPI_Bcast(&(geometricParameters.stretchY), 1, MPI_INT, 0, communicator);
+  MPI_Bcast(&(geometricParameters.stretchZ), 1, MPI_INT, 0, communicator);
+  MPI_Bcast(&(geometricParameters.lengthX), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(geometricParameters.lengthY), 1, MY_MPI_FLOAT, 0, communicator);
+  MPI_Bcast(&(geometricParameters.lengthZ), 1, MY_MPI_FLOAT, 0, communicator);
+
+  MPI_Bcast(parallelParameters.numProcessors, 3, MPI_INT, 0, communicator);
+
+  Parameters parameters(geometricParameters, parallelParameters);
+
+  if (rank == 0) {
     //--------------------------------------------------
     // Timestep parameters
     //--------------------------------------------------
@@ -306,40 +362,6 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
     readFloatOptional(parameters.stdOut.interval, node, "interval", 1);
 
     //--------------------------------------------------
-    // Parallel parameters
-    //--------------------------------------------------
-    node = confFile.FirstChildElement()->FirstChildElement("parallel");
-
-    if (node == NULL) {
-      throw std::runtime_error("Error loading parallel parameters");
-    }
-
-    readIntOptional(parameters.parallel.numProcessors[0], node, "numProcessorsX", 1);
-    readIntOptional(parameters.parallel.numProcessors[1], node, "numProcessorsY", 1);
-    readIntOptional(parameters.parallel.numProcessors[2], node, "numProcessorsZ", 1);
-
-    // Start neighbors on null in case that no parallel configuration is used later.
-    parameters.parallel.leftNb   = MPI_PROC_NULL;
-    parameters.parallel.rightNb  = MPI_PROC_NULL;
-    parameters.parallel.bottomNb = MPI_PROC_NULL;
-    parameters.parallel.topNb    = MPI_PROC_NULL;
-    parameters.parallel.frontNb  = MPI_PROC_NULL;
-    parameters.parallel.backNb   = MPI_PROC_NULL;
-
-    // Yet more parameters initialized in case that no parallel configuration is applied
-    parameters.parallel.localSize[0] = parameters.geometry.sizeX;
-    parameters.parallel.localSize[1] = parameters.geometry.sizeY;
-    parameters.parallel.localSize[2] = parameters.geometry.sizeZ;
-
-    parameters.parallel.firstCorner[0] = 0;
-    parameters.parallel.firstCorner[1] = 0;
-    parameters.parallel.firstCorner[2] = 0;
-
-    // VTK output is named after the rank, so we define it here, again, in case that it's not
-    // initialized anywhere else.
-    parameters.parallel.rank = rank;
-
-    //--------------------------------------------------
     // Walls
     //--------------------------------------------------
     node = confFile.FirstChildElement()->FirstChildElement("walls");
@@ -421,20 +443,6 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
   }
 
   // Broadcasting of the values
-  MPI_Bcast(&(parameters.geometry.sizeX), 1, MPI_INT, 0, communicator);
-  MPI_Bcast(&(parameters.geometry.sizeY), 1, MPI_INT, 0, communicator);
-  MPI_Bcast(&(parameters.geometry.sizeZ), 1, MPI_INT, 0, communicator);
-
-  MPI_Bcast(&(parameters.geometry.dim), 1, MPI_INT, 0, communicator);
-
-  MPI_Bcast(&(parameters.geometry.meshsizeType), 1, MPI_INT, 0, communicator);
-  MPI_Bcast(&(parameters.geometry.stretchX), 1, MPI_INT, 0, communicator);
-  MPI_Bcast(&(parameters.geometry.stretchY), 1, MPI_INT, 0, communicator);
-  MPI_Bcast(&(parameters.geometry.stretchZ), 1, MPI_INT, 0, communicator);
-  MPI_Bcast(&(parameters.geometry.lengthX), 1, MY_MPI_FLOAT, 0, communicator);
-  MPI_Bcast(&(parameters.geometry.lengthY), 1, MY_MPI_FLOAT, 0, communicator);
-  MPI_Bcast(&(parameters.geometry.lengthZ), 1, MY_MPI_FLOAT, 0, communicator);
-
   MPI_Bcast(&(parameters.timestep.dt), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.timestep.tau), 1, MY_MPI_FLOAT, 0, communicator);
 
@@ -458,8 +466,6 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
 
   MPI_Bcast(&(parameters.bfStep.xRatio), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.bfStep.yRatio), 1, MY_MPI_FLOAT, 0, communicator);
-
-  MPI_Bcast(parameters.parallel.numProcessors, 3, MPI_INT, 0, communicator);
 
   MPI_Bcast(&(parameters.walls.scalarLeft), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.walls.scalarRight), 1, MY_MPI_FLOAT, 0, communicator);
@@ -491,4 +497,6 @@ void Configuration::loadParameters(Parameters& parameters, const MPI_Comm& commu
       }
     }
   }
+
+  return parameters;
 }

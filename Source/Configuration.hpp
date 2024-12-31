@@ -15,5 +15,5 @@ public:
   ~Configuration() = default;
 
   void setFileName(const std::string& filename);
-  void loadParameters(Parameters& parameters, const MPI_Comm& communicator = PETSC_COMM_WORLD);
+  Parameters loadParameters(const MPI_Comm& communicator = PETSC_COMM_WORLD);
 };

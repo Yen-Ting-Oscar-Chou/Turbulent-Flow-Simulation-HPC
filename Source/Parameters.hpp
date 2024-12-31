@@ -147,8 +147,8 @@ public:
  */
 class Parameters {
 public:
-  Parameters();
-  ~Parameters();
+  Parameters(const GeometricParameters& geometricParameters, const ParallelParameters& parallelParameters);
+  ~Parameters() = default;
 
   SimulationParameters    simulation;
   TimestepParameters      timestep;
@@ -162,10 +162,11 @@ public:
   StdOutParameters        stdOut;
   BFStepParameters        bfStep;
   TurbulenceParameters    turbulence;
-  Meshsize* meshsize;
+  TanhMeshStretching      meshsize;
 };
 #pragma omp declare mapper(Parameters p) \
-  map(to: p, p.meshsize[0:1]) \
+  map(to: p) \
+  map(to: p.meshsize) \
   map(to: p.timestep) \
   map(to: p.environment) \
   map(to: p.flow) \

@@ -2,25 +2,18 @@
 
 #include "Parameters.hpp"
 
-Parameters::Parameters():
+Parameters::Parameters(const GeometricParameters& geometricParameters, const ParallelParameters& parallelParameters):
   simulation{},
   timestep{},
   environment{},
   flow{},
   solver{},
-  geometry{},
+  geometry(geometricParameters),
   walls{},
   vtk{},
-  parallel{},
+  parallel(parallelParameters),
   stdOut{},
   bfStep{},
   turbulence{},
-  meshsize(NULL) {
-}
-
-Parameters::~Parameters() {
-  if (meshsize != NULL) {
-    delete meshsize;
-    meshsize = NULL;
-  }
+  meshsize(TanhMeshStretching(geometry, parallel)) {
 }

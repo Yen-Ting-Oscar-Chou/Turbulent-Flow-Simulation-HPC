@@ -14,7 +14,9 @@ constexpr auto SIZE_Y = 25;
 TEST_CASE("Test derivatives", "[single-file]") {
   spdlog::info("Testing derivatives");
 
-  Parameters parameters;
+  GeometricParameters geometricParameters{};
+  ParallelParameters parallelParameters{};
+  Parameters parameters(geometricParameters, parallelParameters);
   parameters.solver.gamma = 0.5;
   RealType lv[81]{}; // Local velocity
   RealType lm[81]{}; // Local meshsize

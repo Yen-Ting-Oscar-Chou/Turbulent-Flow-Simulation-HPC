@@ -2,7 +2,6 @@
 
 #include "Clock.hpp"
 #include "Configuration.hpp"
-#include "MeshsizeFactory.hpp"
 #include "Simulation.hpp"
 #include "TurbulentSimulation.hpp"
 #include <fenv.h>
@@ -54,10 +53,8 @@ int main(int argc, char* argv[]) {
 
   // Read configuration and store information in parameters object
   Configuration configuration(argv[1]);
-  Parameters    parameters;
-  configuration.loadParameters(parameters);
+  Parameters parameters = configuration.loadParameters();
   ParallelManagers::PetscParallelConfiguration parallelConfiguration(parameters);
-  MeshsizeFactory::getInstance().initMeshsize(parameters);
   FlowField*  flowField  = NULL;
   Simulation* simulation = NULL;
 
@@ -76,9 +73,9 @@ int main(int argc, char* argv[]) {
   spdlog::debug("Front neighbour: {}, back neighbour: {}", parameters.parallel.frontNb, parameters.parallel.backNb);
   spdlog::debug(
     "Min. meshsizes: {}, {}, {}",
-    parameters.meshsize->getDxMin(),
-    parameters.meshsize->getDyMin(),
-    parameters.meshsize->getDzMin()
+    parameters.meshsize.getDxMin(),
+    parameters.meshsize.getDyMin(),
+    parameters.meshsize.getDzMin()
   );
 
   // Initialise simulation
@@ -94,9 +91,6 @@ int main(int argc, char* argv[]) {
     flowField = turbulentFlowField;
     simulation = turbulentSimulation;
   } else if (parameters.simulation.type == "dns") {
-    // #ifdef GPU
-    //   throw std::runtime_error("GPUs are only supported for simulations of type turbulence!");
-    // #endif
     if (rank == 0) {
       spdlog::info("Start DNS simulation in {}D", parameters.geometry.dim);
     }

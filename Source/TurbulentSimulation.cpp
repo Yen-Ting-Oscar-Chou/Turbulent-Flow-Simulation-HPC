@@ -57,7 +57,7 @@ void TurbulentSimulation::solveTimestep() {
 void TurbulentSimulation::setTimeStep() {
   RealType localMin, globalMin;
   ASSERTION(parameters_.geometry.dim == 2 || parameters_.geometry.dim == 3);
-  RealType factor = 1.0 / (parameters_.meshsize->getDxMin() * parameters_.meshsize->getDxMin()) + 1.0 / (parameters_.meshsize->getDyMin() * parameters_.meshsize->getDyMin());
+  RealType factor = 1.0 / (parameters_.meshsize.getDxMin() * parameters_.meshsize.getDxMin()) + 1.0 / (parameters_.meshsize.getDyMin() * parameters_.meshsize.getDyMin());
   // Determine maximum velocity
   maxUStencil_.reset();
   maxViscStencil_.reset();
@@ -66,7 +66,7 @@ void TurbulentSimulation::setTimeStep() {
   maxViscFieldIterator_.iterate();
   maxViscBoundaryIterator_.iterate();
   if (parameters_.geometry.dim == 3) {
-    factor += 1.0 / (parameters_.meshsize->getDzMin() * parameters_.meshsize->getDzMin());
+    factor += 1.0 / (parameters_.meshsize.getDzMin() * parameters_.meshsize.getDzMin());
     parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[2] + EPSILON);
   } else {
     parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[0] + EPSILON);

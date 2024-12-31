@@ -19,14 +19,14 @@ namespace Stencils {
   }
 
   inline void computeGlobalCoordinates(RealType* coords, const Parameters& parameters_, int i, int j) {
-    coords[0] = parameters_.meshsize->getPosX(i, j) + 0.5 * parameters_.meshsize->getDx(i, j);
-    coords[1] = parameters_.meshsize->getPosY(i, j) + 0.5 * parameters_.meshsize->getDy(i, j);
+    coords[0] = parameters_.meshsize.getPosX(i, j) + 0.5 * parameters_.meshsize.getDx(i, j);
+    coords[1] = parameters_.meshsize.getPosY(i, j) + 0.5 * parameters_.meshsize.getDy(i, j);
   }
 
   inline void computeGlobalCoordinates(RealType* coords, const Parameters& parameters_, int i, int j, int k) {
-    coords[0] = parameters_.meshsize->getPosX(i, j, k) + 0.5 * parameters_.meshsize->getDx(i, j, k);
-    coords[1] = parameters_.meshsize->getPosY(i, j, k) + 0.5 * parameters_.meshsize->getDy(i, j, k);
-    coords[2] = parameters_.meshsize->getPosZ(i, j, k) + 0.5 * parameters_.meshsize->getDz(i, j, k);
+    coords[0] = parameters_.meshsize.getPosX(i, j, k) + 0.5 * parameters_.meshsize.getDx(i, j, k);
+    coords[1] = parameters_.meshsize.getPosY(i, j, k) + 0.5 * parameters_.meshsize.getDy(i, j, k);
+    coords[2] = parameters_.meshsize.getPosZ(i, j, k) + 0.5 * parameters_.meshsize.getDz(i, j, k);
   }
 
   // Load the local velocity cube with relevant velocities of the 2D plane
@@ -58,8 +58,8 @@ namespace Stencils {
   inline void loadLocalMeshsize2D(const Parameters& parameters, RealType* const localMeshsize, int i, int j) {
     for (int row = -1; row <= 1; row++) {
       for (int column = -1; column <= 1; column++) {
-        localMeshsize[39 + 9 * row + 3 * column]     = parameters.meshsize->getDx(i + column, j + row);
-        localMeshsize[39 + 9 * row + 3 * column + 1] = parameters.meshsize->getDy(i + column, j + row);
+        localMeshsize[39 + 9 * row + 3 * column]     = parameters.meshsize.getDx(i + column, j + row);
+        localMeshsize[39 + 9 * row + 3 * column + 1] = parameters.meshsize.getDy(i + column, j + row);
       }
     }
   }
@@ -69,9 +69,9 @@ namespace Stencils {
     for (int layer = -1; layer <= 1; layer++) {
       for (int row = -1; row <= 1; row++) {
         for (int column = -1; column <= 1; column++) {
-          localMeshsize[39 + 27 * layer + 9 * row + 3 * column]     = parameters.meshsize->getDx(i + column, j + row, k + layer);
-          localMeshsize[39 + 27 * layer + 9 * row + 3 * column + 1] = parameters.meshsize->getDy(i + column, j + row, k + layer);
-          localMeshsize[39 + 27 * layer + 9 * row + 3 * column + 2] = parameters.meshsize->getDz(i + column, j + row, k + layer);
+          localMeshsize[39 + 27 * layer + 9 * row + 3 * column]     = parameters.meshsize.getDx(i + column, j + row, k + layer);
+          localMeshsize[39 + 27 * layer + 9 * row + 3 * column + 1] = parameters.meshsize.getDy(i + column, j + row, k + layer);
+          localMeshsize[39 + 27 * layer + 9 * row + 3 * column + 2] = parameters.meshsize.getDz(i + column, j + row, k + layer);
         }
       }
     }

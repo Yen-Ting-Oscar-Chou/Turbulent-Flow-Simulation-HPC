@@ -352,12 +352,12 @@ PetscErrorCode computeMatrix2D([[maybe_unused]] KSP ksp, Mat A, [[maybe_unused]]
       const int obstacle = flags.getValue(cellIndexX, cellIndexY);
 
       if ((obstacle & OBSTACLE_SELF) == 0) { // If we have a fluid cell
-        const RealType dx_0  = parameters.meshsize->getDx(cellIndexX, cellIndexY);
-        const RealType dx_M1 = parameters.meshsize->getDx(cellIndexX - 1, cellIndexY);
-        const RealType dx_P1 = parameters.meshsize->getDx(cellIndexX + 1, cellIndexY);
-        const RealType dy_0  = parameters.meshsize->getDy(cellIndexX, cellIndexY);
-        const RealType dy_M1 = parameters.meshsize->getDy(cellIndexX, cellIndexY - 1);
-        const RealType dy_P1 = parameters.meshsize->getDy(cellIndexX, cellIndexY + 1);
+        const RealType dx_0  = parameters.meshsize.getDx(cellIndexX, cellIndexY);
+        const RealType dx_M1 = parameters.meshsize.getDx(cellIndexX - 1, cellIndexY);
+        const RealType dx_P1 = parameters.meshsize.getDx(cellIndexX + 1, cellIndexY);
+        const RealType dy_0  = parameters.meshsize.getDy(cellIndexX, cellIndexY);
+        const RealType dy_M1 = parameters.meshsize.getDy(cellIndexX, cellIndexY - 1);
+        const RealType dy_P1 = parameters.meshsize.getDy(cellIndexX, cellIndexY + 1);
 
         const RealType dx_L  = 0.5 * (dx_0 + dx_M1);
         const RealType dx_R  = 0.5 * (dx_0 + dx_P1);
@@ -602,15 +602,15 @@ PetscErrorCode computeMatrix3D([[maybe_unused]] KSP ksp, Mat A, [[maybe_unused]]
         const int obstacle   = flags.getValue(cellIndexX, cellIndexY, cellIndexZ);
 
         if ((obstacle & OBSTACLE_SELF) == 0) { // If the cell is fluid
-          const RealType dx_0  = parameters.meshsize->getDx(cellIndexX, cellIndexY, cellIndexZ);
-          const RealType dx_M1 = parameters.meshsize->getDx(cellIndexX - 1, cellIndexY, cellIndexZ);
-          const RealType dx_P1 = parameters.meshsize->getDx(cellIndexX + 1, cellIndexY, cellIndexZ);
-          const RealType dy_0  = parameters.meshsize->getDy(cellIndexX, cellIndexY, cellIndexZ);
-          const RealType dy_M1 = parameters.meshsize->getDy(cellIndexX, cellIndexY - 1, cellIndexZ);
-          const RealType dy_P1 = parameters.meshsize->getDy(cellIndexX, cellIndexY + 1, cellIndexZ);
-          const RealType dz_0  = parameters.meshsize->getDz(cellIndexX, cellIndexY, cellIndexZ);
-          const RealType dz_M1 = parameters.meshsize->getDz(cellIndexX, cellIndexY, cellIndexZ - 1);
-          const RealType dz_P1 = parameters.meshsize->getDz(cellIndexX, cellIndexY, cellIndexZ + 1);
+          const RealType dx_0  = parameters.meshsize.getDx(cellIndexX, cellIndexY, cellIndexZ);
+          const RealType dx_M1 = parameters.meshsize.getDx(cellIndexX - 1, cellIndexY, cellIndexZ);
+          const RealType dx_P1 = parameters.meshsize.getDx(cellIndexX + 1, cellIndexY, cellIndexZ);
+          const RealType dy_0  = parameters.meshsize.getDy(cellIndexX, cellIndexY, cellIndexZ);
+          const RealType dy_M1 = parameters.meshsize.getDy(cellIndexX, cellIndexY - 1, cellIndexZ);
+          const RealType dy_P1 = parameters.meshsize.getDy(cellIndexX, cellIndexY + 1, cellIndexZ);
+          const RealType dz_0  = parameters.meshsize.getDz(cellIndexX, cellIndexY, cellIndexZ);
+          const RealType dz_M1 = parameters.meshsize.getDz(cellIndexX, cellIndexY, cellIndexZ - 1);
+          const RealType dz_P1 = parameters.meshsize.getDz(cellIndexX, cellIndexY, cellIndexZ + 1);
 
           const RealType dx_L  = 0.5 * (dx_0 + dx_M1);
           const RealType dx_R  = 0.5 * (dx_0 + dx_P1);

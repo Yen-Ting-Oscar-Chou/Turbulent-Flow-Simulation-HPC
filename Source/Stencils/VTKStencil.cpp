@@ -65,9 +65,9 @@ void Stencils::VTKStencil<FlowFieldType>::writePoints(std::ostream& file, RealTy
           sprintf(
             buffer,
             "%f %f %f\n",
-            FieldStencil<FlowFieldType>::parameters_.meshsize->getPosX(i, j, k),
-            FieldStencil<FlowFieldType>::parameters_.meshsize->getPosY(i, j, k),
-            FieldStencil<FlowFieldType>::parameters_.meshsize->getPosZ(i, j, k)
+            FieldStencil<FlowFieldType>::parameters_.meshsize.getPosX(i, j, k),
+            FieldStencil<FlowFieldType>::parameters_.meshsize.getPosY(i, j, k),
+            FieldStencil<FlowFieldType>::parameters_.meshsize.getPosZ(i, j, k)
           );
           grid.append(buffer);
         }
@@ -76,7 +76,7 @@ void Stencils::VTKStencil<FlowFieldType>::writePoints(std::ostream& file, RealTy
   } else {
     for (int j = 2; j < 2 + py; j++) {
       for (int i = 2; i < 2 + px; i++) {
-        sprintf(buffer, "%f %f 0.0\n", FieldStencil<FlowFieldType>::parameters_.meshsize->getPosX(i, j), FieldStencil<FlowFieldType>::parameters_.meshsize->getPosY(i, j));
+        sprintf(buffer, "%f %f 0.0\n", FieldStencil<FlowFieldType>::parameters_.meshsize.getPosX(i, j), FieldStencil<FlowFieldType>::parameters_.meshsize.getPosY(i, j));
         grid.append(buffer);
       }
     }

@@ -71,10 +71,33 @@ void Simulation::initializeFlowField() {
   }
 
   solver_->reInitMatrix();
+
+//   std::cout << flowField_.getPressure().getScalar(2, 3) << std::endl;
+
+// #pragma omp target map(tofrom : flowField_)
+//   {
+//     for (int i = 2; i < 10; i++) {
+//       //localFlowField.pressure_.data_[3 * localFlowField.pressure_.size_ + i] = 1000;
+//       flowField_.getPressure().getScalar(i,3) = 10000;
+//     }
+//   }
+
+//   std::cout << flowField_.getPressure().getScalar(2, 3) << std::endl;
+
+//     std::cout << "Meshsize on CPU: " << parameters_.meshsize.getDxMin() << std::endl;
+
+// #pragma omp target map(tofrom : flowField_) map(to: parameters_)
+//   {
+//     flowField_.getPressure().getScalar(2, 3) = parameters_.meshsize.getDxMin();
+//   }
+
+//   std::cout << "Meshsize on GPU: " << flowField_.getPressure().getScalar(2, 3) << std::endl;
+//   exit(0);
 }
 
 void Simulation::solveTimestep() {
   // Determine and set max. timestep which is allowed in this simulation
+  // rhsIterator_.iterate();
   setTimeStep();
   // Compute FGH
   fghIterator_.iterate();
@@ -110,14 +133,13 @@ void Simulation::plotVTK(int timeStep, RealType simulationTime) {
 void Simulation::setTimeStep() {
   RealType localMin, globalMin;
   ASSERTION(parameters_.geometry.dim == 2 || parameters_.geometry.dim == 3);
-  RealType factor = 1.0 / (parameters_.meshsize->getDxMin() * parameters_.meshsize->getDxMin())
-                  + 1.0 / (parameters_.meshsize->getDyMin() * parameters_.meshsize->getDyMin());
+  RealType factor = 1.0 / (parameters_.meshsize.getDxMin() * parameters_.meshsize.getDxMin()) + 1.0 / (parameters_.meshsize.getDyMin() * parameters_.meshsize.getDyMin());
   // Determine maximum velocity
   maxUStencil_.reset();
   maxUFieldIterator_.iterate();
   maxUBoundaryIterator_.iterate();
   if (parameters_.geometry.dim == 3) {
-    factor += 1.0 / (parameters_.meshsize->getDzMin() * parameters_.meshsize->getDzMin());
+    factor += 1.0 / (parameters_.meshsize.getDzMin() * parameters_.meshsize.getDzMin());
     parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[2] + EPSILON);
   } else {
     parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[0] + EPSILON);
@@ -126,10 +148,7 @@ void Simulation::setTimeStep() {
   // localMin = std::min(parameters_.timestep.dt, std::min(std::min(parameters_.flow.Re/(2 * factor), 1.0 /
   // maxUStencil_.getMaxValues()[0]), 1.0 / maxUStencil_.getMaxValues()[1]));
   localMin = std::min(
-    parameters_.flow.Re / (2 * factor),
-    std::min(
-      parameters_.timestep.dt, std::min(1 / (maxUStencil_.getMaxValues()[0] + EPSILON), 1 / (maxUStencil_.getMaxValues()[1] + EPSILON))
-    )
+    parameters_.flow.Re / (2 * factor), std::min(parameters_.timestep.dt, std::min(1 / (maxUStencil_.getMaxValues()[0] + EPSILON), 1 / (maxUStencil_.getMaxValues()[1] + EPSILON)))
   );
 
   // Here, we select the type of operation before compiling. This allows to use the correct
@@ -138,8 +157,7 @@ void Simulation::setTimeStep() {
 
   globalMin = MY_FLOAT_MAX;
   MPI_Allreduce(&localMin, &globalMin, 1, MY_MPI_FLOAT, MPI_MIN, PETSC_COMM_WORLD);
-  
+
   parameters_.timestep.dt = globalMin;
   parameters_.timestep.dt *= parameters_.timestep.tau;
 }
-

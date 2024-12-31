@@ -24,9 +24,9 @@
 
 class Simulation {
 protected:
-  Parameters& parameters_;
+  Parameters parameters_;
 
-  FlowField& flowField_;
+  FlowField flowField_;
 
   Stencils::MaxUStencil             maxUStencil_;
   FieldIterator<FlowField>          maxUFieldIterator_;
@@ -54,7 +54,7 @@ protected:
 
   virtual void setTimeStep();
 
-  virtual void solveTimestepHelper();
+  void solveTimestepHelper();
 
 public:
   Simulation(Parameters& parameters, FlowField& flowField);

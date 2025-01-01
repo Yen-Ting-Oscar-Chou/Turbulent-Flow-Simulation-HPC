@@ -38,7 +38,7 @@ public:
 };
 
 /** Implements a uniform, equidistant grid spacing */
-class UniformMeshsize: protected Meshsize {
+class UniformMeshsize: public Meshsize {
 private:
   const RealType dx_;
   const RealType dy_;
@@ -54,28 +54,13 @@ public:
   inline virtual RealType getDx([[maybe_unused]] int i, [[maybe_unused]] int j) const override { return dx_; }
   inline virtual RealType getDy([[maybe_unused]] int i, [[maybe_unused]] int j) const override { return dy_; }
 
-  inline virtual RealType getDx([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override {
-    return dx_;
-  }
-  inline virtual RealType getDy([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override {
-    return dy_;
-  }
-  inline virtual RealType getDz([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override {
-    return dz_;
-  }
+  inline virtual RealType getDx([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override { return dx_; }
+  inline virtual RealType getDy([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override { return dy_; }
+  inline virtual RealType getDz([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override { return dz_; }
 
-  inline virtual RealType getPosX([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k)
-    const override {
-    return dx_ * (firstCornerX_ - 2 + i);
-  }
-  inline virtual RealType getPosY([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k)
-    const override {
-    return dy_ * (firstCornerY_ - 2 + j);
-  }
-  inline virtual RealType getPosZ([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k)
-    const override {
-    return dz_ * (firstCornerZ_ - 2 + k);
-  }
+  inline virtual RealType getPosX([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override { return dx_ * (firstCornerX_ - 2 + i); }
+  inline virtual RealType getPosY([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override { return dy_ * (firstCornerY_ - 2 + j); }
+  inline virtual RealType getPosZ([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override { return dz_ * (firstCornerZ_ - 2 + k); }
 
   inline virtual RealType getPosX(int i, int j) const override { return getPosX(i, j, 0); }
   inline virtual RealType getPosY(int i, int j) const override { return getPosY(i, j, 0); }
@@ -92,7 +77,7 @@ public:
  * dissertation by Tobias Neckel, Chair of Scientific Computing in Computer Science (TUM SCCS). For non-stretched
  * meshes, the UniformMeshsize implementation is used to create a uniform mesh.
  */
-class TanhMeshStretching: protected Meshsize {
+class TanhMeshStretching: public Meshsize {
 private:
   const UniformMeshsize uniformMeshsize_;
   const RealType        lengthX_;

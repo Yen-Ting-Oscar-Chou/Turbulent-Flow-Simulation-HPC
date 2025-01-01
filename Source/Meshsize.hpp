@@ -8,8 +8,37 @@ class ParallelParameters;
 
 enum MeshsizeType { Uniform = 0, TanhStretching = 1 };
 
+class Meshsize {
+public:
+  Meshsize()          = default;
+  virtual ~Meshsize() = default;
+
+  // Returns the meshsize of cell i, j or i, j, k, respectively.
+  virtual RealType getDx(int i, int j) const = 0;
+  virtual RealType getDy(int i, int j) const = 0;
+
+  virtual RealType getDx(int i, int j, int k) const = 0;
+  virtual RealType getDy(int i, int j, int k) const = 0;
+  virtual RealType getDz(int i, int j, int k) const = 0;
+
+  // Returns the global geometric position in x-, y-, z-direction
+  // of the lower/left/front corner of the local cell at (i, j, k).
+  virtual RealType getPosX(int i, int j, int k) const = 0;
+  virtual RealType getPosY(int i, int j, int k) const = 0;
+  virtual RealType getPosZ(int i, int j, int k) const = 0;
+
+  virtual RealType getPosX(int i, int j) const = 0;
+  virtual RealType getPosY(int i, int j) const = 0;
+
+  // Returns the min. meshsize used in this simulation
+  // -> required for adaptive time stepping.
+  virtual RealType getDxMin() const = 0;
+  virtual RealType getDyMin() const = 0;
+  virtual RealType getDzMin() const = 0;
+};
+
 /** Implements a uniform, equidistant grid spacing */
-class UniformMeshsize {
+class UniformMeshsize: protected Meshsize {
 private:
   const RealType dx_;
   const RealType dy_;
@@ -20,25 +49,40 @@ private:
 
 public:
   UniformMeshsize(const GeometricParameters& geometricParameters, const ParallelParameters& parallelParameters);
-  ~UniformMeshsize() = default;
+  virtual ~UniformMeshsize() override = default;
 
-  inline RealType getDx([[maybe_unused]] int i, [[maybe_unused]] int j) const { return dx_; }
-  inline RealType getDy([[maybe_unused]] int i, [[maybe_unused]] int j) const { return dy_; }
+  inline virtual RealType getDx([[maybe_unused]] int i, [[maybe_unused]] int j) const override { return dx_; }
+  inline virtual RealType getDy([[maybe_unused]] int i, [[maybe_unused]] int j) const override { return dy_; }
 
-  inline RealType getDx([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const { return dx_; }
-  inline RealType getDy([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const { return dy_; }
-  inline RealType getDz([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const { return dz_; }
+  inline virtual RealType getDx([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override {
+    return dx_;
+  }
+  inline virtual RealType getDy([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override {
+    return dy_;
+  }
+  inline virtual RealType getDz([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const override {
+    return dz_;
+  }
 
-  inline RealType getPosX([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const { return dx_ * (firstCornerX_ - 2 + i); }
-  inline RealType getPosY([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const { return dy_ * (firstCornerY_ - 2 + j); }
-  inline RealType getPosZ([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) const { return dz_ * (firstCornerZ_ - 2 + k); }
+  inline virtual RealType getPosX([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k)
+    const override {
+    return dx_ * (firstCornerX_ - 2 + i);
+  }
+  inline virtual RealType getPosY([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k)
+    const override {
+    return dy_ * (firstCornerY_ - 2 + j);
+  }
+  inline virtual RealType getPosZ([[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k)
+    const override {
+    return dz_ * (firstCornerZ_ - 2 + k);
+  }
 
-  inline RealType getPosX(int i, int j) const { return getPosX(i, j, 0); }
-  inline RealType getPosY(int i, int j) const { return getPosY(i, j, 0); }
+  inline virtual RealType getPosX(int i, int j) const override { return getPosX(i, j, 0); }
+  inline virtual RealType getPosY(int i, int j) const override { return getPosY(i, j, 0); }
 
-  inline RealType getDxMin() const { return dx_; }
-  inline RealType getDyMin() const { return dy_; }
-  inline RealType getDzMin() const { return dz_; }
+  inline virtual RealType getDxMin() const override { return dx_; }
+  inline virtual RealType getDyMin() const override { return dy_; }
+  inline virtual RealType getDzMin() const override { return dz_; }
 };
 
 /**
@@ -48,7 +92,7 @@ public:
  * dissertation by Tobias Neckel, Chair of Scientific Computing in Computer Science (TUM SCCS). For non-stretched
  * meshes, the UniformMeshsize implementation is used to create a uniform mesh.
  */
-class TanhMeshStretching {
+class TanhMeshStretching: protected Meshsize {
 private:
   const UniformMeshsize uniformMeshsize_;
   const RealType        lengthX_;
@@ -108,9 +152,9 @@ private:
 
 public:
   TanhMeshStretching(const GeometricParameters& geometricParameters, const ParallelParameters& parallelParameters);
-  ~TanhMeshStretching() = default;
+  virtual ~TanhMeshStretching() = default;
 
-  inline RealType getDx(int i, int j) const {
+  inline virtual RealType getDx(int i, int j) const override {
     if (stretchX_) {
       return getMeshsize(i, firstCornerX_, sizeX_, lengthX_, dxMin_);
     } else {
@@ -118,7 +162,7 @@ public:
     }
   }
 
-  inline RealType getDy(int i, int j) const {
+  inline virtual RealType getDy(int i, int j) const override {
     if (stretchY_) {
       return getMeshsize(j, firstCornerY_, sizeY_, lengthY_, dyMin_);
     } else {
@@ -126,11 +170,11 @@ public:
     }
   }
 
-  inline RealType getDx(int i, int j, [[maybe_unused]] int k) const { return getDx(i, j); }
+  inline virtual RealType getDx(int i, int j, [[maybe_unused]] int k) const override { return getDx(i, j); }
 
-  inline RealType getDy(int i, int j, [[maybe_unused]] int k) const { return getDy(i, j); }
+  inline virtual RealType getDy(int i, int j, [[maybe_unused]] int k) const override { return getDy(i, j); }
 
-  inline RealType getDz(int i, int j, int k) const {
+  inline virtual RealType getDz(int i, int j, int k) const override {
     if (stretchZ_) {
       return getMeshsize(k, firstCornerZ_, sizeZ_, lengthZ_, dzMin_);
     } else {
@@ -138,7 +182,7 @@ public:
     }
   }
 
-  inline RealType getPosX(int i, int j, int k) const {
+  inline virtual RealType getPosX(int i, int j, int k) const override {
     if (stretchX_) {
       return computeCoordinate(i, firstCornerX_, sizeX_, lengthX_, dxMin_);
     } else {
@@ -146,7 +190,7 @@ public:
     }
   }
 
-  inline RealType getPosY(int i, int j, int k) const {
+  inline virtual RealType getPosY(int i, int j, int k) const override {
     if (stretchY_) {
       return computeCoordinate(j, firstCornerY_, sizeY_, lengthY_, dyMin_);
     } else {
@@ -154,7 +198,7 @@ public:
     }
   }
 
-  inline RealType getPosZ(int i, int j, int k) const {
+  inline virtual RealType getPosZ(int i, int j, int k) const override {
     if (stretchZ_) {
       return computeCoordinate(k, firstCornerZ_, sizeZ_, lengthZ_, dzMin_);
     } else {
@@ -162,10 +206,10 @@ public:
     }
   }
 
-  inline RealType getPosX(int i, int j) const { return getPosX(i, j, 0); }
-  inline RealType getPosY(int i, int j) const { return getPosY(i, j, 0); }
+  inline virtual RealType getPosX(int i, int j) const override { return getPosX(i, j, 0); }
+  inline virtual RealType getPosY(int i, int j) const override { return getPosY(i, j, 0); }
 
-  inline RealType getDxMin() const { return dxMin_; }
-  inline RealType getDyMin() const { return dyMin_; }
-  inline RealType getDzMin() const { return dzMin_; }
+  inline virtual RealType getDxMin() const override { return dxMin_; }
+  inline virtual RealType getDyMin() const override { return dyMin_; }
+  inline virtual RealType getDzMin() const override { return dzMin_; }
 };

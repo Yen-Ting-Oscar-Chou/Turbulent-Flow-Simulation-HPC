@@ -3,7 +3,7 @@
 #include "BoundaryType.hpp"
 #include "MixingLengths.hpp"
 #include "Definitions.hpp"
-#include "Meshsize.hpp"
+#include "MeshsizeDelegate.hpp"
 
 //! Classes for the parts of the parameters
 //@{
@@ -162,7 +162,7 @@ public:
   StdOutParameters        stdOut;
   BFStepParameters        bfStep;
   TurbulenceParameters    turbulence;
-  TanhMeshStretching      meshsize;
+  MeshsizeDelegate      meshsize;
 };
 #pragma omp declare mapper(Parameters p) \
   map(to: p) \

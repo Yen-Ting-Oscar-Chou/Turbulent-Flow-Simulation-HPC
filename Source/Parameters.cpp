@@ -15,5 +15,5 @@ Parameters::Parameters(const GeometricParameters& geometricParameters, const Par
   stdOut{},
   bfStep{},
   turbulence{},
-  meshsize(TanhMeshStretching(geometry, parallel)) {
+  meshsize(MeshsizeDelegate(geometry, parallel)) {
 }

@@ -14,12 +14,12 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   globalBoundaryFactory_(parameters),
   wallVelocityIterator_(globalBoundaryFactory_.getGlobalBoundaryVelocityIterator(flowField_)),
   wallFGHIterator_(globalBoundaryFactory_.getGlobalBoundaryFGHIterator(flowField_)),
-  fghStencil_(parameters),
+  fghStencil_(),
   fghIterator_(flowField_, parameters, fghStencil_),
-  rhsStencil_(parameters),
+  rhsStencil_(),
   rhsIterator_(flowField_, parameters, rhsStencil_),
-  velocityStencil_(parameters),
-  obstacleStencil_(parameters),
+  velocityStencil_(),
+  obstacleStencil_(),
   velocityIterator_(flowField_, parameters, velocityStencil_),
   obstacleIterator_(flowField_, parameters, obstacleStencil_),
   petscParallelManager_(parameters, flowField)
@@ -77,19 +77,17 @@ void Simulation::initializeFlowField() {
 // #pragma omp target map(tofrom : flowField_)
 //   {
 //     for (int i = 2; i < 10; i++) {
-//       //localFlowField.pressure_.data_[3 * localFlowField.pressure_.size_ + i] = 1000;
-//       flowField_.getPressure().getScalar(i,3) = 10000;
+//       // localFlowField.pressure_.data_[3 * localFlowField.pressure_.size_ + i] = 1000;
+//       flowField_.getPressure().getScalar(i, 3) = 10000;
 //     }
 //   }
 
 //   std::cout << flowField_.getPressure().getScalar(2, 3) << std::endl;
 
-//     std::cout << "Meshsize on CPU: " << parameters_.meshsize.getDxMin() << std::endl;
+//   std::cout << "Meshsize on CPU: " << parameters_.meshsize.getType() << std::endl;
 
-// #pragma omp target map(tofrom : flowField_) map(to: parameters_)
-//   {
-//     flowField_.getPressure().getScalar(2, 3) = parameters_.meshsize.getDxMin();
-//   }
+// #pragma omp target map(tofrom : flowField_) map(to : parameters_)
+//   { flowField_.getPressure().getScalar(2, 3) = parameters_.meshsize.getDxMin(); }
 
 //   std::cout << "Meshsize on GPU: " << flowField_.getPressure().getScalar(2, 3) << std::endl;
 //   exit(0);
@@ -97,7 +95,13 @@ void Simulation::initializeFlowField() {
 
 void Simulation::solveTimestep() {
   // Determine and set max. timestep which is allowed in this simulation
-  // rhsIterator_.iterate();
+  // parameters_.timestep.dt = 1.0;
+  // FieldStencilDelegate fieldStencilDelegate(RHS);
+  // GPUFieldIterator<FlowField> iter(flowField_, parameters_, fieldStencilDelegate);
+  // iter.iterate();
+  // flowField_.getPressure().show("Pressure");
+  // std::cout << "finished" << std::endl;
+  // exit(0);
   setTimeStep();
   // Compute FGH
   fghIterator_.iterate();

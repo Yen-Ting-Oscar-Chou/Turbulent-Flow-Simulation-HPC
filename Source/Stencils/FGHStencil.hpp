@@ -17,8 +17,10 @@ namespace Stencils {
     FGHStencil(const Parameters& parameters);
     ~FGHStencil() override = default;
 
+#pragma omp declare target
     void apply(FlowField& flowField, int i, int j) override;
     void apply(FlowField& flowField, int i, int j, int k) override;
+#pragma omp end declare target
   };
 
 } // namespace Stencils

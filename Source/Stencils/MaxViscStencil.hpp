@@ -17,6 +17,7 @@ namespace Stencils {
     MaxViscStencil(const Parameters& parameters);
     ~MaxViscStencil() override = default;
 
+#pragma omp declare target
     void apply(TurbulentFlowField& flowField, int i, int j) override;
     void apply(TurbulentFlowField& flowField, int i, int j, int k) override;
 
@@ -34,6 +35,7 @@ namespace Stencils {
 
     RealType getMaxValue() const;
     void           reset();
+#pragma omp end declare target
   };
 
 } // namespace Stencils

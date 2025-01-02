@@ -18,8 +18,10 @@ namespace Stencils {
     TurbulentFGHStencil(const Parameters& parameters);
     ~TurbulentFGHStencil() override = default;
 
+#pragma omp declare target
     void apply(TurbulentFlowField& flowField, int i, int j) override;
     void apply(TurbulentFlowField& flowField, int i, int j, int k) override;
+#pragma omp end declare target
   };
 
 } // namespace Stencils

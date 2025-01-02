@@ -3,8 +3,6 @@
 #include "RHSStencil.hpp"
 
 void Stencils::RHSStencil::apply(const Parameters& parameters, FlowField& flowField, int i, int j) {
-
-  printf("dt %f\n", parameters.timestep.dt);
   flowField.getRHS().getScalar(i, j) = 1.0 / parameters.timestep.dt *
         ((flowField.getFGH().getVector(i, j)[0] - flowField.getFGH().getVector(i - 1, j)[0]) / parameters.meshsize.getDx(i, j) +
          (flowField.getFGH().getVector(i, j)[1] - flowField.getFGH().getVector(i, j - 1)[1]) / parameters.meshsize.getDy(i, j));

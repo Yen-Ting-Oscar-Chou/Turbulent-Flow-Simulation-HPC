@@ -19,6 +19,8 @@ namespace Stencils {
     std::string   prefix_;  //! Prefix to be attached to the vtk files
     std::ofstream ofile_;   //! Output file stream
 
+    const Parameters& parameters_;
+
     std::stringstream pressureStream_; //! Stream for the pressure data
     std::stringstream velocityStream_; //! Stream for the velocity data
 
@@ -45,8 +47,8 @@ namespace Stencils {
     VTKStencil(const Parameters& parameters);
     ~VTKStencil() override = default;
 
-    void apply(FlowFieldType& flowField, int i, int j) override;
-    void apply(FlowFieldType& flowField, int i, int j, int k) override;
+    void apply(const Parameters& parameters, FlowFieldType& flowField, int i, int j) override;
+    void apply(const Parameters& parameters, FlowFieldType& flowField, int i, int j, int k) override;
 
     void write(FlowFieldType& flowField, int timeStep, RealType simulationTime);
   };

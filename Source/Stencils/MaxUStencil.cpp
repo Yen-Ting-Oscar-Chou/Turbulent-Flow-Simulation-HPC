@@ -3,15 +3,14 @@
 #include "MaxUStencil.hpp"
 
 Stencils::MaxUStencil::MaxUStencil(const Parameters& parameters):
-  FieldStencil<FlowField>(parameters),
   BoundaryStencil<FlowField>(parameters) {
 
   reset();
 }
 
-void Stencils::MaxUStencil::apply(FlowField& flowField, int i, int j) { cellMaxValue(flowField, i, j); }
+void Stencils::MaxUStencil::apply(const Parameters& parameters, FlowField& flowField, int i, int j) { cellMaxValue(flowField, i, j); }
 
-void Stencils::MaxUStencil::apply(FlowField& flowField, int i, int j, int k) { cellMaxValue(flowField, i, j, k); }
+void Stencils::MaxUStencil::apply(const Parameters& parameters, FlowField& flowField, int i, int j, int k) { cellMaxValue(flowField, i, j, k); }
 
 void Stencils::MaxUStencil::applyLeftWall(FlowField& flowField, int i, int j) { cellMaxValue(flowField, i, j); }
 
@@ -47,8 +46,8 @@ void Stencils::MaxUStencil::applyBackWall(FlowField& flowField, int i, int j, in
 
 void Stencils::MaxUStencil::cellMaxValue(FlowField& flowField, int i, int j) {
   RealType*      velocity = flowField.getVelocity().getVector(i, j);
-  const RealType dx       = FieldStencil<FlowField>::parameters_.meshsize.getDx(i, j);
-  const RealType dy       = FieldStencil<FlowField>::parameters_.meshsize.getDy(i, j);
+  const RealType dx       = BoundaryStencil<FlowField>::parameters_.meshsize.getDx(i, j);
+  const RealType dy       = BoundaryStencil<FlowField>::parameters_.meshsize.getDy(i, j);
   if (fabs(velocity[0]) / dx > maxValues_[0]) {
     maxValues_[0] = fabs(velocity[0]) / dx;
   }
@@ -59,9 +58,9 @@ void Stencils::MaxUStencil::cellMaxValue(FlowField& flowField, int i, int j) {
 
 void Stencils::MaxUStencil::cellMaxValue(FlowField& flowField, int i, int j, int k) {
   RealType*      velocity = flowField.getVelocity().getVector(i, j, k);
-  const RealType dx       = FieldStencil<FlowField>::parameters_.meshsize.getDx(i, j, k);
-  const RealType dy       = FieldStencil<FlowField>::parameters_.meshsize.getDy(i, j, k);
-  const RealType dz       = FieldStencil<FlowField>::parameters_.meshsize.getDz(i, j, k);
+  const RealType dx       = BoundaryStencil<FlowField>::parameters_.meshsize.getDx(i, j, k);
+  const RealType dy       = BoundaryStencil<FlowField>::parameters_.meshsize.getDy(i, j, k);
+  const RealType dz       = BoundaryStencil<FlowField>::parameters_.meshsize.getDz(i, j, k);
   if (fabs(velocity[0]) / dx > maxValues_[0]) {
     maxValues_[0] = fabs(velocity[0]) / dx;
   }

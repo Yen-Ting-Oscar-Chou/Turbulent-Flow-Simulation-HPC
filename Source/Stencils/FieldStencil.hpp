@@ -10,12 +10,9 @@ namespace Stencils {
    */
   template <class FlowFieldType>
   class FieldStencil {
-  protected:
-    const Parameters& parameters_; //! Reference to the parameters
 
   public:
-    FieldStencil(const Parameters& parameters):
-      parameters_(parameters) {}
+    FieldStencil() = default;
 
     virtual ~FieldStencil() = default;
 
@@ -25,7 +22,7 @@ namespace Stencils {
      * @param i Position in the x direction
      * @param j Position in the y direction
      */
-    virtual void apply(FlowFieldType& flowField, int i, int j) = 0;
+    virtual void apply(const Parameters& parameters, FlowFieldType& flowField, int i, int j) = 0;
 
     /** Performs the operation in 3D in a given position
      * @param flowField Flow field data
@@ -34,7 +31,7 @@ namespace Stencils {
      * @param j Position in the y direction
      * @param k Position in the z direction
      */
-    virtual void apply(FlowFieldType& flowField, int i, int j, int k) = 0;
+    virtual void apply(const Parameters& parameters, FlowFieldType& flowField, int i, int j, int k) = 0;
   };
 
 } // namespace Stencils

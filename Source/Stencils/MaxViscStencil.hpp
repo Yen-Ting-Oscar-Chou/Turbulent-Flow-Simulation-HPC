@@ -18,8 +18,8 @@ namespace Stencils {
     ~MaxViscStencil() override = default;
 
 #pragma omp declare target
-    void apply(TurbulentFlowField& flowField, int i, int j) override;
-    void apply(TurbulentFlowField& flowField, int i, int j, int k) override;
+    void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
+    void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
 
     void applyLeftWall(TurbulentFlowField& flowField, int i, int j) override;
     void applyRightWall(TurbulentFlowField& flowField, int i, int j) override;

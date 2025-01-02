@@ -5,8 +5,8 @@
 Stencils::TurbulentVTKStencil::TurbulentVTKStencil(const Parameters& parameters):
   VTKStencil(parameters) {}
 
-void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, int i, int j) {
-  ASSERTION(FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 2);
+void Stencils::TurbulentVTKStencil::apply(const Parameters& parameters, TurbulentFlowField& turbulentField, int i, int j) {
+  ASSERTION(parameters_.geometry.dim == 2);
 
   RealType pressure    = 0.0;
   RealType viscosity   = 0.0;
@@ -29,8 +29,8 @@ void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, in
   }
 }
 
-void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, int i, int j, int k) {
-  ASSERTION(FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 3);
+void Stencils::TurbulentVTKStencil::apply(const Parameters& parameters, TurbulentFlowField& turbulentField, int i, int j, int k) {
+  ASSERTION(parameters_.geometry.dim == 3);
 
   RealType pressure    = 0.0;
   RealType viscosity   = 0.0;
@@ -56,7 +56,7 @@ void Stencils::TurbulentVTKStencil::apply(TurbulentFlowField& turbulentField, in
 void Stencils::TurbulentVTKStencil::write(TurbulentFlowField& turbulentField, int timeStep, RealType simulationTime) {
   openFile(timeStep, simulationTime);
 
-  if (FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 2) {
+  if (parameters_.geometry.dim == 2) {
     // Write pressure
     ofile_ << "CELL_DATA " << turbulentField.getNx() * turbulentField.getNy() << std::endl << "SCALARS pressure float 1" << std::endl << "LOOKUP_TABLE default" << std::endl;
     ofile_ << pressureStream_.str() << std::endl;
@@ -76,7 +76,7 @@ void Stencils::TurbulentVTKStencil::write(TurbulentFlowField& turbulentField, in
     velocityStream_.str("");
   }
 
-  if (FieldStencil<TurbulentFlowField>::parameters_.geometry.dim == 3) {
+  if (parameters_.geometry.dim == 3) {
     // Write pressure
     ofile_
       << "CELL_DATA " << turbulentField.getNx() * turbulentField.getNy() * turbulentField.getNz() << std::endl

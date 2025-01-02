@@ -15,11 +15,11 @@ namespace Stencils {
     std::vector<std::tuple<RealType, RealType, RealType>> coordinatesList3D;
 
   public:
-    DistanceStencil(const Parameters& parameters, std::vector<std::tuple<RealType, RealType>>& coordinatesList);
-    DistanceStencil(const Parameters& parameters, std::vector<std::tuple<RealType, RealType, RealType>>& coordinatesList);
+    DistanceStencil(std::vector<std::tuple<RealType, RealType>>& coordinatesList);
+    DistanceStencil(std::vector<std::tuple<RealType, RealType, RealType>>& coordinatesList);
     ~DistanceStencil() override = default;
-    void apply(TurbulentFlowField& turbulentField, int i, int j) override;
-    void apply(TurbulentFlowField& turbulentField, int i, int j, int k) override;
+    void apply(const Parameters& parameters, TurbulentFlowField& turbulentField, int i, int j) override;
+    void apply(const Parameters& parameters, TurbulentFlowField& turbulentField, int i, int j, int k) override;
   };
 
 } // namespace Stencils

@@ -14,12 +14,12 @@ namespace Stencils {
     RealType localMeshsize_[27 * 3];
 
   public:
-    FGHStencil(const Parameters& parameters);
+    FGHStencil() = default;
     ~FGHStencil() override = default;
 
 #pragma omp declare target
-    void apply(FlowField& flowField, int i, int j) override;
-    void apply(FlowField& flowField, int i, int j, int k) override;
+    void apply(const Parameters& parameters, FlowField& flowField, int i, int j) override;
+    void apply(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
 #pragma omp end declare target
   };
 

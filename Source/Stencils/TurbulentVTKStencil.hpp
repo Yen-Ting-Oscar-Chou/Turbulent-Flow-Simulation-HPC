@@ -13,8 +13,8 @@ namespace Stencils {
     TurbulentVTKStencil(const Parameters& parameters);
     ~TurbulentVTKStencil() override = default;
     
-    void apply(TurbulentFlowField& turbulentField, int i, int j) override;
-    void apply(TurbulentFlowField& turbulentField, int i, int j, int k) override;
+    void apply(const Parameters& parameters, TurbulentFlowField& turbulentField, int i, int j) override;
+    void apply(const Parameters& parameters, TurbulentFlowField& turbulentField, int i, int j, int k) override;
 
     void write(TurbulentFlowField& turbulentField, int timeStep, RealType simulationTime);
   };

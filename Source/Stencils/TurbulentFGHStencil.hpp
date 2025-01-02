@@ -15,12 +15,12 @@ namespace Stencils {
     RealType localViscosity_[27 * 3];
 
   public:
-    TurbulentFGHStencil(const Parameters& parameters);
+    TurbulentFGHStencil() = default;
     ~TurbulentFGHStencil() override = default;
 
 #pragma omp declare target
-    void apply(TurbulentFlowField& flowField, int i, int j) override;
-    void apply(TurbulentFlowField& flowField, int i, int j, int k) override;
+    void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
+    void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
 #pragma omp end declare target
   };
 

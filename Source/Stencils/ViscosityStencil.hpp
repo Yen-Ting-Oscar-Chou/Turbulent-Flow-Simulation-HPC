@@ -11,11 +11,14 @@ namespace Stencils {
     RealType localVelocity_[27 * 3];
     RealType localMeshsize_[27 * 3];
   public:
-    explicit ViscosityStencil(const Parameters& parameters);
+    ViscosityStencil() = default;
     ~ViscosityStencil() override = default;
-    using FieldStencil::apply;
-    void apply(TurbulentFlowField& turbulentField, int i, int j) override;
-    void apply(TurbulentFlowField& turbulentField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) override;
+    //using FieldStencil::apply;
+
+#pragma omp declare target
+    void apply(const Parameters& parameters, TurbulentFlowField& turbulentField, int i, int j) override;
+    void apply(const Parameters& parameters, TurbulentFlowField& turbulentField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) override;
+#pragma omp end declare target
   };
 
 } // namespace Stencils

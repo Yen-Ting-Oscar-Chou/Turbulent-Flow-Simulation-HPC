@@ -14,24 +14,13 @@ void FieldIterator<FlowFieldType>::iterate() {
   const int cellsX = Iterator<FlowFieldType>::flowField_.getCellsX();
   const int cellsY = Iterator<FlowFieldType>::flowField_.getCellsY();
   const int cellsZ = Iterator<FlowFieldType>::flowField_.getCellsZ();
-
-  // int localLowOffset = lowOffset_;
-  // int localHighOffset = highOffset_;
-  // auto localStencil = &stencil_;
-  // auto localVector = Iterator<FlowFieldType>::flowField_.getVelocity().data_;
-  // int size = Iterator<FlowFieldType>::flowField_.getVelocity().size_;
-  // std::cout << size << std::endl;
-  // std::cout << localVector[0] << std::endl;
-
   // The index k can be used for the 2D and 3D cases.
   if (Iterator<FlowFieldType>::parameters_.geometry.dim == 2) {
     // Loop without lower boundaries. These will be dealt with by the global boundary stencils
     // or by the subdomain boundary iterators.
-
-    // #pragma omp target teams distribute parallel for collapse(2) map(to: cellsX, cellsY, localLowOffset, localHighOffset, localStencil) map(tofrom: localVector[0:size])
     for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
       for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
-        stencil_.apply(Iterator<FlowFieldType>::flowField_, i, j);
+        stencil_.apply(Iterator<FlowFieldType>::parameters_, Iterator<FlowFieldType>::flowField_, i, j);
       }
     }
   }
@@ -40,7 +29,7 @@ void FieldIterator<FlowFieldType>::iterate() {
     for (int k = 1 + lowOffset_; k < cellsZ - 1 + highOffset_; k++) {
       for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
         for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
-          stencil_.apply(Iterator<FlowFieldType>::flowField_, i, j, k);
+          stencil_.apply(Iterator<FlowFieldType>::parameters_, Iterator<FlowFieldType>::flowField_, i, j, k);
         }
       }
     }

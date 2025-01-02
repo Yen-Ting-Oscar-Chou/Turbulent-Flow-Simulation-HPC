@@ -5,9 +5,9 @@
 TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowField& flowField):
   Simulation(parameters, flowField),
   turbulentField_(flowField),
-  viscosityStencil_(parameters),
+  viscosityStencil_(),
   viscosityIterator_(turbulentField_, parameters, viscosityStencil_),
-  turbulentFGHStencil_(parameters),
+  turbulentFGHStencil_(),
   turbulentFGHIterator_(turbulentField_, parameters, turbulentFGHStencil_),
   maxViscStencil_(parameters),
   maxViscFieldIterator_(turbulentField_, parameters, maxViscStencil_),
@@ -25,11 +25,11 @@ void TurbulentSimulation::initializeFlowField() {
   obstBoundaryIterator.iterate();
   turbulentPetscParallelManager_.communicateObstacleCoordinates(coordinateList2D, coordinateList3D);
   if (parameters_.geometry.dim == 2) {
-    Stencils::DistanceStencil         distStencil(parameters_, coordinateList2D);
+    Stencils::DistanceStencil         distStencil(coordinateList2D);
     FieldIterator<TurbulentFlowField> distIterator(turbulentField_, parameters_, distStencil);
     distIterator.iterate();
   } else {
-    Stencils::DistanceStencil         distStencil(parameters_, coordinateList3D);
+    Stencils::DistanceStencil         distStencil(coordinateList3D);
     FieldIterator<TurbulentFlowField> distIterator(turbulentField_, parameters_, distStencil);
     distIterator.iterate();
   }

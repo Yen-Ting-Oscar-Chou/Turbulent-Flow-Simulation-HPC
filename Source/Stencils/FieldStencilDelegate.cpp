@@ -2,7 +2,7 @@
 
 #include "FieldStencilDelegate.hpp"
 
-FieldStencilDelegate::FieldStencilDelegate(const StencilType type):
+FieldStencilDelegate::FieldStencilDelegate(StencilType type):
   stencilType(type),
   //distanceStencil(),
   fghStencil(),

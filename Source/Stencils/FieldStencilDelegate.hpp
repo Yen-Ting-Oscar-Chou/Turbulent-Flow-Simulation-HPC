@@ -17,7 +17,7 @@ class FieldStencilDelegate {
 public:
   StencilType stencilType;
   // Stencils::DistanceStencil            distanceStencil;
-  Stencils::FGHStencil     fghStencil;
+  Stencils::FGHStencil fghStencil;
   // Stencils::MaxUStencil    maxUStencil;
   // Stencils::MaxViscStencil maxViscStencil;
   // Stencils::ObstacleCoordinatesStencil obstacleCoordinatesStencil;
@@ -26,69 +26,120 @@ public:
   Stencils::TurbulentFGHStencil turbulentFGHStencil;
   Stencils::VelocityStencil     velocityStencil;
   Stencils::ViscosityStencil    viscosityStencil;
-  
+
   FieldStencilDelegate(const StencilType type);
   ~FieldStencilDelegate() = default;
 
   inline void apply(const Parameters& parameters, FlowField& flowField, int i, int j) {
-    if (stencilType == FGH) {
+    switch (stencilType) {
+    case FGH:
       fghStencil.apply(parameters, flowField, i, j);
-    } else if(stencilType == MAXVELO) {
+      break;
+
+    case MAXVELO:
       // maxUStencil.apply(parameters, flowField, i, j);
       assert(false);
-    } else if(stencilType == OBSTACLE) {
+      break;
+
+    case OBSTACLE:
       obstacleStencil.apply(parameters, flowField, i, j);
-    } else if(stencilType == RHS) {
+      break;
+
+    case RHS:
       rhsStencil.apply(parameters, flowField, i, j);
-    } else if(stencilType == VELOCITY) {
+      break;
+
+    case VELOCITY:
       velocityStencil.apply(parameters, flowField, i, j);
-    } else {
+      break;
+
+    default:
       assert(false);
     }
   }
 
   inline void apply(const Parameters& parameters, FlowField& flowField, int i, int j, int k) {
-    if (stencilType == FGH) {
+    switch (stencilType) {
+    case FGH:
       fghStencil.apply(parameters, flowField, i, j, k);
-    } else if(stencilType == MAXVELO) {
+      break;
+
+    case MAXVELO:
       // maxUStencil.apply(parameters, flowField, i, j, k);
       assert(false);
-    } else if(stencilType == OBSTACLE) {
+      break;
+
+    case OBSTACLE:
       obstacleStencil.apply(parameters, flowField, i, j, k);
-    } else if(stencilType == RHS) {
+      break;
+
+    case RHS:
       rhsStencil.apply(parameters, flowField, i, j, k);
-    } else if(stencilType == VELOCITY) {
+      break;
+
+    case VELOCITY:
       velocityStencil.apply(parameters, flowField, i, j, k);
-    } else {
+      break;
+
+    default:
       assert(false);
     }
   }
 
   inline void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) {
-    if (stencilType == DISTANCE){
+    switch (stencilType) {
+    case DISTANCE:
       //   distanceStencil.apply(parameters, flowField, i, j);
       assert(false);
-    } else if(stencilType == MAXVISC) {
+      break;
+
+    case MAXVISC:
       // maxViscStencil.apply(parameters, flowField, i, j);
       assert(false);
-    } else if (stencilType == TURBFGH) {
+      break;
+
+    case VISCOSITY:
+      viscosityStencil.apply(parameters, flowField, i, j);
+      break;
+
+    case TURBFGH:
       turbulentFGHStencil.apply(parameters, flowField, i, j);
-    } else if (stencilType == OBSTCOORD) {
+      break;
+
+    case OBSTCOORD:
+      assert(false);
+      break;
+
+    default:
       assert(false);
     }
   }
 
   inline void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) {
-     if (stencilType == DISTANCE){
-      //   distanceStencil.apply(parameters, flowField, i, j, k);
+    switch (stencilType) {
+    case DISTANCE:
+      // distanceStencil.apply(parameters, flowField, i, j, k);
       assert(false);
-    } else if(stencilType == MAXVISC) {
+      break;
+
+    case MAXVISC:
       // maxViscStencil.apply(parameters, flowField, i, j, k);
       assert(false);
-    } else if (stencilType == TURBFGH) {
+      break;
+
+    case VISCOSITY:
+      viscosityStencil.apply(parameters, flowField, i, j, k);
+      break;
+
+    case OBSTCOORD:
+      assert(false);
+      break;
+
+    case TURBFGH:
       turbulentFGHStencil.apply(parameters, flowField, i, j, k);
-    } else if (stencilType == OBSTCOORD) {
-      // TODO
+      break;
+
+    default:
       assert(false);
     }
   }
@@ -98,11 +149,11 @@ public:
 #pragma omp declare mapper(FieldStencilDelegate fsd) \
   map(fsd) \
   map(fsd.stencilType) \
-  map(fsd.rhsStencil) \
   map(fsd.fghStencil) \
-  map(fsd.obstacleStencil) \
-  map(fsd.turbulentFGHStencil) \
+  map(fsd.rhsStencil) \
   map(fsd.velocityStencil) \
-  map(fsd.viscosityStencil)
-  // map(fsd.maxUStencil) 
-  // map(fsd.maxViscStencil) 
+  map(fsd.viscosityStencil) \
+  map(fsd.obstacleStencil) 
+  // map(fsd.maxUStencil) \
+  // map(fsd.maxViscStencil) \
+  // map(fsd.turbulentFGHStencil) \

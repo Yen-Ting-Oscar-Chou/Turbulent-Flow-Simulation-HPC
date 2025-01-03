@@ -11,10 +11,9 @@
 template <class DataType>
 class Field {
 protected:
-
-  const int sizeX_;      //! Size of the field in x direction, including ghost layers
-  const int sizeY_;      //! Size of the field in y direction, including ghost layers
-  const int sizeZ_;      //! Size of the field in z direction, including ghost layers
+  const int sizeX_; //! Size of the field in x direction, including ghost layers
+  const int sizeY_; //! Size of the field in y direction, including ghost layers
+  const int sizeZ_; //! Size of the field in z direction, including ghost layers
 
 public:
   //! Pointer to the data array
@@ -43,6 +42,16 @@ public:
     if (data_ == 0) {
       throw std::runtime_error("Unable to allocate memory");
     }
+  }
+
+  Field(const Field& field):
+    sizeX_(field.getNx()),
+    sizeY_(field.getNy()),
+    sizeZ_(field.getNz()),
+    components_(field.components_),
+    size_(field.size_) {
+    data_ = new DataType[size_];
+    std::copy(field.data_, field.data_ + size_, data_);
   }
 
   ~Field() {

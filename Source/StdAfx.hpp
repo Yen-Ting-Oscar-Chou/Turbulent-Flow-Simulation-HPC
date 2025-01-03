@@ -51,6 +51,7 @@
 #include <vector>
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_sinks.h>
+#include "omp.h"
 
 // https://en.cppreference.com/w/cpp/feature_test
 #if __has_include(<format>)

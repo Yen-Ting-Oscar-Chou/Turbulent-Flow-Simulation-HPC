@@ -58,6 +58,19 @@ public:
 
   virtual ~FlowField() = default;
 
+  FlowField(FlowField& flowField): 
+    sizeX_(flowField.getNx()),
+    sizeY_(flowField.getNy()),
+    sizeZ_(flowField.getNz()),
+    cellsX_(flowField.getCellsX()),
+    cellsY_(flowField.getCellsY()),
+    cellsZ_(flowField.getCellsZ()),
+    pressure_(flowField.getPressure()),
+    velocity_(flowField.getVelocity()),
+    flags_(flowField.getFlags()),
+    FGH_(flowField.getFGH()),
+    RHS_(flowField.getRHS()) {}
+
 #pragma omp declare target
 
   /** Obtain size in the X direction

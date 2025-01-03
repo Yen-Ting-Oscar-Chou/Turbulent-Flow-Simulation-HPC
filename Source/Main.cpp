@@ -135,7 +135,7 @@ int main(int argc, char* argv[]) {
     if (timeVtk <= time) {
       simulation->plotVTK(timeSteps, time);
       timeVtk += parameters.vtk.interval;
-    }
+    } 
   }
   spdlog::info("Finished simulation with a duration of {}ns", clock.getTime());
 

@@ -18,20 +18,24 @@ void GPUFieldIterator<FlowFieldType>::iterate() {
   FlowField            localFlowField  = GPUIterator<FlowFieldType>::flowField_;
   Parameters           localParameters = GPUIterator<FlowFieldType>::parameters_;
   FieldStencilDelegate localStencil    = stencil_;
-
+  
   // The index k can be used for the 2D and 3D cases.
   if (GPUIterator<FlowFieldType>::parameters_.geometry.dim == 2) {
     // Loop without lower boundaries. These will be dealt with by the global boundary stencils
     // or by the subdomain boundary GPUIterator.
 
-#pragma omp target parallel for collapse(2) map(to : cellsX, cellsY, lowOffset_, highOffset_, localParameters) map(tofrom : localFlowField, localStencil)
+    //#pragma omp target parallel for collapse(2) map(to : cellsX, cellsY, lowOffset_, highOffset_, localParameters) map(tofrom : localFlowField, localStencil)
+    #pragma omp target enter data map(to : cellsX, cellsY, lowOffset_, highOffset_, localParameters, localFlowField, localStencil)
     {
+      //#pragma omp parallel for collapse(2)
       for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
         for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
           localStencil.apply(localParameters, localFlowField, i, j);
         }
       }
     }
+    //#pragma omp target update to(localFlowField)
+    #pragma omp target exit data map(from: localFlowField)
 
     switch (stencil_.getType()) {
     case RHS:
@@ -53,8 +57,6 @@ void GPUFieldIterator<FlowFieldType>::iterate() {
       }
     }
   }
-
-  //delete localFlowField;
 }
 
 template class GPUFieldIterator<FlowField>;

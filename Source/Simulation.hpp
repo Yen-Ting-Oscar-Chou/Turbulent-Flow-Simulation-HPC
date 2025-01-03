@@ -4,6 +4,7 @@
 #include "FlowField.hpp"
 #include "GlobalBoundaryFactory.hpp"
 #include "Iterators.hpp"
+#include "IteratorsGPU.hpp"
 
 #include "Solvers/LinearSolver.hpp"
 #include "Stencils/BFInputStencils.hpp"
@@ -24,9 +25,9 @@
 
 class Simulation {
 protected:
-  Parameters parameters_;
+  Parameters& parameters_;
 
-  FlowField flowField_;
+  FlowField& flowField_;
 
   Stencils::MaxUStencil             maxUStencil_;
   FieldIterator<FlowField>          maxUFieldIterator_;

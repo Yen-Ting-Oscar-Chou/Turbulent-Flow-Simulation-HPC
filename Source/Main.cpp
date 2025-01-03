@@ -109,15 +109,13 @@ int main(int argc, char* argv[]) {
   }
   simulation->initializeFlowField();
 
-  // flowField->getFlags().show();
-
   RealType time       = 0.0;
   RealType timeVtk    = parameters.vtk.interval;
   RealType timeStdOut = parameters.stdOut.interval;
   int      timeSteps  = 0;
 
   // Plot initial state
-  //simulation->plotVTK(timeSteps, time);
+  simulation->plotVTK(timeSteps, time);
 
   Clock clock;
   // Time loop
@@ -134,15 +132,15 @@ int main(int argc, char* argv[]) {
     }
 
     // TODO #pragma map from gpu to cpu and back afterwards
-    // if (timeVtk <= time) {
-    //   simulation->plotVTK(timeSteps, time);
-    //   timeVtk += parameters.vtk.interval;
-    // }
+    if (timeVtk <= time) {
+      simulation->plotVTK(timeSteps, time);
+      timeVtk += parameters.vtk.interval;
+    }
   }
   spdlog::info("Finished simulation with a duration of {}ns", clock.getTime());
 
   // Plot final solution
-  //simulation->plotVTK(timeSteps, time);
+  simulation->plotVTK(timeSteps, time);
 
   delete simulation;
   simulation = NULL;

@@ -15,8 +15,13 @@ TEST_CASE("Test derivatives", "[single-file]") {
   spdlog::info("Testing derivatives");
 
   GeometricParameters geometricParameters{};
+  geometricParameters.lengthX = 1;
+  geometricParameters.sizeX = SIZE_X;
+  geometricParameters.lengthY = 1;
+  geometricParameters.sizeY = SIZE_Y;
   ParallelParameters parallelParameters{};
   Parameters parameters(geometricParameters, parallelParameters);
+
   parameters.solver.gamma = 0.5;
   RealType lv[81]{}; // Local velocity
   RealType lm[81]{}; // Local meshsize

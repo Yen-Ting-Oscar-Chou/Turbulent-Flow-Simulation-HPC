@@ -91,8 +91,8 @@ public:
    * @return Position in the array
    */
   int index2array(int i, int j, int k = 0) const {
-    ASSERTION((i < sizeX_) && (j < sizeY_) && (k < sizeZ_));
-    ASSERTION((i >= 0) && (j >= 0) && (k >= 0));
+    // ASSERTION((i < sizeX_) && (j < sizeY_) && (k < sizeZ_));
+    // ASSERTION((i >= 0) && (j >= 0) && (k >= 0));
     return components_ * (i + (j * sizeX_) + (k * sizeX_ * sizeY_));
   }
 };

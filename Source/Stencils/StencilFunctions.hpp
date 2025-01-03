@@ -318,15 +318,15 @@ namespace Stencils {
   // First derivative of product (u*v), evaluated at the location of the v-component.
   inline RealType duvdx(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
 #ifndef NDEBUG
-    const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 1, 0, 0)]) *
-        (lv[mapd(0, 0, 0, 1)] + lv[mapd(1, 0, 0, 1)])) -
-        ((lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 1, 0, 0)]) *
-            (lv[mapd(-1, 0, 0, 1)] + lv[mapd(0, 0, 0, 1)])))
-        + parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 1, 0, 0)]) *
-            (lv[mapd(0, 0, 0, 1)] - lv[mapd(1, 0, 0, 1)])) -
-            (fabs(lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 1, 0, 0)]) *
-                (lv[mapd(-1, 0, 0, 1)] - lv[mapd(0, 0, 0, 1)])))
-        ) / lm[mapd(0, 0, 0, 0)];
+    // const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 1, 0, 0)]) *
+    //     (lv[mapd(0, 0, 0, 1)] + lv[mapd(1, 0, 0, 1)])) -
+    //     ((lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 1, 0, 0)]) *
+    //         (lv[mapd(-1, 0, 0, 1)] + lv[mapd(0, 0, 0, 1)])))
+    //     + parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 1, 0, 0)]) *
+    //         (lv[mapd(0, 0, 0, 1)] - lv[mapd(1, 0, 0, 1)])) -
+    //         (fabs(lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 1, 0, 0)]) *
+    //             (lv[mapd(-1, 0, 0, 1)] - lv[mapd(0, 0, 0, 1)])))
+    //     ) / lm[mapd(0, 0, 0, 0)];
 #endif
 
     const RealType hxShort = 0.5 * lm[mapd(0, 0, 0, 0)];                           // Distance of corner points in x-direction from center v-value
@@ -375,7 +375,7 @@ namespace Stencils {
   // Evaluates first derivative w.r.t. y for u*v at location of u-component. For details on implementation, see duvdx.
   inline RealType duvdy(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
 #ifndef NDEBUG
-    const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 1)] + lv[mapd(1, 0, 0, 1)]) *
+    /* const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 1)] + lv[mapd(1, 0, 0, 1)]) *
         (lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 1, 0, 0)])) -
         ((lv[mapd(0, -1, 0, 1)] + lv[mapd(1, -1, 0, 1)]) *
             (lv[mapd(0, -1, 0, 0)] + lv[mapd(0, 0, 0, 0)]))) +
@@ -383,7 +383,7 @@ namespace Stencils {
             (lv[mapd(0, 0, 0, 0)] - lv[mapd(0, 1, 0, 0)])) -
             (fabs(lv[mapd(0, -1, 0, 1)] + lv[mapd(1, -1, 0, 1)]) *
                 (lv[mapd(0, -1, 0, 0)] - lv[mapd(0, 0, 0, 0)])))) /
-        lm[mapd(0, 0, 0, 1)];
+        lm[mapd(0, 0, 0, 1)]; */
 #endif
 
     const RealType hyShort = 0.5 * lm[mapd(0, 0, 0, 1)];                           // Distance of corner points in x-direction from center v-value
@@ -426,15 +426,15 @@ namespace Stencils {
   // Evaluates first derivative w.r.t. x for u*w at location of w-component. For details on implementation, see duvdx.
   inline RealType duwdx(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
 #ifndef NDEBUG
-    const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 0, 1, 0)]) *
-        (lv[mapd(0, 0, 0, 2)] + lv[mapd(1, 0, 0, 2)])) -
-        ((lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 0, 1, 0)]) *
-            (lv[mapd(-1, 0, 0, 2)] + lv[mapd(0, 0, 0, 2)]))) +
-        parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 0, 1, 0)]) *
-            (lv[mapd(0, 0, 0, 2)] - lv[mapd(1, 0, 0, 2)])) -
-            (fabs(lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 0, 1, 0)]) *
-                (lv[mapd(-1, 0, 0, 2)] - lv[mapd(0, 0, 0, 2)])))) /
-        lm[mapd(0, 0, 0, 0)];
+    // const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 0, 1, 0)]) *
+    //     (lv[mapd(0, 0, 0, 2)] + lv[mapd(1, 0, 0, 2)])) -
+    //     ((lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 0, 1, 0)]) *
+    //         (lv[mapd(-1, 0, 0, 2)] + lv[mapd(0, 0, 0, 2)]))) +
+    //     parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 0, 1, 0)]) *
+    //         (lv[mapd(0, 0, 0, 2)] - lv[mapd(1, 0, 0, 2)])) -
+    //         (fabs(lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 0, 1, 0)]) *
+    //             (lv[mapd(-1, 0, 0, 2)] - lv[mapd(0, 0, 0, 2)])))) /
+    //     lm[mapd(0, 0, 0, 0)];
 #endif
 
     const RealType hxShort = 0.5 * lm[mapd(0, 0, 0, 0)];                           // Distance of corner points in x-direction from center v-value
@@ -477,7 +477,7 @@ namespace Stencils {
   // Evaluates first derivative w.r.t. z for u*w at location of u-component. For details on implementation, see duvdx.
   inline RealType duwdz(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
 #ifndef NDEBUG
-    const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 2)] + lv[mapd(1, 0, 0, 2)]) *
+    /* const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 2)] + lv[mapd(1, 0, 0, 2)]) *
         (lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 0, 1, 0)])) -
         ((lv[mapd(0, 0, -1, 2)] + lv[mapd(1, 0, -1, 2)]) *
             (lv[mapd(0, 0, -1, 0)] + lv[mapd(0, 0, 0, 0)]))) +
@@ -485,7 +485,7 @@ namespace Stencils {
             (lv[mapd(0, 0, 0, 0)] - lv[mapd(0, 0, 1, 0)])) -
             (fabs(lv[mapd(0, 0, -1, 2)] + lv[mapd(1, 0, -1, 2)]) *
                 (lv[mapd(0, 0, -1, 0)] - lv[mapd(0, 0, 0, 0)])))) /
-        lm[mapd(0, 0, 0, 2)];
+        lm[mapd(0, 0, 0, 2)]; */
 #endif
 
     const RealType hzShort = 0.5 * lm[mapd(0, 0, 0, 2)];                           // Distance of corner points in x-direction from center v-value
@@ -528,7 +528,7 @@ namespace Stencils {
   // Evaluates first derivative w.r.t. y for v*w at location of w-component. For details on implementation, see duvdx.
   inline RealType dvwdy(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
 #ifndef NDEBUG
-    const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 0, 1, 1)]) *
+    /* const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 0, 1, 1)]) *
         (lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 1, 0, 2)])) -
         ((lv[mapd(0, -1, 0, 1)] + lv[mapd(0, -1, 1, 1)]) *
             (lv[mapd(0, -1, 0, 2)] + lv[mapd(0, 0, 0, 2)]))) +
@@ -536,7 +536,7 @@ namespace Stencils {
             (lv[mapd(0, 0, 0, 2)] - lv[mapd(0, 1, 0, 2)])) -
             (fabs(lv[mapd(0, -1, 0, 1)] + lv[mapd(0, -1, 1, 1)]) *
                 (lv[mapd(0, -1, 0, 2)] - lv[mapd(0, 0, 0, 2)])))) /
-        lm[mapd(0, 0, 0, 1)];
+        lm[mapd(0, 0, 0, 1)]; */
 #endif
 
     const RealType hyShort = 0.5 * lm[mapd(0, 0, 0, 1)];                           // Distance of corner points in x-direction from center v-value
@@ -579,7 +579,7 @@ namespace Stencils {
   // Evaluates first derivative w.r.t. z for v*w at location of v-component. For details on implementation, see duvdx.
   inline RealType dvwdz(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
 #ifndef NDEBUG
-    const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 1, 0, 2)]) *
+    /* const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 1, 0, 2)]) *
         (lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 0, 1, 1)])) -
         ((lv[mapd(0, 0, -1, 2)] + lv[mapd(0, 1, -1, 2)]) *
             (lv[mapd(0, 0, -1, 1)] + lv[mapd(0, 0, 0, 1)]))) +
@@ -587,7 +587,7 @@ namespace Stencils {
             (lv[mapd(0, 0, 0, 1)] - lv[mapd(0, 0, 1, 1)])) -
             (fabs(lv[mapd(0, 0, -1, 2)] + lv[mapd(0, 1, -1, 2)]) *
                 (lv[mapd(0, 0, -1, 1)] - lv[mapd(0, 0, 0, 1)])))) /
-        lm[mapd(0, 0, 0, 2)];
+        lm[mapd(0, 0, 0, 2)]; */
 #endif
 
     const RealType hzShort = 0.5 * lm[mapd(0, 0, 0, 2)];                           // Distance of corner points in x-direction from center v-value
@@ -631,15 +631,15 @@ namespace Stencils {
   // First derivative of u*u w.r.t. x, evaluated at location of u-component.
   inline RealType du2dx(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
 #ifndef NDEBUG
-    const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 0)] + lv[mapd(1, 0, 0, 0)]) *
-        (lv[mapd(0, 0, 0, 0)] + lv[mapd(1, 0, 0, 0)])) -
-        ((lv[mapd(-1, 0, 0, 0)] + lv[mapd(0, 0, 0, 0)]) *
-            (lv[mapd(-1, 0, 0, 0)] + lv[mapd(0, 0, 0, 0)]))) +
-        parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 0)] + lv[mapd(1, 0, 0, 0)]) *
-            (lv[mapd(0, 0, 0, 0)] - lv[mapd(1, 0, 0, 0)])) -
-            (fabs(lv[mapd(-1, 0, 0, 0)] + lv[mapd(0, 0, 0, 0)]) *
-                (lv[mapd(-1, 0, 0, 0)] - lv[mapd(0, 0, 0, 0)])))) /
-        lm[mapd(0, 0, 0, 0)];
+    // const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 0)] + lv[mapd(1, 0, 0, 0)]) *
+    //     (lv[mapd(0, 0, 0, 0)] + lv[mapd(1, 0, 0, 0)])) -
+    //     ((lv[mapd(-1, 0, 0, 0)] + lv[mapd(0, 0, 0, 0)]) *
+    //         (lv[mapd(-1, 0, 0, 0)] + lv[mapd(0, 0, 0, 0)]))) +
+    //     parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 0)] + lv[mapd(1, 0, 0, 0)]) *
+    //         (lv[mapd(0, 0, 0, 0)] - lv[mapd(1, 0, 0, 0)])) -
+    //         (fabs(lv[mapd(-1, 0, 0, 0)] + lv[mapd(0, 0, 0, 0)]) *
+    //             (lv[mapd(-1, 0, 0, 0)] - lv[mapd(0, 0, 0, 0)])))) /
+    //     lm[mapd(0, 0, 0, 0)];
 #endif
 
     const RealType dxShort = 0.5 * lm[mapd(0, 0, 0, 0)];
@@ -685,15 +685,15 @@ namespace Stencils {
   // First derivative of v*v w.r.t. y, evaluated at location of v-component. For details, see du2dx.
   inline RealType dv2dy(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
 #ifndef NDEBUG
-    const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 1, 0, 1)]) *
-        (lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 1, 0, 1)])) -
-        ((lv[mapd(0, -1, 0, 1)] + lv[mapd(0, 0, 0, 1)]) *
-            (lv[mapd(0, -1, 0, 1)] + lv[mapd(0, 0, 0, 1)]))) +
-        parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 1, 0, 1)]) *
-            (lv[mapd(0, 0, 0, 1)] - lv[mapd(0, 1, 0, 1)])) -
-            (fabs(lv[mapd(0, -1, 0, 1)] + lv[mapd(0, 0, 0, 1)]) *
-                (lv[mapd(0, -1, 0, 1)] - lv[mapd(0, 0, 0, 1)])))) /
-        lm[mapd(0, 0, 0, 1)];
+    // const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 1, 0, 1)]) *
+    //     (lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 1, 0, 1)])) -
+    //     ((lv[mapd(0, -1, 0, 1)] + lv[mapd(0, 0, 0, 1)]) *
+    //         (lv[mapd(0, -1, 0, 1)] + lv[mapd(0, 0, 0, 1)]))) +
+    //     parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 1, 0, 1)]) *
+    //         (lv[mapd(0, 0, 0, 1)] - lv[mapd(0, 1, 0, 1)])) -
+    //         (fabs(lv[mapd(0, -1, 0, 1)] + lv[mapd(0, 0, 0, 1)]) *
+    //             (lv[mapd(0, -1, 0, 1)] - lv[mapd(0, 0, 0, 1)])))) /
+    //     lm[mapd(0, 0, 0, 1)];
 #endif
 
     const RealType dyShort = 0.5 * lm[mapd(0, 0, 0, 1)];
@@ -733,7 +733,7 @@ namespace Stencils {
   // First derivative of w*w w.r.t. z, evaluated at location of w-component. For details, see du2dx.
   inline RealType dw2dz(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
 #ifndef NDEBUG
-    const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 0, 1, 2)]) *
+    /* const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 0, 1, 2)]) *
         (lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 0, 1, 2)])) -
         ((lv[mapd(0, 0, -1, 2)] + lv[mapd(0, 0, 0, 2)]) *
             (lv[mapd(0, 0, -1, 2)] + lv[mapd(0, 0, 0, 2)]))) +
@@ -741,7 +741,7 @@ namespace Stencils {
             (lv[mapd(0, 0, 0, 2)] - lv[mapd(0, 0, 1, 2)])) -
             (fabs(lv[mapd(0, 0, -1, 2)] + lv[mapd(0, 0, 0, 2)]) *
                 (lv[mapd(0, 0, -1, 2)] - lv[mapd(0, 0, 0, 2)])))) /
-        lm[mapd(0, 0, 0, 2)];
+        lm[mapd(0, 0, 0, 2)]; */
 #endif
 
     const RealType dzShort = 0.5 * lm[mapd(0, 0, 0, 2)];

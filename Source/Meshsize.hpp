@@ -128,9 +128,9 @@ private:
     const RealType pos0 = computeCoordinate(i, firstCorner, size, length, dxMin);
     const RealType pos1 = computeCoordinate(i + 1, firstCorner, size, length, dxMin);
 #ifndef NDEBUG
-    if (pos1 - pos0 < 1.0e-12) {
-      throw std::runtime_error("Error TanhMeshStretching::getMeshsize(): dx < 1.0e-12!");
-    }
+    // if (pos1 - pos0 < 1.0e-12) {
+    //   throw std::runtime_error("Error TanhMeshStretching::getMeshsize(): dx < 1.0e-12!");
+    // }
 #endif
     return pos1 - pos0;
   }

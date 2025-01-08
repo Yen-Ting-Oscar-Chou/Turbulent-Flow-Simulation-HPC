@@ -49,6 +49,9 @@ VectorField::VectorField(int Nx, int Ny, int Nz):
 
 RealType* VectorField::getVector(int i, int j, int k) { return &data_[index2array(i, j, k)]; }
 
+RealType& VectorField::getVectorElement(int i, int j, int elem) { return data_[index2array(i, j, 0) + elem]; }
+RealType& VectorField::getVectorElement(int i, int j, int k, int elem) { return data_[index2array(i, j, k) + elem]; }
+
 void VectorField::show(const std::string title) {
   std::cout << std::endl << "--- " << title << " ---" << std::endl;
   std::cout << "Component 1" << std::endl;

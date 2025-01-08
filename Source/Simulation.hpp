@@ -38,8 +38,10 @@ protected:
   GlobalBoundaryIterator<FlowField> wallVelocityIterator_;
   GlobalBoundaryIterator<FlowField> wallFGHIterator_;
 
-  Stencils::FGHStencil    fghStencil_;
-  FieldIterator<FlowField> fghIterator_;
+  FieldStencilDelegate    fghStencil_;
+  GPUFieldIterator<FlowField> fghIterator_;
+  // Stencils::FGHStencil    fghStencil_;
+  // FieldIterator<FlowField> fghIterator_;
 
   FieldStencilDelegate     rhsStencil_;
   GPUFieldIterator<FlowField> rhsIterator_;

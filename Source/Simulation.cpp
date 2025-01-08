@@ -14,7 +14,8 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   globalBoundaryFactory_(parameters),
   wallVelocityIterator_(globalBoundaryFactory_.getGlobalBoundaryVelocityIterator(flowField_)),
   wallFGHIterator_(globalBoundaryFactory_.getGlobalBoundaryFGHIterator(flowField_)),
-  fghStencil_(),
+  // fghStencil_(),
+  fghStencil_(FGH),
   fghIterator_(flowField_, parameters, fghStencil_),
   rhsStencil_(RHS),
   // rhsStencil_(),
@@ -89,10 +90,8 @@ void Simulation::solveTimestepHelper() {
   wallFGHIterator_.iterate();
   // Compute the right hand side (RHS)
   rhsIterator_.iterate();
-  rhsIterator_.iterate();
   // Solve for pressure
-  // TODO solver leads to second iteration crash when running on GPU in GPUIterator
-  //solver_->solve();
+  solver_->solve();
   // TODO WS2: communicate pressure values
   petscParallelManager_.communicatePressure();
   // Compute velocity

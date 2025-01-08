@@ -144,12 +144,32 @@ public:
     }
   }
 
+  inline void applyGPU(const Parameters& parameters, ScalarField& scalarField, VectorField& vectorField, int i, int j) {
+    switch (stencilType) {
+      case RHS:
+        rhsStencil.applyGPU(parameters, scalarField, vectorField, i, j);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+  inline void applyGPU(const Parameters& parameters, VectorField& vectorField1, VectorField& vectorField2, IntScalarField& intScalarField, int i, int j) {
+    switch (stencilType) {
+      case FGH:
+        fghStencil.applyGPU(parameters, vectorField1, vectorField2, intScalarField, i, j);
+        break;
+      default:
+        assert(false);
+    }
+  }
+
   inline StencilType getType() const { return stencilType; }
 };
 #pragma omp declare mapper(FieldStencilDelegate fsd) \
   map(fsd) \
   map(fsd.stencilType) \
-  map(fsd.fghStencil) \
+  map(fsd.fghStencil, fsd.fghStencil.localVelocity_[0:81], fsd.fghStencil.localMeshsize_[0:81]) \
   map(fsd.rhsStencil) \
   map(fsd.velocityStencil) \
   map(fsd.viscosityStencil) \

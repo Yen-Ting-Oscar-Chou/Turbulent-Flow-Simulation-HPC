@@ -38,3 +38,33 @@ void Stencils::FGHStencil::apply(const Parameters& parameters, FlowField& flowFi
     }
   }
 }
+
+void Stencils::FGHStencil::applyGPU(const Parameters& parameters, VectorField& velocity, VectorField& fgh, IntScalarField& flags, int i, int j) {
+  // Load local velocities into the center layer of the local array
+  loadLocalVelocity2D(velocity, localVelocity_, i, j);
+  loadLocalMeshsize2D(parameters, localMeshsize_, i, j);
+
+  // Now the localVelocity array should contain lexicographically ordered elements around the given index
+  fgh.getVectorElement(i, j, 0) = computeF2D(localVelocity_, localMeshsize_, parameters, parameters.timestep.dt);
+  fgh.getVectorElement(i, j, 1) = computeG2D(localVelocity_, localMeshsize_, parameters, parameters.timestep.dt);
+}
+
+void Stencils::FGHStencil::applyGPU(const Parameters& parameters, VectorField& velocity, VectorField& fgh, IntScalarField& flags, int i, int j, int k) {
+  // Load local velocities into the center layer of the local array
+  const int obstacle = flags.getValue(i, j, k);
+
+  if ((obstacle & OBSTACLE_SELF) == 0) { // If the cell is fluid
+    loadLocalVelocity3D(velocity, localVelocity_, i, j, k);
+    loadLocalMeshsize3D(parameters, localMeshsize_, i, j, k);
+
+    if ((obstacle & OBSTACLE_RIGHT) == 0) { // If the right cell is fluid
+      fgh.getVectorElement(i, j, 0) = computeF3D(localVelocity_, localMeshsize_, parameters, parameters.timestep.dt);
+    }
+    if ((obstacle & OBSTACLE_TOP) == 0) {
+      fgh.getVectorElement(i, j, 1) = computeG3D(localVelocity_, localMeshsize_, parameters, parameters.timestep.dt);
+    }
+    if ((obstacle & OBSTACLE_BACK) == 0) {
+      fgh.getVectorElement(i, j, 2) = computeH3D(localVelocity_, localMeshsize_, parameters, parameters.timestep.dt);
+    }
+  }
+}

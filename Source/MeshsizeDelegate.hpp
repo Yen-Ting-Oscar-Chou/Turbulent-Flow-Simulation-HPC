@@ -3,12 +3,11 @@
 #include "Meshsize.hpp"
 
 class MeshsizeDelegate {
-private:
+public:
   UniformMeshsize    uniform;
   TanhMeshStretching tanh;
   const MeshsizeType type;
 
-public:
   MeshsizeDelegate(const GeometricParameters& geometricParameters, const ParallelParameters& parallelParameters);
 
   ~MeshsizeDelegate() = default;

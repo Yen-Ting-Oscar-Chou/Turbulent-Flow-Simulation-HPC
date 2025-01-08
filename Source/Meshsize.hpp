@@ -78,7 +78,8 @@ public:
  * meshes, the UniformMeshsize implementation is used to create a uniform mesh.
  */
 class TanhMeshStretching: public Meshsize {
-private:
+
+public:
   const UniformMeshsize uniformMeshsize_;
   const RealType        lengthX_;
   const RealType        lengthY_;
@@ -135,7 +136,6 @@ private:
     return pos1 - pos0;
   }
 
-public:
   TanhMeshStretching(const GeometricParameters& geometricParameters, const ParallelParameters& parallelParameters);
   virtual ~TanhMeshStretching() = default;
 

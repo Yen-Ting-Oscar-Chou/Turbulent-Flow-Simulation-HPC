@@ -150,6 +150,21 @@ public:
   Parameters(const GeometricParameters& geometricParameters, const ParallelParameters& parallelParameters);
   ~Parameters() = default;
 
+  Parameters(const Parameters& parameters): 
+    simulation(parameters.simulation),
+    timestep(parameters.timestep),
+    environment(parameters.environment),
+    flow(parameters.flow),
+    solver(parameters.solver),
+    geometry(parameters.geometry),
+    walls(parameters.walls),
+    vtk(parameters.vtk),
+    parallel(parameters.parallel),
+    stdOut(parameters.stdOut),
+    bfStep(parameters.bfStep),
+    turbulence(parameters.turbulence),
+    meshsize(MeshsizeDelegate(parameters.geometry, parameters.parallel)) {}
+
   SimulationParameters    simulation;
   TimestepParameters      timestep;
   EnvironmentalParameters environment;
@@ -162,11 +177,11 @@ public:
   StdOutParameters        stdOut;
   BFStepParameters        bfStep;
   TurbulenceParameters    turbulence;
-  MeshsizeDelegate      meshsize;
+  MeshsizeDelegate        meshsize;
 };
 #pragma omp declare mapper(Parameters p) \
   map(to: p) \
-  map(to: p.meshsize) \
+  map(to: p.meshsize, p.meshsize.uniform, p.meshsize.tanh, p.meshsize.tanh.uniformMeshsize_) \
   map(to: p.timestep) \
   map(to: p.environment) \
   map(to: p.flow) \

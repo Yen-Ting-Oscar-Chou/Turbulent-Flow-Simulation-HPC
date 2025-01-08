@@ -108,10 +108,10 @@ public:
   void getPressureAndVelocity(RealType& pressure, RealType* const velocity, int i, int j, int k);
 #pragma omp end declare target
 };
-#pragma omp declare mapper(FlowField f) \
-  map(f) \
-  map(f.pressure_, f.pressure_.data_[0:f.pressure_.size_]) \
-  map(f.RHS_, f.RHS_.data_[0:f.RHS_.size_]) \
-  map(f.velocity_, f.velocity_.data_[0:f.velocity_.size_]) \
-  map(f.FGH_, f.FGH_.data_[0:f.FGH_.size_]) \
-  map(f.flags_, f.flags_.data_[0:f.flags_.size_])
+// #pragma omp declare mapper(FlowField f) \
+  // map(f) \
+  // map(f.pressure_, f.pressure_.data_[0:f.pressure_.size_]) \
+  // map(f.RHS_, f.RHS_.data_[0:f.RHS_.size_]) \
+  // map(f.velocity_, f.velocity_.data_[0:f.velocity_.size_]) \
+  // map(f.FGH_, f.FGH_.data_[0:f.FGH_.size_]) \
+  // map(f.flags_, f.flags_.data_[0:f.flags_.size_])

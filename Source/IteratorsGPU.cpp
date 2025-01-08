@@ -15,33 +15,52 @@ void GPUFieldIterator<FlowFieldType>::iterate() {
   const int cellsY = GPUIterator<FlowFieldType>::flowField_.getCellsY();
   const int cellsZ = GPUIterator<FlowFieldType>::flowField_.getCellsZ();
 
-  FlowField            localFlowField  = GPUIterator<FlowFieldType>::flowField_;
-  Parameters           localParameters = GPUIterator<FlowFieldType>::parameters_;
+  //Parameters           localParameters = GPUIterator<FlowFieldType>::parameters_;
+  Parameters           localParameters = Parameters(GPUIterator<FlowFieldType>::parameters_);
   FieldStencilDelegate localStencil    = stencil_;
-  
+  VectorField    fghLocal      = GPUIterator<FlowFieldType>::flowField_.FGH_;
+  ScalarField rhsLocal = GPUIterator<FlowFieldType>::flowField_.RHS_;
+
   // The index k can be used for the 2D and 3D cases.
   if (GPUIterator<FlowFieldType>::parameters_.geometry.dim == 2) {
     // Loop without lower boundaries. These will be dealt with by the global boundary stencils
     // or by the subdomain boundary GPUIterator.
 
-    //#pragma omp target parallel for collapse(2) map(to : cellsX, cellsY, lowOffset_, highOffset_, localParameters) map(tofrom : localFlowField, localStencil)
-    #pragma omp target enter data map(to : cellsX, cellsY, lowOffset_, highOffset_, localParameters, localFlowField, localStencil)
-    {
-      //#pragma omp parallel for collapse(2)
-      for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
-        for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
-          localStencil.apply(localParameters, localFlowField, i, j);
+    #pragma omp target data map(to : cellsX, cellsY, localParameters, localStencil)
+    switch (localStencil.getType()) {
+    case RHS:
+      #pragma omp target map(to : fghLocal, fghLocal.data_[0 : fghLocal.size_]) map(tofrom : rhsLocal, rhsLocal.data_[0 : rhsLocal.size_])
+      { 
+        for (int j = 1; j < cellsY - 1; j++) {
+          for (int i = 1; i < cellsX - 1; i++) {
+            localStencil.applyGPU(localParameters, rhsLocal, fghLocal, i, j);
+          }
         }
       }
-    }
-    //#pragma omp target update to(localFlowField)
-    #pragma omp target exit data map(from: localFlowField)
-
-    switch (stencil_.getType()) {
-    case RHS:
       for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
         for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
-          GPUIterator<FlowFieldType>::flowField_.getRHS().getScalar(i, j) = localFlowField.getRHS().getScalar(i, j);
+          GPUIterator<FlowFieldType>::flowField_.getRHS().getScalar(i, j) = rhsLocal.getScalar(i, j);
+        }
+      }
+      break;
+
+    case FGH:
+      VectorField    velocityLocal = GPUIterator<FlowFieldType>::flowField_.velocity_;
+      IntScalarField flagsLocal    = GPUIterator<FlowFieldType>::flowField_.flags_;
+      #pragma omp target map(to : velocityLocal, velocityLocal.data_[0 : velocityLocal.size_]) \
+        map(to : flagsLocal, flagsLocal.data_[0 : flagsLocal.size_]) \
+        map(tofrom : fghLocal, fghLocal.data_[0 : fghLocal.size_])
+      {
+        for (int j = 1; j < cellsY - 1; j++) {
+          for (int i = 1; i < cellsX - 1; i++) {
+            localStencil.applyGPU(localParameters, velocityLocal, fghLocal, flagsLocal, i, j);
+          }
+        }
+      }
+      for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
+        for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
+          GPUIterator<FlowFieldType>::flowField_.getFGH().getVectorElement(i, j, 0) = fghLocal.getVectorElement(i, j, 0);
+          GPUIterator<FlowFieldType>::flowField_.getFGH().getVectorElement(i, j, 1) = fghLocal.getVectorElement(i, j, 1);
         }
       }
       break;

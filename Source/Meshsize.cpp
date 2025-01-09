@@ -48,12 +48,12 @@ TanhMeshStretching::TanhMeshStretching(const GeometricParameters& geometricParam
       : uniformMeshsize_.getDx(0, 0)
   ),
   dyMin_(
-    (geometricParameters.meshsizeType == TanhStretching ? static_cast<bool>(geometricParameters.stretchX) : false)
+    (geometricParameters.meshsizeType == TanhStretching ? static_cast<bool>(geometricParameters.stretchY) : false)
       ? 0.5 * geometricParameters.lengthY * (1.0 + tanh(deltaS_ * (2.0 / sizeY_ - 1.0)) / tanhDeltaS_)
       : uniformMeshsize_.getDy(0, 0)
   ),
   dzMin_(
-    (geometricParameters.meshsizeType == TanhStretching ? static_cast<bool>(geometricParameters.stretchX) : false)
+    (geometricParameters.meshsizeType == TanhStretching ? static_cast<bool>(geometricParameters.stretchZ) : false)
       ? 0.5 * geometricParameters.lengthZ * (1.0 + tanh(deltaS_ * (2.0 / sizeZ_ - 1.0)) / tanhDeltaS_)
       : uniformMeshsize_.getDz(0, 0, 0)
   ) {}

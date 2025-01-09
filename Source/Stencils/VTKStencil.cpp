@@ -93,8 +93,7 @@ void Stencils::VTKStencil<FlowFieldType>::apply(const Parameters& parameters, Fl
   RealType velocity[2] = {0.0, 0.0};
 
   if ((flowField.getFlags().getValue(i, j) & OBSTACLE_SELF) == 0) {
-    // TODO leads to second iteration crash in GPUIterator when running GPU
-    // flowField.getPressureAndVelocity(pressure, velocity, i, j);
+    flowField.getPressureAndVelocity(pressure, velocity, i, j);
 
     pressureStream_ << pressure << std::endl;
     velocityStream_ << velocity[0] << " " << velocity[1] << " 0" << std::endl;

@@ -14,13 +14,11 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   globalBoundaryFactory_(parameters),
   wallVelocityIterator_(globalBoundaryFactory_.getGlobalBoundaryVelocityIterator(flowField_)),
   wallFGHIterator_(globalBoundaryFactory_.getGlobalBoundaryFGHIterator(flowField_)),
-  // fghStencil_(),
   fghStencil_(FGH),
   fghIterator_(flowField_, parameters, fghStencil_),
   rhsStencil_(RHS),
-  // rhsStencil_(),
   rhsIterator_(flowField_, parameters, rhsStencil_),
-  velocityStencil_(),
+  velocityStencil_(VELOCITY),
   obstacleStencil_(),
   velocityIterator_(flowField_, parameters, velocityStencil_),
   obstacleIterator_(flowField_, parameters, obstacleStencil_),
@@ -84,6 +82,7 @@ void Simulation::solveTimestep() {
   fghIterator_.iterate();
   solveTimestepHelper();
 }
+
 
 void Simulation::solveTimestepHelper() {
   // Set global boundary values

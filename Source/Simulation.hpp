@@ -5,22 +5,20 @@
 #include "GlobalBoundaryFactory.hpp"
 #include "Iterators.hpp"
 #include "IteratorsGPU.hpp"
-
+#include "ParallelManagers/PetscParallelManager.hpp"
 #include "Solvers/LinearSolver.hpp"
 #include "Stencils/BFInputStencils.hpp"
 #include "Stencils/BFStepInitStencil.hpp"
 #include "Stencils/FGHStencil.hpp"
-#include "Stencils/RHSStencil.hpp"
 #include "Stencils/InitTaylorGreenFlowFieldStencil.hpp"
 #include "Stencils/MaxUStencil.hpp"
 #include "Stencils/MovingWallStencils.hpp"
 #include "Stencils/NeumannBoundaryStencils.hpp"
 #include "Stencils/ObstacleStencil.hpp"
 #include "Stencils/PeriodicBoundaryStencils.hpp"
+#include "Stencils/RHSStencil.hpp"
 #include "Stencils/VelocityStencil.hpp"
 #include "Stencils/VTKStencil.hpp"
-#include "ParallelManagers/PetscParallelManager.hpp"
-
 
 
 class Simulation {
@@ -38,20 +36,16 @@ protected:
   GlobalBoundaryIterator<FlowField> wallVelocityIterator_;
   GlobalBoundaryIterator<FlowField> wallFGHIterator_;
 
-  FieldStencilDelegate    fghStencil_;
+  StencilDelegate             fghStencil_;
   GPUFieldIterator<FlowField> fghIterator_;
-  // Stencils::FGHStencil    fghStencil_;
-  // FieldIterator<FlowField> fghIterator_;
 
-  FieldStencilDelegate     rhsStencil_;
+  StencilDelegate             rhsStencil_;
   GPUFieldIterator<FlowField> rhsIterator_;
-  // Stencils::RHSStencil rhsStencil_;
-  // FieldIterator<FlowField> rhsIterator_;
 
-  Stencils::VelocityStencil velocityStencil_;
-  Stencils::ObstacleStencil obstacleStencil_;
-  FieldIterator<FlowField>  velocityIterator_;
-  FieldIterator<FlowField>  obstacleIterator_;
+  StencilDelegate             velocityStencil_;
+  Stencils::ObstacleStencil   obstacleStencil_;
+  GPUFieldIterator<FlowField> velocityIterator_;
+  FieldIterator<FlowField>    obstacleIterator_;
 
   ParallelManagers::PetscParallelManager petscParallelManager_;
   std::unique_ptr<Solvers::LinearSolver> solver_;

@@ -67,9 +67,9 @@ namespace Stencils {
     for (int layer = -1; layer <= 1; layer++) {
       for (int row = -1; row <= 1; row++) {
         for (int column = -1; column <= 1; column++) {
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column]     = velocity.getVectorElement(i + column, j + row, 0); // x-component
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 1] = velocity.getVectorElement(i + column, j + row, 1); // y-component
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 2] = velocity.getVectorElement(i + column, j + row, 2); // z-component
+          localVelocity[39 + 27 * layer + 9 * row + 3 * column]     = velocity.getVectorElement(i + column, j + row, k + layer, 0); // x-component
+          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 1] = velocity.getVectorElement(i + column, j + row, k + layer, 1); // y-component
+          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 2] = velocity.getVectorElement(i + column, j + row, k + layer, 2); // z-component
         }
       }
     }
@@ -108,6 +108,15 @@ namespace Stencils {
     }
   }
 
+  inline void loadLocalViscosity2D(const Parameters& parameters, ScalarField& viscosity, RealType* const localViscosity, int i, int j) {
+    for (int row = -1; row <= 1; row++) {
+      for (int column = -1; column <= 1; column++) {
+        localViscosity[39 + 9 * row + 3 * column]     = 1 / parameters.flow.Re + viscosity.getScalar(i + column, j + row);
+        localViscosity[39 + 9 * row + 3 * column + 1] = 1 / parameters.flow.Re + viscosity.getScalar(i + column, j + row);
+      }
+    }
+  }
+
   // Load local meshsize for 3D
   inline void loadLocalViscosity3D(const Parameters& parameters, TurbulentFlowField& turbulentField, RealType* const localViscosity, int i, int j, int k) {
     for (int layer = -1; layer <= 1; layer++) {
@@ -116,6 +125,18 @@ namespace Stencils {
           localViscosity[39 + 27 * layer + 9 * row + 3 * column]     = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row, k + layer);
           localViscosity[39 + 27 * layer + 9 * row + 3 * column + 1] = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row, k + layer);
           localViscosity[39 + 27 * layer + 9 * row + 3 * column + 2] = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row, k + layer);
+        }
+      }
+    }
+  }
+
+  inline void loadLocalViscosity3D(const Parameters& parameters, ScalarField& viscosity, RealType* const localViscosity, int i, int j, int k) {
+    for (int layer = -1; layer <= 1; layer++) {
+      for (int row = -1; row <= 1; row++) {
+        for (int column = -1; column <= 1; column++) {
+          localViscosity[39 + 27 * layer + 9 * row + 3 * column]     = 1 / parameters.flow.Re + viscosity.getScalar(i + column, j + row, k + layer);
+          localViscosity[39 + 27 * layer + 9 * row + 3 * column + 1] = 1 / parameters.flow.Re + viscosity.getScalar(i + column, j + row, k + layer);
+          localViscosity[39 + 27 * layer + 9 * row + 3 * column + 2] = 1 / parameters.flow.Re + viscosity.getScalar(i + column, j + row, k + layer);
         }
       }
     }

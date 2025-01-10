@@ -2,7 +2,7 @@
 
 #include "FlowField.hpp"
 #include "Parameters.hpp"
-#include "Stencils/FieldStencilDelegate.hpp"
+#include "Stencils/StencilDelegate.hpp"
 #include "TurbulentFlowField.hpp"
 
 /** GPUIterator class
@@ -31,7 +31,7 @@ public:
 template <class FlowFieldType>
 class GPUFieldIterator: public GPUIterator<FlowFieldType> {
 private:
-  FieldStencilDelegate& stencil_;
+  StencilDelegate& stencil_;
 
   //@brief Define the iteration domain to include more or less layers
   // Added since the ability to select the iteration domain provides more flexibility
@@ -41,7 +41,7 @@ private:
   //@}
 
 public:
-  GPUFieldIterator(FlowFieldType& flowField, const Parameters& parameters, FieldStencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
+  GPUFieldIterator(FlowFieldType& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
 
   virtual ~GPUFieldIterator() override = default;
 

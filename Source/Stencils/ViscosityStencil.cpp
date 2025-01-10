@@ -65,12 +65,12 @@ void Stencils::ViscosityStencil::applyGPU(const Parameters& parameters, VectorFi
   // S_ij S_ij = S11^2 + S_22^2 + 2S_12^2
   // (dudx)^2 + (dvdy)^2 + (dudy + dvdx)^2
   // v_t = l_m^2 * sqrt(2*S_ij*S_ij)
-  const RealType S_11    = dudx(localVelocity_, localMeshsize_);
-  const RealType S_22    = dvdy(localVelocity_, localMeshsize_);
-  const RealType S_12    = 0.5 * (dudy(localVelocity_, localMeshsize_) + dvdx(localVelocity_, localMeshsize_));
-  const RealType S_ij_sq = S_11 * S_11 + S_22 * S_22 + 2 * S_12 * S_12;
-  RealType&      v_t     = viscosity.getScalar(i, j);
-  v_t                    = mixingLength * mixingLength * sqrt(2 * S_ij_sq);
+  const RealType S_11       = dudx(localVelocity_, localMeshsize_);
+  const RealType S_22       = dvdy(localVelocity_, localMeshsize_);
+  const RealType S_12       = 0.5 * (dudy(localVelocity_, localMeshsize_) + dvdx(localVelocity_, localMeshsize_));
+  const RealType S_ij_sq    = S_11 * S_11 + S_22 * S_22 + 2 * S_12 * S_12;
+  const RealType v_t        = mixingLength * mixingLength * sqrt(2 * S_ij_sq);
+  viscosity.getScalar(i, j) = v_t;
 
   // For BFS
   if ((obstacle & OBSTACLE_BOTTOM) == OBSTACLE_BOTTOM) {

@@ -28,8 +28,7 @@ public:
   virtual void iterate() = 0;
 };
 
-template <class FlowFieldType>
-class GPUFieldIterator: public GPUIterator<FlowFieldType> {
+class GPUFieldIterator: public GPUIterator<FlowField> {
 private:
   StencilDelegate& stencil_;
 
@@ -41,9 +40,28 @@ private:
   //@}
 
 public:
-  GPUFieldIterator(FlowFieldType& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
+  GPUFieldIterator(FlowField& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
 
   virtual ~GPUFieldIterator() override = default;
+
+  virtual void iterate() override;
+};
+
+class GPUFieldIteratorTurbulent: public GPUIterator<TurbulentFlowField> {
+private:
+  StencilDelegate& stencil_;
+
+  //@brief Define the iteration domain to include more or less layers
+  // Added since the ability to select the iteration domain provides more flexibility
+  //@{
+  const int lowOffset_;
+  const int highOffset_;
+  //@}
+
+public:
+  GPUFieldIteratorTurbulent(TurbulentFlowField& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
+
+  virtual ~GPUFieldIteratorTurbulent() override = default;
 
   virtual void iterate() override;
 };

@@ -2,20 +2,17 @@
 
 #include "IteratorsGPU.hpp"
 
-template <class FlowFieldType>
-GPUFieldIterator<FlowFieldType>::GPUFieldIterator(FlowFieldType& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset, int highOffset):
-  GPUIterator<FlowFieldType>(flowField, parameters),
+GPUFieldIterator::GPUFieldIterator(FlowField& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset, int highOffset):
+  GPUIterator<FlowField>(flowField, parameters),
   stencil_(stencil),
   lowOffset_(lowOffset),
   highOffset_(highOffset) {}
 
-template<>
-void GPUFieldIterator<FlowField>::iterate() {
+void GPUFieldIterator::iterate() {
   const int cellsX = GPUIterator<FlowField>::flowField_.getCellsX();
   const int cellsY = GPUIterator<FlowField>::flowField_.getCellsY();
   const int cellsZ = GPUIterator<FlowField>::flowField_.getCellsZ();
 
-  // Parameters           localParameters = GPUIterator<FlowFieldType>::parameters_;
   Parameters      localParameters = Parameters(GPUIterator<FlowField>::parameters_);
   StencilDelegate localStencil    = stencil_;
 
@@ -23,7 +20,6 @@ void GPUFieldIterator<FlowField>::iterate() {
   if (GPUIterator<FlowField>::parameters_.geometry.dim == 2) {
     // Loop without lower boundaries. These will be dealt with by the global boundary stencils
     // or by the subdomain boundary GPUIterator.
-
 #pragma omp target data map(to : lowOffset_, highOffset_, cellsX, cellsY, localParameters, localStencil)
     {
       if (localStencil.getType() == RHS) {
@@ -166,8 +162,13 @@ void GPUFieldIterator<FlowField>::iterate() {
   }
 }
 
-template<>
-void GPUFieldIterator<TurbulentFlowField>::iterate() {
+GPUFieldIteratorTurbulent::GPUFieldIteratorTurbulent(TurbulentFlowField& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset, int highOffset):
+  GPUIterator<TurbulentFlowField>(flowField, parameters),
+  stencil_(stencil),
+  lowOffset_(lowOffset),
+  highOffset_(highOffset) {}
+
+void GPUFieldIteratorTurbulent::iterate() {
   const int cellsX = GPUIterator<TurbulentFlowField>::flowField_.getCellsX();
   const int cellsY = GPUIterator<TurbulentFlowField>::flowField_.getCellsY();
   const int cellsZ = GPUIterator<TurbulentFlowField>::flowField_.getCellsZ();
@@ -176,19 +177,12 @@ void GPUFieldIterator<TurbulentFlowField>::iterate() {
   Parameters      localParameters = Parameters(GPUIterator<TurbulentFlowField>::parameters_);
   StencilDelegate localStencil    = stencil_;
 
-  #pragma omp target data map(to: localParameters)
-  {
-    printf("Stencil test");
-  }
-
   // The index k can be used for the 2D and 3D cases.
   if (GPUIterator<TurbulentFlowField>::parameters_.geometry.dim == 2) {
     // Loop without lower boundaries. These will be dealt with by the global boundary stencils
     // or by the subdomain boundary GPUIterator.
-    std::cout << "TurbulentFlowField 2D" << std::endl;
     #pragma omp target data map(to : lowOffset_, highOffset_, cellsX, cellsY, localParameters, localStencil)
     {
-      printf("Stencil inside outer mapping");
       if (localStencil.getType() == VISCOSITY) {
         IntScalarField flagsLocal    = GPUIterator<TurbulentFlowField>::flowField_.flags_;
         ScalarField    viscosityLocal = GPUIterator<TurbulentFlowField>::flowField_.viscosity_;
@@ -206,6 +200,27 @@ void GPUFieldIterator<TurbulentFlowField>::iterate() {
         for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
           for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
             GPUIterator<TurbulentFlowField>::flowField_.getViscosity().getScalar(i, j) = viscosityLocal.getScalar(i, j);
+          }
+        }
+      } else if(stencil_.getType() == TURBFGH) {
+        VectorField    velocityLocal = GPUIterator<TurbulentFlowField>::flowField_.velocity_;
+        IntScalarField flagsLocal    = GPUIterator<TurbulentFlowField>::flowField_.flags_;
+        VectorField    fghLocal      = GPUIterator<TurbulentFlowField>::flowField_.FGH_;
+        ScalarField viscosityLocal = GPUIterator<TurbulentFlowField>::flowField_.viscosity_;
+#pragma omp target map(to : velocityLocal, velocityLocal.data_[0 : velocityLocal.size_]) map(to : flagsLocal, flagsLocal.data_[0 : flagsLocal.size_]) \
+  map(tofrom : fghLocal, fghLocal.data_[0 : fghLocal.size_]) map(to : viscosityLocal, viscosityLocal.data_[0 : viscosityLocal.size_])
+        {
+          for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
+            for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
+              localStencil.applyTurbulentFGH(localParameters, fghLocal, viscosityLocal, velocityLocal, flagsLocal, i, j);
+            }
+          }
+        }
+        for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
+          for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
+            GPUIterator<TurbulentFlowField>::flowField_.getFGH().getVectorElement(i, j, 0) = fghLocal.getVectorElement(i, j, 0);
+            GPUIterator<TurbulentFlowField>::flowField_.getFGH().getVectorElement(i, j, 1) = fghLocal.getVectorElement(i, j, 1);
+            GPUIterator<TurbulentFlowField>::flowField_.getFGH().getVectorElement(i, j, 2) = fghLocal.getVectorElement(i, j, 2);
           }
         }
       } else {
@@ -240,13 +255,34 @@ void GPUFieldIterator<TurbulentFlowField>::iterate() {
             }
           }
         }
+      } else if(localStencil.getType() == TURBFGH) {
+        VectorField    velocityLocal = GPUIterator<TurbulentFlowField>::flowField_.velocity_;
+        IntScalarField flagsLocal    = GPUIterator<TurbulentFlowField>::flowField_.flags_;
+        VectorField    fghLocal      = GPUIterator<TurbulentFlowField>::flowField_.FGH_;
+        ScalarField viscosityLocal = GPUIterator<TurbulentFlowField>::flowField_.viscosity_;
+#pragma omp target map(to : velocityLocal, velocityLocal.data_[0 : velocityLocal.size_]) map(to : flagsLocal, flagsLocal.data_[0 : flagsLocal.size_]) \
+  map(tofrom : fghLocal, fghLocal.data_[0 : fghLocal.size_]) map(to : viscosityLocal, viscosityLocal.data_[0 : viscosityLocal.size_])
+        {
+          for (int k = 1 + lowOffset_; k < cellsZ - 1 + highOffset_; k++) {
+            for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
+              for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
+                localStencil.applyTurbulentFGH(localParameters, fghLocal, viscosityLocal, velocityLocal, flagsLocal, i, j, k);
+              }
+            }
+          }
+        }
+        for (int k = 1 + lowOffset_; k < cellsZ - 1 + highOffset_; k++) {
+          for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
+            for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
+              GPUIterator<TurbulentFlowField>::flowField_.getFGH().getVectorElement(i, j, k, 0) = fghLocal.getVectorElement(i, j, k, 0);
+              GPUIterator<TurbulentFlowField>::flowField_.getFGH().getVectorElement(i, j, k, 1) = fghLocal.getVectorElement(i, j, k, 1);
+              GPUIterator<TurbulentFlowField>::flowField_.getFGH().getVectorElement(i, j, k, 2) = fghLocal.getVectorElement(i, j, k, 2);
+            }
+          }
+        }
       } else {
         assert(false);
       }
     }
   }
 }
-
-
-template class GPUFieldIterator<FlowField>;
-template class GPUFieldIterator<TurbulentFlowField>;

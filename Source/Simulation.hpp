@@ -36,16 +36,16 @@ protected:
   GlobalBoundaryIterator<FlowField> wallVelocityIterator_;
   GlobalBoundaryIterator<FlowField> wallFGHIterator_;
 
-  StencilDelegate             fghStencil_;
-  GPUFieldIterator<FlowField> fghIterator_;
+  StencilDelegate  fghStencil_;
+  GPUFieldIterator fghIterator_;
 
-  StencilDelegate             rhsStencil_;
-  GPUFieldIterator<FlowField> rhsIterator_;
+  StencilDelegate  rhsStencil_;
+  GPUFieldIterator rhsIterator_;
 
-  StencilDelegate             velocityStencil_;
-  Stencils::ObstacleStencil   obstacleStencil_;
-  GPUFieldIterator<FlowField> velocityIterator_;
-  FieldIterator<FlowField>    obstacleIterator_;
+  StencilDelegate           velocityStencil_;
+  Stencils::ObstacleStencil obstacleStencil_;
+  GPUFieldIterator          velocityIterator_;
+  FieldIterator<FlowField>  obstacleIterator_;
 
   ParallelManagers::PetscParallelManager petscParallelManager_;
   std::unique_ptr<Solvers::LinearSolver> solver_;

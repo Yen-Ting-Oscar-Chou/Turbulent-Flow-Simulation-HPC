@@ -43,7 +43,7 @@ void GPUFieldIterator::iterate() {
         VectorField    fghLocal      = GPUIterator<FlowField>::flowField_.FGH_;
 #pragma omp target map(to : velocityLocal, velocityLocal.data_[0 : velocityLocal.size_]) map(to : flagsLocal, flagsLocal.data_[0 : flagsLocal.size_]) \
   map(tofrom : fghLocal, fghLocal.data_[0 : fghLocal.size_])
-#pragma omp teams distribute parallel for
+//#pragma omp teams distribute parallel for
         for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
           for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
             localStencil.applyFGH(localParameters, velocityLocal, fghLocal, flagsLocal, i, j);
@@ -108,7 +108,7 @@ void GPUFieldIterator::iterate() {
         VectorField    fghLocal      = GPUIterator<FlowField>::flowField_.FGH_;
 #pragma omp target map(to : velocityLocal, velocityLocal.data_[0 : velocityLocal.size_]) map(to : flagsLocal, flagsLocal.data_[0 : flagsLocal.size_]) \
   map(tofrom : fghLocal, fghLocal.data_[0 : fghLocal.size_])
-#pragma omp teams distribute parallel for
+//#pragma omp teams distribute parallel for
         for (int k = 1 + lowOffset_; k < cellsZ - 1 + highOffset_; k++) {
           for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
             for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {

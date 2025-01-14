@@ -14,11 +14,11 @@ class Field {
 public:
   //! Pointer to the data array
   DataType* data_;
-  const int components_; //! Number of components per position
-  const int size_;       //! Total size of the data array
-  const int sizeX_; //! Size of the field in x direction, including ghost layers
-  const int sizeY_; //! Size of the field in y direction, including ghost layers
-  const int sizeZ_; //! Size of the field in z direction, including ghost layers
+  int components_; //! Number of components per position
+  int size_;       //! Total size of the data array
+  int sizeX_;      //! Size of the field in x direction, including ghost layers
+  int sizeY_;      //! Size of the field in y direction, including ghost layers
+  int sizeZ_;      //! Size of the field in z direction, including ghost layers
   /** Constructor for the field
    *
    * General constructor. Takes the three arguments even if the matrix is
@@ -180,8 +180,7 @@ public:
 #pragma omp declare target
   RealType& getVectorElement(int i, int j, int elem);
   RealType& getVectorElement(int i, int j, int k, int elem);
-#pragma omp end declare target
-/** Non constant acces to an element in the vector field
+  /** Non constant acces to an element in the vector field
    *
    * Returns a pointer to the position in the array that can be used to
    * modify it.
@@ -191,6 +190,7 @@ public:
    * @param k z index
    */
   RealType* getVector(int i, int j, int k = 0);
+#pragma omp end declare target
 
   /** Prints the contents of the field
    *

@@ -11,19 +11,10 @@ namespace Stencils {
    */
   class InitTaylorGreenFlowFieldStencil: public FieldStencil<FlowField> {
   private:
-    const RealType        pi2_;
-    const RealType* const domainSize_;
-
-    RealType* initializeDomainSize(const Parameters& parameters) const;
-
-    /** from the local grid coordinates i, j, k, computes the global coordinates of the current cell and initialises
-     *  the velocity field correspondingly.
-     */
-    void computeGlobalCoordinates(const Parameters& parameters, RealType* coords, int i, int j, int k = 0) const;
+    const RealType pi2_;
 
   public:
-    InitTaylorGreenFlowFieldStencil(const Parameters& parameters);
-    ~InitTaylorGreenFlowFieldStencil() override;
+    InitTaylorGreenFlowFieldStencil();
 
     void apply(const Parameters& parameters, FlowField& flowField, int i, int j) override;
     void apply(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;

@@ -13,16 +13,16 @@ namespace Stencils {
   public:
     explicit ViscosityBufferFillStencil(const Parameters& parameters);
 
-    void applyLeftWall(TurbulentFlowField& flowField, int i, int j) override;
-    void applyRightWall(TurbulentFlowField& flowField, int i, int j) override;
-    void applyBottomWall(TurbulentFlowField& flowField, int i, int j) override;
-    void applyTopWall(TurbulentFlowField& flowField, int i, int j) override;
+    void applyLeftWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
+    void applyRightWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
+    void applyBottomWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
+    void applyTopWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
 
-    void applyLeftWall(TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyRightWall(TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyBottomWall(TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyTopWall(TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyFrontWall(TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyBackWall(TurbulentFlowField& flowField, int i, int j, int k) override;
+    void applyLeftWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void applyRightWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void applyBottomWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void applyTopWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void applyFrontWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void applyBackWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
   };
 } // namespace Stencils

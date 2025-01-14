@@ -9,14 +9,14 @@ GlobalBoundaryFactory::GlobalBoundaryFactory(Parameters& parameters):
   // All stencils are created, disregarding whether they will be used or not. This is less
   // complicated and doesn't seem that costly.
 
-  periodic_[0] = new Stencils::PeriodicBoundaryVelocityStencil(parameters);
-  periodic_[1] = new Stencils::PeriodicBoundaryFGHStencil(parameters);
+  periodic_[0] = new Stencils::PeriodicBoundaryVelocityStencil();
+  periodic_[1] = new Stencils::PeriodicBoundaryFGHStencil();
 
-  moving_[0] = new Stencils::MovingWallVelocityStencil(parameters);
-  moving_[1] = new Stencils::MovingWallFGHStencil(parameters);
+  moving_[0] = new Stencils::MovingWallVelocityStencil();
+  moving_[1] = new Stencils::MovingWallFGHStencil();
 
-  outflow_[0] = new Stencils::NeumannVelocityBoundaryStencil(parameters);
-  outflow_[1] = new Stencils::NeumannFGHBoundaryStencil(parameters);
+  outflow_[0] = new Stencils::NeumannVelocityBoundaryStencil();
+  outflow_[1] = new Stencils::NeumannFGHBoundaryStencil();
 
   channelInput_[0] = new Stencils::BFInputVelocityStencil(parameters);
   channelInput_[1] = new Stencils::BFInputFGHStencil(parameters);

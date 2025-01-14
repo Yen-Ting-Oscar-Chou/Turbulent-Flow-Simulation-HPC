@@ -2,73 +2,69 @@
 
 #include "MaxUStencil.hpp"
 
-Stencils::MaxUStencil::MaxUStencil(const Parameters& parameters):
-  BoundaryStencil<FlowField>(parameters) {
+Stencils::MaxUStencil::MaxUStencil() { reset(); }
 
-  reset();
-}
+void Stencils::MaxUStencil::apply(const Parameters& parameters, FlowField& flowField, int i, int j) { cellMaxValue(parameters, flowField, i, j); }
 
-void Stencils::MaxUStencil::apply(const Parameters& parameters, FlowField& flowField, int i, int j) { cellMaxValue(flowField, i, j); }
+void Stencils::MaxUStencil::apply(const Parameters& parameters, FlowField& flowField, int i, int j, int k) { cellMaxValue(parameters, flowField, i, j, k); }
 
-void Stencils::MaxUStencil::apply(const Parameters& parameters, FlowField& flowField, int i, int j, int k) { cellMaxValue(flowField, i, j, k); }
+void Stencils::MaxUStencil::applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j) { cellMaxValue(parameters, flowField, i, j); }
 
-void Stencils::MaxUStencil::applyLeftWall(FlowField& flowField, int i, int j) { cellMaxValue(flowField, i, j); }
+void Stencils::MaxUStencil::applyRightWall(const Parameters& parameters, FlowField& flowField, int i, int j) { cellMaxValue(parameters, flowField, i, j); }
 
-void Stencils::MaxUStencil::applyRightWall(FlowField& flowField, int i, int j) { cellMaxValue(flowField, i, j); }
+void Stencils::MaxUStencil::applyBottomWall(const Parameters& parameters, FlowField& flowField, int i, int j) { cellMaxValue(parameters, flowField, i, j); }
 
-void Stencils::MaxUStencil::applyBottomWall(FlowField& flowField, int i, int j) { cellMaxValue(flowField, i, j); }
+void Stencils::MaxUStencil::applyTopWall(const Parameters& parameters, FlowField& flowField, int i, int j) { cellMaxValue(parameters, flowField, i, j); }
 
-void Stencils::MaxUStencil::applyTopWall(FlowField& flowField, int i, int j) { cellMaxValue(flowField, i, j); }
+void Stencils::MaxUStencil::applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) { cellMaxValue(parameters, flowField, i, j, k); }
 
-void Stencils::MaxUStencil::applyLeftWall(FlowField& flowField, int i, int j, int k) {
-  cellMaxValue(flowField, i, j, k);
-}
+void Stencils::MaxUStencil::applyRightWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) { cellMaxValue(parameters, flowField, i, j, k); }
 
-void Stencils::MaxUStencil::applyRightWall(FlowField& flowField, int i, int j, int k) {
-  cellMaxValue(flowField, i, j, k);
-}
+void Stencils::MaxUStencil::applyBottomWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) { cellMaxValue(parameters, flowField, i, j, k); }
 
-void Stencils::MaxUStencil::applyBottomWall(FlowField& flowField, int i, int j, int k) {
-  cellMaxValue(flowField, i, j, k);
-}
+void Stencils::MaxUStencil::applyTopWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) { cellMaxValue(parameters, flowField, i, j, k); }
 
-void Stencils::MaxUStencil::applyTopWall(FlowField& flowField, int i, int j, int k) {
-  cellMaxValue(flowField, i, j, k);
-}
+void Stencils::MaxUStencil::applyFrontWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) { cellMaxValue(parameters, flowField, i, j, k); }
 
-void Stencils::MaxUStencil::applyFrontWall(FlowField& flowField, int i, int j, int k) {
-  cellMaxValue(flowField, i, j, k);
-}
+void Stencils::MaxUStencil::applyBackWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) { cellMaxValue(parameters, flowField, i, j, k); }
 
-void Stencils::MaxUStencil::applyBackWall(FlowField& flowField, int i, int j, int k) {
-  cellMaxValue(flowField, i, j, k);
-}
+void Stencils::MaxUStencil::cellMaxValue(const Parameters& parameters, FlowField& flowField, int i, int j) {
+  const RealType velocityX = flowField.getVelocity().getVectorElement(i, j, 0);
+  const RealType velocityY = flowField.getVelocity().getVectorElement(i, j, 1);
+  const RealType dx        = parameters.meshsize.getDx(i, j);
+  const RealType dy        = parameters.meshsize.getDy(i, j);
 
-void Stencils::MaxUStencil::cellMaxValue(FlowField& flowField, int i, int j) {
-  RealType*      velocity = flowField.getVelocity().getVector(i, j);
-  const RealType dx       = BoundaryStencil<FlowField>::parameters_.meshsize.getDx(i, j);
-  const RealType dy       = BoundaryStencil<FlowField>::parameters_.meshsize.getDy(i, j);
-  if (fabs(velocity[0]) / dx > maxValues_[0]) {
-    maxValues_[0] = fabs(velocity[0]) / dx;
+  const RealType scaledVelocityX = fabs(velocityX) / dx;
+  const RealType scaledVelocityY = fabs(velocityY) / dy;
+
+  if (scaledVelocityX > maxValues_[0]) {
+    maxValues_[0] = scaledVelocityX;
   }
-  if (fabs(velocity[1]) / dy > maxValues_[1]) {
-    maxValues_[1] = fabs(velocity[1]) / dy;
+  if (scaledVelocityY > maxValues_[1]) {
+    maxValues_[1] = scaledVelocityY;
   }
 }
 
-void Stencils::MaxUStencil::cellMaxValue(FlowField& flowField, int i, int j, int k) {
-  RealType*      velocity = flowField.getVelocity().getVector(i, j, k);
-  const RealType dx       = BoundaryStencil<FlowField>::parameters_.meshsize.getDx(i, j, k);
-  const RealType dy       = BoundaryStencil<FlowField>::parameters_.meshsize.getDy(i, j, k);
-  const RealType dz       = BoundaryStencil<FlowField>::parameters_.meshsize.getDz(i, j, k);
-  if (fabs(velocity[0]) / dx > maxValues_[0]) {
-    maxValues_[0] = fabs(velocity[0]) / dx;
+void Stencils::MaxUStencil::cellMaxValue(const Parameters& parameters, FlowField& flowField, int i, int j, int k) {
+  const RealType velocityX = flowField.getVelocity().getVectorElement(i, j, k, 0);
+  const RealType velocityY = flowField.getVelocity().getVectorElement(i, j, k, 1);
+  const RealType velocityZ = flowField.getVelocity().getVectorElement(i, j, k, 2);
+  const RealType dx        = parameters.meshsize.getDx(i, j, k);
+  const RealType dy        = parameters.meshsize.getDy(i, j, k);
+  const RealType dz        = parameters.meshsize.getDz(i, j, k);
+
+  const RealType scaledVelocityX = fabs(velocityX) / dx;
+  const RealType scaledVelocityY = fabs(velocityY) / dy;
+  const RealType scaledVelocityZ = fabs(velocityZ) / dz;
+
+  if (scaledVelocityX > maxValues_[0]) {
+    maxValues_[0] = scaledVelocityX;
   }
-  if (fabs(velocity[1]) / dy > maxValues_[1]) {
-    maxValues_[1] = fabs(velocity[1]) / dy;
+  if (scaledVelocityY > maxValues_[1]) {
+    maxValues_[1] = scaledVelocityY;
   }
-  if (fabs(velocity[2]) / dz > maxValues_[2]) {
-    maxValues_[2] = fabs(velocity[2]) / dz;
+  if (scaledVelocityZ > maxValues_[2]) {
+    maxValues_[2] = scaledVelocityZ;
   }
 }
 
@@ -78,4 +74,16 @@ void Stencils::MaxUStencil::reset() {
   maxValues_[2] = 0;
 }
 
-const RealType* Stencils::MaxUStencil::getMaxValues() const { return maxValues_; }
+const RealType Stencils::MaxUStencil::getMaxValue() const {
+  const RealType maxX = maxValues_[0];
+  const RealType maxY = maxValues_[1];
+  const RealType maxZ = maxValues_[2];
+
+  if (maxX >= maxY && maxX >= maxZ) {
+    return maxX;
+  } else if (maxY >= maxX && maxY >= maxZ) {
+    return maxY;
+  } else {
+    return maxZ;
+  }
+}

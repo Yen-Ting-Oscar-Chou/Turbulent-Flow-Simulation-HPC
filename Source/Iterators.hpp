@@ -4,8 +4,8 @@
 #include "Parameters.hpp"
 #include "Stencils/BoundaryStencil.hpp"
 #include "Stencils/FieldStencil.hpp"
-#include "TurbulentFlowField.hpp"
 #include "Stencils/StencilDelegate.hpp"
+#include "TurbulentFlowField.hpp"
 
 /** Iterator class
  *
@@ -57,7 +57,7 @@ public:
 
 template <class FlowFieldType>
 class FieldIteratorGPU: public Iterator<FlowFieldType> {
-  public:
+public:
   StencilDelegate& stencil_;
 
   int lowOffset_;

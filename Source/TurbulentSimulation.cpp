@@ -9,7 +9,7 @@ TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowFi
   viscosityIterator_(turbulentField_, parameters, viscosityStencil_),
   turbulentFGHStencil_(),
   turbulentFGHIterator_(turbulentField_, parameters, turbulentFGHStencil_),
-  maxViscStencil_(parameters),
+  maxViscStencil_(),
   maxViscFieldIterator_(turbulentField_, parameters, maxViscStencil_),
   maxViscBoundaryIterator_(turbulentField_, parameters, maxViscStencil_),
   turbulentPetscParallelManager_(parameters, turbulentField_) {}
@@ -18,7 +18,7 @@ void TurbulentSimulation::initializeFlowField() {
   Simulation::initializeFlowField();
   std::vector<std::tuple<RealType, RealType, RealType>> coordinateList3D;
   std::vector<std::tuple<RealType, RealType>>           coordinateList2D;
-  Stencils::ObstacleCoordinatesStencil                  obstStencil(parameters_, coordinateList2D, coordinateList3D);
+  Stencils::ObstacleCoordinatesStencil                  obstStencil(coordinateList2D, coordinateList3D);
   FieldIterator<FlowField>                              obstIterator(flowField_, parameters_, obstStencil);
   GlobalBoundaryIterator<FlowField>                     obstBoundaryIterator(flowField_, parameters_, obstStencil, 1, 0);
   obstIterator.iterate();
@@ -51,7 +51,7 @@ void TurbulentSimulation::solveTimestep() {
   setTimeStep();
   // Compute FGH
   turbulentFGHIterator_.iterate();
-  
+
   Simulation::solveTimestepHelper();
 }
 
@@ -68,17 +68,11 @@ void TurbulentSimulation::setTimeStep() {
   maxViscBoundaryIterator_.iterate();
   if (parameters_.geometry.dim == 3) {
     factor += 1.0 / (parameters_.meshsize.getDzMin() * parameters_.meshsize.getDzMin());
-    parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[2] + EPSILON);
-  } else {
-    parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[0] + EPSILON);
   }
 
-  // localMin = std::min(parameters_.timestep.dt, std::min(std::min(parameters_.flow.Re/(2 * factor), 1.0 /
-  // maxUStencil_.getMaxValues()[0]), 1.0 / maxUStencil_.getMaxValues()[1]));
-  localMin = std::min(
-    1 / (2 * (1 / parameters_.flow.Re + maxViscStencil_.getMaxValue()) * factor),
-    std::min(parameters_.timestep.dt, std::min(1 / (maxUStencil_.getMaxValues()[0] + EPSILON), 1 / (maxUStencil_.getMaxValues()[1] + EPSILON)))
-  );
+  parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValue() + EPSILON);
+
+  localMin = std::min(1 / (2 * (1 / parameters_.flow.Re + maxViscStencil_.getMaxValue()) * factor), parameters_.timestep.dt);
 
   // Here, we select the type of operation before compiling. This allows to use the correct
   // data type for MPI. Not a concern for small simulations, but useful if using heterogeneous

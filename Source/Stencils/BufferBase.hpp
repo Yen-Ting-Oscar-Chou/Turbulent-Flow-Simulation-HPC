@@ -30,22 +30,21 @@ namespace Stencils {
   template <typename FlowFieldType>
   class BufferStencilBase : public BoundaryStencil<FlowFieldType>, public BufferBase {
   public:
-    explicit BufferStencilBase(const Parameters& parameters)
-      : BoundaryStencil<FlowFieldType>(parameters) {}
+    explicit BufferStencilBase() {}
 
     ~BufferStencilBase() override = default;
 
-    void applyLeftWall(FlowFieldType& flowField, int i, int j) override = 0;
-    void applyRightWall(FlowFieldType& flowField, int i, int j) override = 0;
-    void applyBottomWall(FlowFieldType& flowField, int i, int j) override = 0;
-    void applyTopWall(FlowFieldType& flowField, int i, int j) override = 0;
+    void applyLeftWall(const Parameters& parameters, FlowFieldType& flowField, int i, int j) override = 0;
+    void applyRightWall(const Parameters& parameters, FlowFieldType& flowField, int i, int j) override = 0;
+    void applyBottomWall(const Parameters& parameters, FlowFieldType& flowField, int i, int j) override = 0;
+    void applyTopWall(const Parameters& parameters, FlowFieldType& flowField, int i, int j) override = 0;
 
-    void applyLeftWall(FlowFieldType& flowField, int i, int j, int k) override = 0;
-    void applyRightWall(FlowFieldType& flowField, int i, int j, int k) override = 0;
-    void applyBottomWall(FlowFieldType& flowField, int i, int j, int k) override = 0;
-    void applyTopWall(FlowFieldType& flowField, int i, int j, int k) override = 0;
-    void applyFrontWall(FlowFieldType& flowField, int i, int j, int k) override = 0;
-    void applyBackWall(FlowFieldType& flowField, int i, int j, int k) override = 0;
+    void applyLeftWall(const Parameters& parameters, FlowFieldType& flowField, int i, int j, int k) override = 0;
+    void applyRightWall(const Parameters& parameters, FlowFieldType& flowField, int i, int j, int k) override = 0;
+    void applyBottomWall(const Parameters& parameters, FlowFieldType& flowField, int i, int j, int k) override = 0;
+    void applyTopWall(const Parameters& parameters, FlowFieldType& flowField, int i, int j, int k) override = 0;
+    void applyFrontWall(const Parameters& parameters, FlowFieldType& flowField, int i, int j, int k) override = 0;
+    void applyBackWall(const Parameters& parameters, FlowFieldType& flowField, int i, int j, int k) override = 0;
   };
 }
 

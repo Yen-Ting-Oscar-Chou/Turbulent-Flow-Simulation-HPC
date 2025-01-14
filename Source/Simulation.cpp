@@ -8,7 +8,7 @@
 Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   parameters_(parameters),
   flowField_(flowField),
-  maxUStencil_(parameters),
+  maxUStencil_(),
   maxUFieldIterator_(flowField_, parameters, maxUStencil_),
   maxUBoundaryIterator_(flowField_, parameters, maxUStencil_),
   globalBoundaryFactory_(parameters),
@@ -38,7 +38,7 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
 void Simulation::initializeFlowField() {
   if (parameters_.simulation.scenario == "taylor-green") {
     // Currently, a particular initialisation is only required for the taylor-green vortex.
-    Stencils::InitTaylorGreenFlowFieldStencil stencil(parameters_);
+    Stencils::InitTaylorGreenFlowFieldStencil stencil;
     FieldIterator<FlowField>                  iterator(flowField_, parameters_, stencil);
     iterator.iterate();
   } else if (parameters_.simulation.scenario == "channel") {
@@ -75,7 +75,7 @@ void Simulation::initializeFlowField() {
   solver_->reInitMatrix();
 }
 
-void Simulation::solveTimestep() { 
+void Simulation::solveTimestep() {
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
   // Compute FGH
@@ -117,14 +117,11 @@ void Simulation::setTimeStep() {
   maxUBoundaryIterator_.iterate();
   if (parameters_.geometry.dim == 3) {
     factor += 1.0 / (parameters_.meshsize.getDzMin() * parameters_.meshsize.getDzMin());
-    parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[2] + EPSILON);
-  } else {
-    parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValues()[0] + EPSILON);
   }
 
-  localMin = std::min(
-    parameters_.flow.Re / (2 * factor), std::min(parameters_.timestep.dt, std::min(1 / (maxUStencil_.getMaxValues()[0] + EPSILON), 1 / (maxUStencil_.getMaxValues()[1] + EPSILON)))
-  );
+  parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValue() + EPSILON);
+
+  localMin = std::min(parameters_.flow.Re / (2 * factor), parameters_.timestep.dt);
 
   // Here, we select the type of operation before compiling. This allows to use the correct
   // data type for MPI. Not a concern for small simulations, but useful if using heterogeneous

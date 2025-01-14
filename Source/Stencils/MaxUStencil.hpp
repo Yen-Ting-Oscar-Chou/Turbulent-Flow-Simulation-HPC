@@ -25,7 +25,7 @@ namespace Stencils {
      * @param i Position in the X direction.
      * @param j Position in the Y direction.
      */
-    void cellMaxValue(FlowField& flowField, int i, int j);
+    void cellMaxValue(const Parameters& parameters, FlowField& flowField, int i, int j);
 
     /** Sets the maximum value arrays to the value of the cell if it surpasses the current one.
      *
@@ -35,27 +35,27 @@ namespace Stencils {
      * @param j Position in the Y direction.
      * @param k Position in the Z direction.
      */
-    void cellMaxValue(FlowField& flowField, int i, int j, int k);
+    void cellMaxValue(const Parameters& parameters, FlowField& flowField, int i, int j, int k);
 
   public:
-    MaxUStencil(const Parameters& parameters);
+    MaxUStencil();
     ~MaxUStencil() override = default;
 
 #pragma omp declare target
     void apply(const Parameters& parameters, FlowField& flowField, int i, int j) override;
     void apply(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
 
-    void applyLeftWall(FlowField& flowField, int i, int j) override;
-    void applyRightWall(FlowField& flowField, int i, int j) override;
-    void applyBottomWall(FlowField& flowField, int i, int j) override;
-    void applyTopWall(FlowField& flowField, int i, int j) override;
+    void applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
+    void applyRightWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
+    void applyBottomWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
+    void applyTopWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
 
-    void applyLeftWall(FlowField& flowField, int i, int j, int k) override;
-    void applyRightWall(FlowField& flowField, int i, int j, int k) override;
-    void applyBottomWall(FlowField& flowField, int i, int j, int k) override;
-    void applyTopWall(FlowField& flowField, int i, int j, int k) override;
-    void applyFrontWall(FlowField& flowField, int i, int j, int k) override;
-    void applyBackWall(FlowField& flowField, int i, int j, int k) override;
+    void applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
+    void applyRightWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
+    void applyBottomWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
+    void applyTopWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
+    void applyFrontWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
+    void applyBackWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
 
     /** Resets the maximum values to zero before computing the timestep.
      */
@@ -64,9 +64,9 @@ namespace Stencils {
     /** Returns the array with the maximum modules of the components of the velocity,
      *  divided by the respective local meshsize.
      */
-    const RealType* getMaxValues() const;
+    const RealType getMaxValue() const;
 
-    #pragma omp end declare target
+#pragma omp end declare target
   };
 
 } // namespace Stencils

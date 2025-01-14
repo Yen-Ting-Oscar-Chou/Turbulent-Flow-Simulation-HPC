@@ -1,6 +1,5 @@
 #pragma once
 
-#include "IteratorsGPU.hpp"
 #include "ParallelManagers/TurbulentPetscParallelManager.hpp"
 #include "Simulation.hpp"
 #include "Stencils/DistanceStencil.hpp"
@@ -14,20 +13,14 @@
 class TurbulentSimulation: public Simulation {
 private:
   TurbulentFlowField&                             turbulentField_;
-  StencilDelegate                                 viscosityStencil_;
-  GPUFieldIteratorTurbulent                                viscosityIterator_;
-  StencilDelegate                                 turbulentFGHStencil_;
-  GPUFieldIteratorTurbulent                                turbulentFGHIterator_;
+  Stencils::ViscosityStencil                      viscosityStencil_;
+  FieldIterator<TurbulentFlowField>               viscosityIterator_;
+  Stencils::TurbulentFGHStencil                   turbulentFGHStencil_;
+  FieldIterator<TurbulentFlowField>               turbulentFGHIterator_;
   Stencils::MaxViscStencil                        maxViscStencil_;
   FieldIterator<TurbulentFlowField>               maxViscFieldIterator_;
   GlobalBoundaryIterator<TurbulentFlowField>      maxViscBoundaryIterator_;
   ParallelManagers::TurbulentPetscParallelManager turbulentPetscParallelManager_;
-
-  StencilDelegate  velocityStencil__;
-  GPUFieldIterator velocityIterator__;
-
-  StencilDelegate  rhsStencil__;
-  GPUFieldIterator rhsIterator__;
 
 protected:
   void setTimeStep() override;

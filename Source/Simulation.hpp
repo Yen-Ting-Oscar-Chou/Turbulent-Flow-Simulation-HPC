@@ -4,7 +4,6 @@
 #include "FlowField.hpp"
 #include "GlobalBoundaryFactory.hpp"
 #include "Iterators.hpp"
-#include "IteratorsGPU.hpp"
 #include "ParallelManagers/PetscParallelManager.hpp"
 #include "Solvers/LinearSolver.hpp"
 #include "Stencils/BFInputStencils.hpp"
@@ -36,15 +35,15 @@ protected:
   GlobalBoundaryIterator<FlowField> wallVelocityIterator_;
   GlobalBoundaryIterator<FlowField> wallFGHIterator_;
 
-  StencilDelegate  fghStencil_;
-  GPUFieldIterator fghIterator_;
+  Stencils::FGHStencil     fghStencil_;
+  FieldIterator<FlowField> fghIterator_;
 
-  StencilDelegate  rhsStencil_;
-  GPUFieldIterator rhsIterator_;
+  Stencils::RHSStencil     rhsStencil_;
+  FieldIterator<FlowField> rhsIterator_;
 
-  StencilDelegate           velocityStencil_;
+  Stencils::VelocityStencil velocityStencil_;
   Stencils::ObstacleStencil obstacleStencil_;
-  GPUFieldIterator          velocityIterator_;
+  FieldIterator<FlowField>  velocityIterator_;
   FieldIterator<FlowField>  obstacleIterator_;
 
   ParallelManagers::PetscParallelManager petscParallelManager_;

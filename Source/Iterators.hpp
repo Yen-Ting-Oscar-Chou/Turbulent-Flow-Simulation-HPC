@@ -1,11 +1,11 @@
 #pragma once
 
+#include "FlowField.hpp"
 #include "Parameters.hpp"
-
 #include "Stencils/BoundaryStencil.hpp"
 #include "Stencils/FieldStencil.hpp"
-#include "FlowField.hpp"
 #include "TurbulentFlowField.hpp"
+#include "Stencils/StencilDelegate.hpp"
 
 /** Iterator class
  *
@@ -17,8 +17,8 @@ protected:
   const Parameters& parameters_;
 
 public:
-  FlowFieldType&    flowField_;
-  
+  FlowFieldType& flowField_;
+
   Iterator(FlowFieldType& flowfield, const Parameters& parameters):
     flowField_(flowfield),
     parameters_(parameters) {}
@@ -43,13 +43,7 @@ private:
   //@}
 
 public:
-  FieldIterator(
-    FlowFieldType&                         flowField,
-    const Parameters&                      parameters,
-    Stencils::FieldStencil<FlowFieldType>& stencil,
-    int                                    lowOffset  = 0,
-    int                                    highOffset = 0
-  );
+  FieldIterator(FlowFieldType& flowField, const Parameters& parameters, Stencils::FieldStencil<FlowFieldType>& stencil, int lowOffset = 0, int highOffset = 0);
 
   virtual ~FieldIterator() override = default;
 
@@ -59,6 +53,24 @@ public:
    * boundaries. Lower boundaries are not included.
    */
   virtual void iterate() override;
+};
+
+template <class FlowFieldType>
+class FieldIteratorGPU: public Iterator<FlowFieldType> {
+  public:
+  StencilDelegate& stencil_;
+
+  int lowOffset_;
+  int highOffset_;
+
+  FieldIteratorGPU(FlowFieldType& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
+
+  /** Volume iteration over the field.
+   *
+   * Volume iteration. The stencil will be applied to all cells in the domain plus the upper
+   * boundaries. Lower boundaries are not included.
+   */
+  virtual void iterate(StencilType type) override;
 };
 
 template <class FlowFieldType>
@@ -76,13 +88,7 @@ private:
   Stencils::BoundaryStencil<FlowFieldType>& backWallStencil_;
 
 public:
-  GlobalBoundaryIterator(
-    FlowFieldType&                            flowField,
-    const Parameters&                         parameters,
-    Stencils::BoundaryStencil<FlowFieldType>& stencil,
-    int                                       lowOffset  = 0,
-    int                                       highOffset = 0
-  );
+  GlobalBoundaryIterator(FlowFieldType& flowField, const Parameters& parameters, Stencils::BoundaryStencil<FlowFieldType>& stencil, int lowOffset = 0, int highOffset = 0);
 
   GlobalBoundaryIterator(
     FlowFieldType&                            flowField,
@@ -126,13 +132,7 @@ private:
   const int highOffset_;
 
 public:
-  ParallelBoundaryIterator(
-    FlowFieldType&                            flowField,
-    const Parameters&                         parameters,
-    Stencils::BoundaryStencil<FlowFieldType>& stencil,
-    int                                       lowOffset  = 0,
-    int                                       highOffset = 0
-  );
+  ParallelBoundaryIterator(FlowFieldType& flowField, const Parameters& parameters, Stencils::BoundaryStencil<FlowFieldType>& stencil, int lowOffset = 0, int highOffset = 0);
 
   virtual ~ParallelBoundaryIterator() override = default;
 

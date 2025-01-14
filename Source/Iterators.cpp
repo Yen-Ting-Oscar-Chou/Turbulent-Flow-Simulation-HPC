@@ -37,6 +37,41 @@ void FieldIterator<FlowFieldType>::iterate() {
 }
 
 template <class FlowFieldType>
+FieldIteratorGPU<FlowFieldType>::FieldIteratorGPU(FlowFieldType& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset, int highOffset):
+  Iterator<FlowFieldType>(flowField, parameters),
+  stencil_(stencil),
+  lowOffset_(lowOffset),
+  highOffset_(highOffset) {}
+
+template <class FlowFieldType>
+void FieldIteratorGPU<FlowFieldType>::iterate(StencilType type) {
+  const int cellsX = Iterator<FlowFieldType>::flowField_.getCellsX();
+  const int cellsY = Iterator<FlowFieldType>::flowField_.getCellsY();
+  const int cellsZ = Iterator<FlowFieldType>::flowField_.getCellsZ();
+  stencil_.setType(type);
+  // The index k can be used for the 2D and 3D cases.
+  if (Iterator<FlowFieldType>::parameters_.geometry.dim == 2) {
+    // Loop without lower boundaries. These will be dealt with by the global boundary stencils
+    // or by the subdomain boundary iterators.
+    for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
+      for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
+        stencil_.apply(Iterator<FlowFieldType>::parameters_, Iterator<FlowFieldType>::flowField_, i, j);
+      }
+    }
+  }
+
+  if (Iterator<FlowFieldType>::parameters_.geometry.dim == 3) {
+    for (int k = 1 + lowOffset_; k < cellsZ - 1 + highOffset_; k++) {
+      for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
+        for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
+          stencil_.apply(Iterator<FlowFieldType>::parameters_, Iterator<FlowFieldType>::flowField_, i, j, k);
+        }
+      }
+    }
+  }
+}
+
+template <class FlowFieldType>
 GlobalBoundaryIterator<FlowFieldType>::GlobalBoundaryIterator(
   FlowFieldType& flowField, const Parameters& parameters, Stencils::BoundaryStencil<FlowFieldType>& stencil, int lowOffset, int highOffset
 ):

@@ -5,15 +5,9 @@
 TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowField& flowField):
   Simulation(parameters, flowField),
   turbulentField_(flowField),
-  rhsStencil__(RHS),
-  rhsIterator__(flowField_, parameters, rhsStencil__),
-  velocityStencil__(VELOCITY),
-  velocityIterator__(flowField_, parameters, velocityStencil__),
-  viscosityStencil_(VISCOSITY),
-  // viscosityStencil_(),
+  viscosityStencil_(),
   viscosityIterator_(turbulentField_, parameters, viscosityStencil_),
-  turbulentFGHStencil_(TURBFGH),
-  // turbulentFGHStencil_(),
+  turbulentFGHStencil_(),
   turbulentFGHIterator_(turbulentField_, parameters, turbulentFGHStencil_),
   maxViscStencil_(parameters),
   maxViscFieldIterator_(turbulentField_, parameters, maxViscStencil_),
@@ -58,21 +52,7 @@ void TurbulentSimulation::solveTimestep() {
   // Compute FGH
   turbulentFGHIterator_.iterate();
   
-  // Set global boundary values
-  Simulation::wallFGHIterator_.iterate();
-  // Compute the right hand side (RHS)
-  rhsIterator__.iterate();
-  // Solve for pressure
-  Simulation::solver_->solve();
-  // TODO WS2: communicate pressure values
-  Simulation::petscParallelManager_.communicatePressure();
-  // Compute velocity
-  velocityIterator__.iterate();
-  Simulation::obstacleIterator_.iterate();
-  // TODO WS2: communicate velocity values
-  Simulation::petscParallelManager_.communicateVelocities();
-  // Iterate for velocities on the boundary
-  Simulation::wallVelocityIterator_.iterate();
+  Simulation::solveTimestepHelper();
 }
 
 void TurbulentSimulation::setTimeStep() {

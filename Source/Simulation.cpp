@@ -14,11 +14,11 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   globalBoundaryFactory_(parameters),
   wallVelocityIterator_(globalBoundaryFactory_.getGlobalBoundaryVelocityIterator(flowField_)),
   wallFGHIterator_(globalBoundaryFactory_.getGlobalBoundaryFGHIterator(flowField_)),
-  fghStencil_(FGH),
+  fghStencil_(),
   fghIterator_(flowField_, parameters, fghStencil_),
-  rhsStencil_(RHS),
+  rhsStencil_(),
   rhsIterator_(flowField_, parameters, rhsStencil_),
-  velocityStencil_(VELOCITY),
+  velocityStencil_(),
   obstacleStencil_(),
   velocityIterator_(flowField_, parameters, velocityStencil_),
   obstacleIterator_(flowField_, parameters, obstacleStencil_),
@@ -75,7 +75,7 @@ void Simulation::initializeFlowField() {
   solver_->reInitMatrix();
 }
 
-void Simulation::solveTimestep() {
+void Simulation::solveTimestep() { 
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
   // Compute FGH

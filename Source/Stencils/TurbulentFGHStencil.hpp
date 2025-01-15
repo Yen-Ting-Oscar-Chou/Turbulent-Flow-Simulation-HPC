@@ -20,8 +20,6 @@ namespace Stencils {
 #pragma omp declare target
     void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
     void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyGPU(const Parameters& parameters, VectorField& fgh, ScalarField& viscosity, VectorField& velocity, [[maybe_unused]] IntScalarField& flags, int i, int j);
-    void applyGPU(const Parameters& parameters, VectorField& fgh, ScalarField& viscosity, VectorField& velocity, [[maybe_unused]] IntScalarField& flags, int i, int j, int k);
 #pragma omp end declare target
   };
 

@@ -8,4 +8,12 @@ StencilDelegate::StencilDelegate(StencilType type):
   turbulentFGHStencil(),
   velocityStencil(),
   viscosityStencil(),
-  rhsStencil() {};
+  rhsStencil(),
+  maxUStencil(),
+  obstacleStencil(),
+  neumannFGHBoundaryStencil(),
+  neumannVelocityBoundaryStencil(),
+  movingWallFGHStencil(),
+  movingWallVelocityStencil(),
+  bfInputFGHStencil(),
+  bfInputVelocityStencil() {};

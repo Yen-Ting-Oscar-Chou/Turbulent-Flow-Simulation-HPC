@@ -33,18 +33,8 @@ namespace Stencils {
   inline void loadLocalVelocity2D(FlowField& flowField, RealType* const localVelocity, int i, int j) {
     for (int row = -1; row <= 1; row++) {
       for (int column = -1; column <= 1; column++) {
-        const RealType* const point                  = flowField.getVelocity().getVector(i + column, j + row);
-        localVelocity[39 + 9 * row + 3 * column]     = point[0]; // x-component
-        localVelocity[39 + 9 * row + 3 * column + 1] = point[1]; // y-component
-      }
-    }
-  }
-
-  inline void loadLocalVelocity2D(VectorField& velocity, RealType* const localVelocity, int i, int j) {
-    for (int row = -1; row <= 1; row++) {
-      for (int column = -1; column <= 1; column++) {
-        localVelocity[39 + 9 * row + 3 * column]     = velocity.getVectorElement(i + column, j + row, 0); // x-component
-        localVelocity[39 + 9 * row + 3 * column + 1] = velocity.getVectorElement(i + column, j + row, 1); // y-component
+        localVelocity[39 + 9 * row + 3 * column]     = flowField.getVelocity().getVectorElement(i + column, j + row, 0); // x-component
+        localVelocity[39 + 9 * row + 3 * column + 1] = flowField.getVelocity().getVectorElement(i + column, j + row, 1); // y-component
       }
     }
   }
@@ -54,22 +44,9 @@ namespace Stencils {
     for (int layer = -1; layer <= 1; layer++) {
       for (int row = -1; row <= 1; row++) {
         for (int column = -1; column <= 1; column++) {
-          const RealType* const point                               = flowField.getVelocity().getVector(i + column, j + row, k + layer);
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column]     = point[0]; // x-component
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 1] = point[1]; // y-component
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 2] = point[2]; // z-component
-        }
-      }
-    }
-  }
-
-    inline void loadLocalVelocity3D(VectorField& velocity, RealType* const localVelocity, int i, int j, int k) {
-    for (int layer = -1; layer <= 1; layer++) {
-      for (int row = -1; row <= 1; row++) {
-        for (int column = -1; column <= 1; column++) {
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column]     = velocity.getVectorElement(i + column, j + row, k + layer, 0); // x-component
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 1] = velocity.getVectorElement(i + column, j + row, k + layer, 1); // y-component
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 2] = velocity.getVectorElement(i + column, j + row, k + layer, 2); // z-component
+          localVelocity[39 + 27 * layer + 9 * row + 3 * column]     = flowField.getVelocity().getVectorElement(i + column, j + row, k + layer, 0); // x-component
+          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 1] = flowField.getVelocity().getVectorElement(i + column, j + row, k + layer, 1); // y-component
+          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 2] = flowField.getVelocity().getVectorElement(i + column, j + row, k + layer, 2); // z-component
         }
       }
     }

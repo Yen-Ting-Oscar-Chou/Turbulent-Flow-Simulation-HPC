@@ -36,40 +36,11 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
 }
 
 void Simulation::initializeFlowField() {
-  if (parameters_.simulation.scenario == "taylor-green") {
-    // Currently, a particular initialisation is only required for the taylor-green vortex.
-    Stencils::InitTaylorGreenFlowFieldStencil stencil;
-    FieldIterator<FlowField>                  iterator(flowField_, parameters_, stencil);
-    iterator.iterate();
-  } else if (parameters_.simulation.scenario == "channel") {
+  if (parameters_.simulation.scenario == CHANNEL) {
     Stencils::BFStepInitStencil stencil(parameters_);
     FieldIterator<FlowField>    iterator(flowField_, parameters_, stencil, 0, 1);
     iterator.iterate();
     wallVelocityIterator_.iterate();
-  } else if (parameters_.simulation.scenario == "pressure-channel") {
-    // Set pressure boundaries here for left wall
-    const RealType value = parameters_.walls.scalarLeft;
-    ScalarField&   rhs   = flowField_.getRHS();
-
-    if (parameters_.geometry.dim == 2) {
-      const int sizey = flowField_.getNy();
-      for (int i = 0; i < sizey + 3; i++) {
-        rhs.getScalar(0, i) = value;
-      }
-    } else {
-      const int sizey = flowField_.getNy();
-      const int sizez = flowField_.getNz();
-      for (int i = 0; i < sizey + 3; i++) {
-        for (int j = 0; j < sizez + 3; j++) {
-          rhs.getScalar(0, i, j) = value;
-        }
-      }
-    }
-
-    // Do same procedure for domain flagging as for regular channel
-    Stencils::BFStepInitStencil stencil(parameters_);
-    FieldIterator<FlowField>    iterator(flowField_, parameters_, stencil, 0, 1);
-    iterator.iterate();
   }
 
   solver_->reInitMatrix();

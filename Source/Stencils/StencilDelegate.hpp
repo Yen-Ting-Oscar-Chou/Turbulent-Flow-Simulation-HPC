@@ -1,26 +1,43 @@
 #pragma once
 
+#include "BFInputStencils.hpp"
 #include "DistanceStencil.hpp"
 #include "FGHStencil.hpp"
 #include "MaxUStencil.hpp"
 #include "MaxViscStencil.hpp"
+#include "MovingWallStencils.hpp"
+#include "NeumannBoundaryStencils.hpp"
 #include "ObstacleCoordinatesStencil.hpp"
 #include "ObstacleStencil.hpp"
+#include "PeriodicBoundaryStencils.hpp"
 #include "RHSStencil.hpp"
 #include "TurbulentFGHStencil.hpp"
 #include "VelocityStencil.hpp"
 #include "ViscosityStencil.hpp"
 
-enum StencilType { FGH, RHS, TURBFGH, VELOCITY, VISCOSITY };
+enum StencilType { FGH, RHS, TURBFGH, VELOCITY, VISCOSITY, MAXU, OBSTACLE, WALLFGH, WALLVELOCITY };
 
 class StencilDelegate {
 public:
-  StencilType                   stencilType;
+  StencilType stencilType;
+
   Stencils::FGHStencil          fghStencil;
   Stencils::RHSStencil          rhsStencil;
   Stencils::TurbulentFGHStencil turbulentFGHStencil;
   Stencils::VelocityStencil     velocityStencil;
   Stencils::ViscosityStencil    viscosityStencil;
+  Stencils::MaxUStencil         maxUStencil;
+  Stencils::ObstacleStencil     obstacleStencil;
+
+  Stencils::MovingWallVelocityStencil movingWallVelocityStencil;
+  Stencils::MovingWallFGHStencil      movingWallFGHStencil;
+
+  Stencils::NeumannVelocityBoundaryStencil neumannVelocityBoundaryStencil;
+  Stencils::NeumannFGHBoundaryStencil      neumannFGHBoundaryStencil;
+
+  Stencils::BFInputVelocityStencil bfInputVelocityStencil;
+  Stencils::BFInputFGHStencil      bfInputFGHStencil;
+
 
   StencilDelegate(const StencilType type);
   ~StencilDelegate() = default;
@@ -37,6 +54,10 @@ public:
 
     case VELOCITY:
       velocityStencil.apply(parameters, flowField, i, j);
+      break;
+
+    case OBSTACLE:
+      obstacleStencil.apply(parameters, flowField, i, j);
       break;
 
     default:
@@ -56,6 +77,10 @@ public:
 
     case VELOCITY:
       velocityStencil.apply(parameters, flowField, i, j, k);
+      break;
+
+    case OBSTACLE:
+      obstacleStencil.apply(parameters, flowField, i, j, k);
       break;
 
     default:
@@ -88,6 +113,206 @@ public:
       turbulentFGHStencil.apply(parameters, flowField, i, j, k);
       break;
 
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      if (scenario == CAVITY) {
+        movingWallFGHStencil.applyLeftWall(parameters, flowField, i, j, k);
+      } else if (scenario == CHANNEL) {
+        bfInputFGHStencil.applyLeftWall(parameters, flowField, i, j, k);
+      }
+      break;
+    case WALLVELOCITY:
+      if (scenario == CAVITY) {
+        movingWallVelocityStencil.applyLeftWall(parameters, flowField, i, j, k);
+      } else if (scenario == CHANNEL) {
+        bfInputVelocityStencil.applyLeftWall(parameters, flowField, i, j, k);
+      }
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyRightWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      if (scenario == CAVITY) {
+        movingWallFGHStencil.applyRightWall(parameters, flowField, i, j, k);
+      } else if (scenario == CHANNEL) {
+        neumannFGHBoundaryStencil.applyRightWall(parameters, flowField, i, j, k);
+      }
+      break;
+    case WALLVELOCITY:
+      if (scenario == CAVITY) {
+        movingWallVelocityStencil.applyRightWall(parameters, flowField, i, j, k);
+      } else if (scenario == CHANNEL) {
+        neumannVelocityBoundaryStencil.applyRightWall(parameters, flowField, i, j, k);
+      }
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyTopWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      movingWallFGHStencil.applyTopWall(parameters, flowField, i, j, k);
+      break;
+    case WALLVELOCITY:
+      movingWallVelocityStencil.applyTopWall(parameters, flowField, i, j, k);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyBottomWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      movingWallFGHStencil.applyBottomWall(parameters, flowField, i, j, k);
+      break;
+    case WALLVELOCITY:
+      movingWallVelocityStencil.applyBottomWall(parameters, flowField, i, j, k);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyFrontWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      movingWallFGHStencil.applyFrontWall(parameters, flowField, i, j, k);
+      break;
+    case WALLVELOCITY:
+      movingWallVelocityStencil.applyFrontWall(parameters, flowField, i, j, k);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyBackWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      movingWallFGHStencil.applyBackWall(parameters, flowField, i, j, k);
+      break;
+    case WALLVELOCITY:
+      movingWallVelocityStencil.applyBackWall(parameters, flowField, i, j, k);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      if (scenario == CAVITY) {
+        movingWallFGHStencil.applyLeftWall(parameters, flowField, i, j);
+      } else if (scenario == CHANNEL) {
+        bfInputFGHStencil.applyLeftWall(parameters, flowField, i, j);
+      }
+      break;
+    case WALLVELOCITY:
+      if (scenario == CAVITY) {
+        movingWallVelocityStencil.applyLeftWall(parameters, flowField, i, j);
+      } else if (scenario == CHANNEL) {
+        bfInputVelocityStencil.applyLeftWall(parameters, flowField, i, j);
+      }
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyRightWall(const Parameters& parameters, FlowField& flowField, int i, int j) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      if (scenario == CAVITY) {
+        movingWallFGHStencil.applyRightWall(parameters, flowField, i, j);
+      } else if (scenario == CHANNEL) {
+        neumannFGHBoundaryStencil.applyRightWall(parameters, flowField, i, j);
+      }
+      break;
+    case WALLVELOCITY:
+      if (scenario == CAVITY) {
+        movingWallVelocityStencil.applyRightWall(parameters, flowField, i, j);
+      } else if (scenario == CHANNEL) {
+        neumannVelocityBoundaryStencil.applyRightWall(parameters, flowField, i, j);
+      }
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyTopWall(const Parameters& parameters, FlowField& flowField, int i, int j) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      movingWallFGHStencil.applyTopWall(parameters, flowField, i, j);
+      break;
+    case WALLVELOCITY:
+      movingWallVelocityStencil.applyTopWall(parameters, flowField, i, j);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyBottomWall(const Parameters& parameters, FlowField& flowField, int i, int j) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      movingWallFGHStencil.applyBottomWall(parameters, flowField, i, j);
+      break;
+    case WALLVELOCITY:
+      movingWallVelocityStencil.applyBottomWall(parameters, flowField, i, j);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyFrontWall(const Parameters& parameters, FlowField& flowField, int i, int j) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      movingWallFGHStencil.applyFrontWall(parameters, flowField, i, j);
+      break;
+    case WALLVELOCITY:
+      movingWallVelocityStencil.applyFrontWall(parameters, flowField, i, j);
+      break;
+    default:
+      assert(false);
+    }
+  }
+
+  inline void applyBackWall(const Parameters& parameters, FlowField& flowField, int i, int j) {
+    ScenarioType scenario = parameters.simulation.scenario;
+    switch (stencilType) {
+    case WALLFGH:
+      movingWallFGHStencil.applyBackWall(parameters, flowField, i, j);
+      break;
+    case WALLVELOCITY:
+      movingWallVelocityStencil.applyBackWall(parameters, flowField, i, j);
+      break;
     default:
       assert(false);
     }

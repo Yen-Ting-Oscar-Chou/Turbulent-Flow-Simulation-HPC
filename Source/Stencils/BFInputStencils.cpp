@@ -40,8 +40,11 @@ RealType computeVelocity2D(int i, int j, RealType stepSize, const Parameters& pa
   }
 }
 
-Stencils::BFInputVelocityStencil::BFInputVelocityStencil(const Parameters& parameters):
-  stepSize_(parameters.bfStep.yRatio > 0.0 ? parameters.bfStep.yRatio * parameters.geometry.lengthY : 0.0) {
+Stencils::BFInputVelocityStencil::BFInputVelocityStencil():
+  stepSize_(-1) {}
+
+void Stencils::BFInputVelocityStencil::initStepSize(const Parameters& parameters) {
+  stepSize_ = parameters.bfStep.yRatio > 0.0 ? parameters.bfStep.yRatio * parameters.geometry.lengthY : 0.0;
 
   if (parameters.geometry.dim == 2) {
     RealType posY   = parameters.meshsize.getPosY(0, 0);
@@ -78,42 +81,92 @@ Stencils::BFInputVelocityStencil::BFInputVelocityStencil(const Parameters& param
 }
 
 void Stencils::BFInputVelocityStencil::applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j) {
-  flowField.getVelocity().getVector(i, j)[0] = computeVelocity2D(i, j, stepSize_, parameters);
-  flowField.getVelocity().getVector(i, j)[1] = -flowField.getVelocity().getVector(i + 1, j)[1];
+  if(stepSize_ == -1) {
+    initStepSize(parameters);
+  }
+  flowField.getVelocity().getVectorElement(i, j, 0) = computeVelocity2D(i, j, stepSize_, parameters);
+  flowField.getVelocity().getVectorElement(i, j, 1) = -flowField.getVelocity().getVectorElement(i + 1, j, 1);
 }
 
 // Most of the functions are empty, and they shouldn't be called, assuming that the input is always located at the left.
-void Stencils::BFInputVelocityStencil::applyRightWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j) {}
-void Stencils::BFInputVelocityStencil::applyBottomWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j) {}
-void Stencils::BFInputVelocityStencil::applyTopWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j) {}
+void Stencils::BFInputVelocityStencil::applyRightWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j
+) {}
+void Stencils::BFInputVelocityStencil::applyBottomWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j
+) {}
+void Stencils::BFInputVelocityStencil::applyTopWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j
+) {}
 
 void Stencils::BFInputVelocityStencil::applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) {
-  flowField.getVelocity().getVector(i, j, k)[0] = computeVelocity3D(i, j, k, stepSize_, parameters);
-  flowField.getVelocity().getVector(i, j, k)[1] = -flowField.getVelocity().getVector(i + 1, j, k)[1];
-  flowField.getVelocity().getVector(i, j, k)[2] = -flowField.getVelocity().getVector(i + 1, j, k)[2];
+  if(stepSize_ == -1) {
+    initStepSize(parameters);
+  }
+  flowField.getVelocity().getVectorElement(i, j, k, 0) = computeVelocity3D(i, j, k, stepSize_, parameters);
+  flowField.getVelocity().getVectorElement(i, j, k, 1) = -flowField.getVelocity().getVectorElement(i + 1, j, k, 1);
+  flowField.getVelocity().getVectorElement(i, j, k, 2) = -flowField.getVelocity().getVectorElement(i + 1, j, k, 2);
 }
 
-void Stencils::BFInputVelocityStencil::applyRightWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) {}
-void Stencils::BFInputVelocityStencil::applyBottomWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) {}
-void Stencils::BFInputVelocityStencil::applyTopWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) {}
-void Stencils::BFInputVelocityStencil::applyFrontWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) {}
-void Stencils::BFInputVelocityStencil::applyBackWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) {}
+void Stencils::BFInputVelocityStencil::applyRightWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k
+) {}
+void Stencils::BFInputVelocityStencil::applyBottomWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k
+) {}
+void Stencils::BFInputVelocityStencil::applyTopWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k
+) {}
+void Stencils::BFInputVelocityStencil::applyFrontWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k
+) {}
+void Stencils::BFInputVelocityStencil::applyBackWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k
+) {}
 
-Stencils::BFInputFGHStencil::BFInputFGHStencil(const Parameters& parameters):
-  stepSize_(parameters.bfStep.yRatio > 0.0 ? parameters.bfStep.yRatio * parameters.geometry.lengthY : 0.0) {}
+Stencils::BFInputFGHStencil::BFInputFGHStencil():
+  stepSize_(-1) {}
 
-void Stencils::BFInputFGHStencil::applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j) { flowField.getFGH().getVector(i, j)[0] = computeVelocity2D(i, j, stepSize_, parameters); }
+inline void Stencils::BFInputFGHStencil::initStepSize(const Parameters& parameters) {
+  stepSize_ = parameters.bfStep.yRatio > 0.0 ? parameters.bfStep.yRatio * parameters.geometry.lengthY : 0.0;
+}
 
-void Stencils::BFInputFGHStencil::applyRightWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j) {}
-void Stencils::BFInputFGHStencil::applyBottomWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j) {}
-void Stencils::BFInputFGHStencil::applyTopWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j) {}
+void Stencils::BFInputFGHStencil::applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j) {
+  if(stepSize_ == -1) {
+    initStepSize(parameters);
+  }
+  flowField.getFGH().getVectorElement(i, j, 0) = computeVelocity2D(i, j, stepSize_, parameters);
+}
+
+void Stencils::BFInputFGHStencil::applyRightWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j
+) {}
+void Stencils::BFInputFGHStencil::applyBottomWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j
+) {}
+void Stencils::BFInputFGHStencil::applyTopWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j
+) {}
 
 void Stencils::BFInputFGHStencil::applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) {
-  flowField.getFGH().getVector(i, j, k)[0] = computeVelocity3D(i, j, k, stepSize_, parameters);
+  if(stepSize_ == -1) {
+    initStepSize(parameters);
+  }
+  flowField.getFGH().getVectorElement(i, j, k, 0) = computeVelocity3D(i, j, k, stepSize_, parameters);
 }
 
-void Stencils::BFInputFGHStencil::applyRightWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) {}
-void Stencils::BFInputFGHStencil::applyBottomWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) {}
-void Stencils::BFInputFGHStencil::applyTopWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) {}
-void Stencils::BFInputFGHStencil::applyFrontWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) {}
-void Stencils::BFInputFGHStencil::applyBackWall([[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k) {}
+void Stencils::BFInputFGHStencil::applyRightWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k
+) {}
+void Stencils::BFInputFGHStencil::applyBottomWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k
+) {}
+void Stencils::BFInputFGHStencil::applyTopWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k
+) {}
+void Stencils::BFInputFGHStencil::applyFrontWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k
+) {}
+void Stencils::BFInputFGHStencil::applyBackWall(
+  [[maybe_unused]] const Parameters& parameters, [[maybe_unused]] FlowField& flowField, [[maybe_unused]] int i, [[maybe_unused]] int j, [[maybe_unused]] int k
+) {}

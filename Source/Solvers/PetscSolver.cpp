@@ -390,7 +390,7 @@ PetscErrorCode computeMatrix2D([[maybe_unused]] KSP ksp, Mat A, [[maybe_unused]]
                                                                                                                 // fluid
                                                                                                                 // somewhere
                                                                                                                 // around.
-        int counter      = 0; // This will contain how many neighbours are fluid
+        int counter      = 0;                                                                                   // This will contain how many neighbours are fluid
         int counterFluid = 0;
         // TODO: variable meshwidth might have to be considered
         if ((obstacle & OBSTACLE_LEFT) == 0) { // If there is fluid to the left
@@ -587,9 +587,7 @@ PetscErrorCode computeMatrix3D([[maybe_unused]] KSP ksp, Mat A, [[maybe_unused]]
   Nz = parameters.geometry.sizeZ + 2;
 
   // Loop for inner nodes
-  spdlog::trace(
-    "Limits: {}, {}, {}, {}, {}, {}", limitsX[0], limitsX[1], limitsY[0], limitsY[1], limitsZ[0], limitsZ[1]
-  );
+  spdlog::trace("Limits: {}, {}, {}, {}, {}, {}", limitsX[0], limitsX[1], limitsY[0], limitsY[1], limitsZ[0], limitsZ[1]);
   for (k = limitsZ[0]; k < limitsZ[1]; k++) {
     for (j = limitsY[0]; j < limitsY[1]; j++) {
       for (i = limitsX[0]; i < limitsX[1]; i++) {
@@ -958,14 +956,8 @@ PetscErrorCode computeRHS2D(KSP ksp, Vec b, void* ctx) {
   // Iteration domains are going to be set and the values on the global boundary set when necessary
   // Check left wall
   if (context->setAsBoundary & LEFT_WALL_BIT) {
-    if (parameters.simulation.scenario == "pressure-channel") {
-      for (j = limitsY[0]; j < limitsY[1]; j++) {
-        array[j][0] = RHS.getScalar(0, j);
-      }
-    } else {
-      for (j = limitsY[0]; j < limitsY[1]; j++) {
-        array[j][0] = 0;
-      }
+    for (j = limitsY[0]; j < limitsY[1]; j++) {
+      array[j][0] = 0;
     }
   }
 
@@ -1020,8 +1012,8 @@ PetscErrorCode computeRHS3D(KSP ksp, Vec b, void* ctx) {
   int *limitsX, *limitsY, *limitsZ;
   static_cast<Solvers::PetscUserCtx*>(ctx)->getLimits(&limitsX, &limitsY, &limitsZ);
 
-  PetscInt i, j, k;
-  PetscInt Nx = parameters.geometry.sizeX + 2, Ny = parameters.geometry.sizeY + 2, Nz = parameters.geometry.sizeZ + 2;
+  PetscInt       i, j, k;
+  PetscInt       Nx = parameters.geometry.sizeX + 2, Ny = parameters.geometry.sizeY + 2, Nz = parameters.geometry.sizeZ + 2;
   PetscScalar*** array;
 
   DM da;
@@ -1034,17 +1026,9 @@ PetscErrorCode computeRHS3D(KSP ksp, Vec b, void* ctx) {
 
   // Left wall
   if (context->setAsBoundary & LEFT_WALL_BIT) {
-    if (parameters.simulation.scenario == "pressure-channel") {
-      for (k = limitsZ[0]; k < limitsZ[1]; k++) {
-        for (j = limitsY[0]; j < limitsY[1]; j++) {
-          array[k][j][0] = RHS.getScalar(0, j, k);
-        }
-      }
-    } else {
-      for (k = limitsZ[0]; k < limitsZ[1]; k++) {
-        for (j = limitsY[0]; j < limitsY[1]; j++) {
-          array[k][j][0] = 0;
-        }
+    for (k = limitsZ[0]; k < limitsZ[1]; k++) {
+      for (j = limitsY[0]; j < limitsY[1]; j++) {
+        array[k][j][0] = 0;
       }
     }
   }

@@ -36,79 +36,79 @@ void Stencils::ObstacleCoordinatesStencil::addToList(const Parameters& parameter
 }
 
 void Stencils::ObstacleCoordinatesStencil::applyLeftWall(const Parameters& parameters, [[maybe_unused]] FlowField& flowField, int i, int j) {
-  std::string scenario = parameters.simulation.scenario;
-  if (scenario == "cavity") {
+  ScenarioType scenario = parameters.simulation.scenario;
+  if (scenario == CAVITY) {
     addToList(parameters, i, j);
-  } else if (scenario == "channel") {
+  } else if (scenario == CHANNEL) {
     addToList(parameters, i, j);
   }
 }
 void Stencils::ObstacleCoordinatesStencil::applyRightWall(const Parameters& parameters, [[maybe_unused]] FlowField& flowField, int i, int j) {
-  std::string scenario = parameters.simulation.scenario;
-  if (scenario == "cavity") {
+  ScenarioType scenario = parameters.simulation.scenario;
+  if (scenario == CAVITY) {
     addToList(parameters, i, j);
   }
 }
 void Stencils::ObstacleCoordinatesStencil::applyBottomWall(const Parameters& parameters, [[maybe_unused]] FlowField& flowField, int i, int j) {
-  std::string scenario = parameters.simulation.scenario;
-  if (scenario == "cavity") {
+  ScenarioType scenario = parameters.simulation.scenario;
+  if (scenario == CAVITY) {
     addToList(parameters, i, j);
-  } else if (scenario == "channel") {
+  } else if (scenario == CHANNEL) {
     addToList(parameters, i, j);
   }
 }
 void Stencils::ObstacleCoordinatesStencil::applyTopWall(const Parameters& parameters, [[maybe_unused]] FlowField& flowField, int i, int j) {
-  std::string scenario = parameters.simulation.scenario;
-  if (scenario == "cavity") {
+  ScenarioType scenario = parameters.simulation.scenario;
+  if (scenario == CAVITY) {
     addToList(parameters, i, j);
-  } else if (scenario == "channel") {
+  } else if (scenario == CHANNEL) {
     addToList(parameters, i, j);
   }
 }
 
 void Stencils::ObstacleCoordinatesStencil::applyLeftWall(const Parameters& parameters, [[maybe_unused]] FlowField& flowField, int i, int j, int k) {
-  std::string scenario = parameters.simulation.scenario;
-  if (scenario == "cavity") {
+  ScenarioType scenario = parameters.simulation.scenario;
+  if (scenario == CAVITY) {
     addToList(parameters, i, j, k);
-  } else if (scenario == "channel") {
+  } else if (scenario == CHANNEL) {
     addToList(parameters, i, j, k);
   }
 }
 void Stencils::ObstacleCoordinatesStencil::applyRightWall(const Parameters& parameters, [[maybe_unused]] FlowField& flowField, int i, int j, int k) {
-  std::string scenario = parameters.simulation.scenario;
-  if (scenario == "cavity") {
+  ScenarioType scenario = parameters.simulation.scenario;
+  if (scenario == CAVITY) {
     addToList(parameters, i, j, k);
   }
 }
 void Stencils::ObstacleCoordinatesStencil::applyBottomWall(const Parameters& parameters, [[maybe_unused]] FlowField& flowField, int i, int j, int k) {
-  std::string scenario = parameters.simulation.scenario;
-  if (scenario == "cavity") {
+  ScenarioType scenario = parameters.simulation.scenario;
+  if (scenario == CAVITY) {
     addToList(parameters, i, j, k);
-  } else if (scenario == "channel") {
+  } else if (scenario == CHANNEL) {
     addToList(parameters, i, j, k);
   }
 }
 void Stencils::ObstacleCoordinatesStencil::applyTopWall(const Parameters& parameters, [[maybe_unused]] FlowField& flowField, int i, int j, int k) {
-  std::string scenario = parameters.simulation.scenario;
-  if (scenario == "cavity") {
+  ScenarioType scenario = parameters.simulation.scenario;
+  if (scenario == CAVITY) {
     addToList(parameters, i, j, k);
-  } else if (scenario == "channel") {
+  } else if (scenario == CHANNEL) {
     addToList(parameters, i, j, k);
   }
 }
 void Stencils::ObstacleCoordinatesStencil::applyFrontWall(const Parameters& parameters, [[maybe_unused]] FlowField& flowField, int i, int j, int k) {
-  std::string scenario = parameters.simulation.scenario;
-  if (scenario == "cavity") {
+  ScenarioType scenario = parameters.simulation.scenario;
+  if (scenario == CAVITY) {
     addToList(parameters, i, j, k);
-  } else if (scenario == "channel") {
+  } else if (scenario == CHANNEL) {
     addToList(parameters, i, j, k);
   }
 }
 void Stencils::ObstacleCoordinatesStencil::applyBackWall(const Parameters& parameters, [[maybe_unused]] FlowField& flowField, int i, int j, int k) {
-  std::string scenario = parameters.simulation.scenario;
-  if (scenario == "cavity") {
+  ScenarioType scenario = parameters.simulation.scenario;
+  if (scenario == CAVITY) {
     addToList(parameters, i, j, k);
-  } else if (scenario == "channel") {
+  } else if (scenario == CHANNEL) {
     addToList(parameters, i, j, k);
   }
 }

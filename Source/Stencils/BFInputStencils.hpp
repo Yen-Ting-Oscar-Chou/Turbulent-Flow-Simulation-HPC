@@ -12,8 +12,10 @@ namespace Stencils {
   private:
     RealType stepSize_; //! Fixes the size of the step. If zero, is just channel flow.
 
+    void initStepSize(const Parameters& parameters);
+
   public:
-    BFInputVelocityStencil(const Parameters& parameters);
+    BFInputVelocityStencil();
     ~BFInputVelocityStencil() override = default;
 
     void applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
@@ -34,10 +36,12 @@ namespace Stencils {
    */
   class BFInputFGHStencil: public BoundaryStencil<FlowField> {
   private:
-    const RealType stepSize_; //! Fixes the size of the step. If zero, is just channel flow.
+    RealType stepSize_; //! Fixes the size of the step. If zero, is just channel flow.
+
+    void initStepSize(const Parameters& parameters);
 
   public:
-    BFInputFGHStencil(const Parameters& parameters);
+    BFInputFGHStencil();
     ~BFInputFGHStencil() override = default;
 
     void applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;

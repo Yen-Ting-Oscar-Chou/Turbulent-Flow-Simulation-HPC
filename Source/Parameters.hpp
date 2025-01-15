@@ -5,6 +5,11 @@
 #include "Definitions.hpp"
 #include "MeshsizeDelegate.hpp"
 
+enum ScenarioType {
+  CAVITY,
+  CHANNEL
+};
+
 //! Classes for the parts of the parameters
 //@{
 class TimestepParameters {
@@ -17,7 +22,7 @@ class SimulationParameters {
 public:
   RealType    finalTime = 0; //! Final time for the simulation
   std::string type;          //! Type of the simulation (DNS vs. Turbulence)
-  std::string scenario;      //! If channel or cavity, for example
+  ScenarioType scenario = CAVITY;      //! If channel or cavity, for example
   std::string velocityProfile = "uniform"; //! block or parabolic, block by default
 };
 
@@ -182,6 +187,7 @@ public:
 #pragma omp declare mapper(Parameters p) \
   map(to: p) \
   map(to: p.meshsize, p.meshsize.uniform, p.meshsize.tanh, p.meshsize.tanh.uniformMeshsize_) \
+  map(to: p.simulation) \
   map(to: p.timestep) \
   map(to: p.environment) \
   map(to: p.flow) \

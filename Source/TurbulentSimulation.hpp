@@ -17,7 +17,7 @@ private:
   GlobalBoundaryIteratorGPU<TurbulentFlowField> turbulentBoundaryIterator_;
 
 protected:
-  void setTimeStep() override;
+  void setTimeStep();
 
 public:
   TurbulentSimulation(Parameters* parameters, TurbulentFlowField* flowField);
@@ -26,7 +26,7 @@ public:
   /** Initialises the flow field according to the scenario */
   virtual void initializeFlowField() override;
 
-  virtual void solveTimestep() override;
+  void solveTimestep();
 
   /** Plots the flow field */
   virtual void plotVTK(int timeStep, RealType simulationTime) override;

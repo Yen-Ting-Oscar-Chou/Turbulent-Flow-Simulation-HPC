@@ -48,7 +48,7 @@ public:
   FieldIteratorGPU<FlowField>          fieldIterator_;
   GlobalBoundaryIteratorGPU<FlowField> boundaryIterator_;
   GlobalBoundaryIteratorGPU<FlowField> wallIterator_;
-  
+
   Simulation(Parameters* parameters, FlowField* flowField);
   virtual ~Simulation() = default;
 
@@ -56,9 +56,9 @@ public:
   virtual void initializeFlowField();
 
 #pragma omp declare target
-  virtual void solveTimestep();
+  void solveTimestep();
 
-  virtual void setTimeStep();
+  void setTimeStep();
 
   void solveTimestepHelper();
 

@@ -6,6 +6,7 @@
 #include "MixingLengths.hpp"
 
 enum ScenarioType { CAVITY, CHANNEL };
+enum VelocityProfile { UNIFORM, PARABOLIC };
 
 //! Classes for the parts of the parameters
 //@{
@@ -17,10 +18,10 @@ public:
 
 class SimulationParameters {
 public:
-  RealType     finalTime = 0;               //! Final time for the simulation
-  std::string  type;                        //! Type of the simulation (DNS vs. Turbulence)
-  ScenarioType scenario        = CAVITY;    //! If channel or cavity, for example
-  std::string  velocityProfile = "uniform"; //! block or parabolic, block by default
+  RealType        finalTime = 0;             //! Final time for the simulation
+  std::string     type;                      //! Type of the simulation (DNS vs. Turbulence)
+  ScenarioType    scenario        = CAVITY;  //! If channel or cavity, for example
+  VelocityProfile velocityProfile = UNIFORM; //! block or parabolic, block by default
 };
 
 class EnvironmentalParameters {
@@ -131,7 +132,6 @@ public:
   int firstCorner[3]; //! Position of the first element. Used for plotting.
 
   PetscInt* sizes[3]; //! Arrays with the sizes of the blocks in each direction.
-
 };
 
 class BFStepParameters {

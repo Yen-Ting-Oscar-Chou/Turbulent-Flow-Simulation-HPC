@@ -355,7 +355,7 @@ public:
     }
   }
 
-  static void mapToCPUAndFree(int hostDevice, int targetDevice, FlowField& flowField, FlowFieldGPUPtrs ptrs) {
+  static void mapToCPUAndFree(int hostDevice, int targetDevice, FlowField& flowField, FlowFieldGPUPtrs& ptrs) {
     FlowField::mapToCPU(hostDevice, targetDevice, flowField, ptrs);
 
     bool disassociatedFlowField = omp_target_disassociate_ptr(&flowField, targetDevice) == 0;

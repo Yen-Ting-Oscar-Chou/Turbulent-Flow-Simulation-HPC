@@ -339,9 +339,15 @@ Parameters Configuration::loadParameters(const MPI_Comm& communicator) {
 
     subNode = node->FirstChildElement("velocityProfile");
     if (subNode != NULL) {
-      readStringMandatory(parameters.simulation.velocityProfile, subNode);
-      if (parameters.simulation.velocityProfile != "parabolic" && parameters.simulation.velocityProfile != "uniform") {
+      std::string velocityProfile;
+      readStringMandatory(velocityProfile, subNode);
+      if (velocityProfile != "parabolic" && velocityProfile != "uniform") {
         throw std::runtime_error("Unsupported velocity profile in simulation parameters");
+      }
+      if (velocityProfile == "uniform") {
+        parameters.simulation.velocityProfile = UNIFORM;
+      } else if (velocityProfile == "parabolic") {
+        parameters.simulation.velocityProfile = PARABOLIC;
       }
     }
 
@@ -486,7 +492,7 @@ Parameters Configuration::loadParameters(const MPI_Comm& communicator) {
 
   // TODO WS2: broadcast turbulence parameters
   if (parameters.simulation.type == "turbulence") {
-    broadcastString(parameters.simulation.velocityProfile, communicator);
+    MPI_Bcast(&(parameters.simulation.velocityProfile), 1, MPI_INT, 0, communicator);
     broadcastString(deltaMixLen, communicator);
     if (rank != 0) {
       if (deltaMixLen == "turbulence") {

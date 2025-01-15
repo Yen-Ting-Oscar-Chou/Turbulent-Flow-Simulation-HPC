@@ -31,7 +31,7 @@ RealType computeVelocity2D(int i, int j, RealType stepSize, const Parameters& pa
     [[maybe_unused]] const RealType inletYSize = parameters.geometry.lengthY - stepSize;
     [[maybe_unused]] const RealType y          = posY + 0.5 * dy - stepSize;
 
-    if (parameters.simulation.velocityProfile == "parabolic") {
+    if (parameters.simulation.velocityProfile == PARABOLIC) {
       return 6.0 * parameters.walls.vectorLeft[0] / (inletYSize * inletYSize) * y * (inletYSize - y); // Parabolic inflow
     }
     return parameters.walls.vectorLeft[0]; // Uniform inflow

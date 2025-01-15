@@ -324,7 +324,15 @@ Parameters Configuration::loadParameters(const MPI_Comm& communicator) {
 
     subNode = node->FirstChildElement("scenario");
     if (subNode != NULL) {
-      readStringMandatory(parameters.simulation.scenario, subNode);
+      std::string scenario;
+      readStringMandatory(scenario, subNode);
+      if (scenario == "cavity") {
+        parameters.simulation.scenario = CAVITY;
+      } else if (scenario == "channel") {
+        parameters.simulation.scenario = CHANNEL;
+      } else {
+        throw std::runtime_error("Unkown scenario");
+      }
     } else {
       throw std::runtime_error("Missing scenario in simulation parameters");
     }
@@ -402,11 +410,6 @@ Parameters Configuration::loadParameters(const MPI_Comm& communicator) {
     }
 
     // Set the scalar values to zero;
-    // do not set the left pressure value to zero, if we have a pressure-channel
-    // scenario -> in this case, we need a fixed pressure value there.
-    if (parameters.simulation.scenario != "pressure-channel") {
-      parameters.walls.scalarLeft = 0.0;
-    }
     parameters.walls.scalarRight  = 0.0;
     parameters.walls.scalarBottom = 0.0;
     parameters.walls.scalarTop    = 0.0;
@@ -462,7 +465,7 @@ Parameters Configuration::loadParameters(const MPI_Comm& communicator) {
 
   broadcastString(parameters.vtk.prefix, communicator);
   broadcastString(parameters.simulation.type, communicator);
-  broadcastString(parameters.simulation.scenario, communicator);
+  MPI_Bcast(&(parameters.simulation.scenario), 1, MPI_INT, 0, communicator);
 
   MPI_Bcast(&(parameters.bfStep.xRatio), 1, MY_MPI_FLOAT, 0, communicator);
   MPI_Bcast(&(parameters.bfStep.yRatio), 1, MY_MPI_FLOAT, 0, communicator);

@@ -17,6 +17,7 @@ namespace Stencils {
     BFInputVelocityStencil();
     ~BFInputVelocityStencil() override = default;
 
+#pragma omp declare target
     void applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
     void applyRightWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
     void applyBottomWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
@@ -28,6 +29,7 @@ namespace Stencils {
     void applyTopWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
     void applyFrontWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
     void applyBackWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
+#pragma omp end declare target
   };
 
   /** FGH stencil which corresponds to one-sided Dirichlet conditions (i.e. the channel flow profile).
@@ -42,6 +44,7 @@ namespace Stencils {
     BFInputFGHStencil();
     ~BFInputFGHStencil() override = default;
 
+#pragma omp declare target
     void applyLeftWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
     void applyRightWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
     void applyBottomWall(const Parameters& parameters, FlowField& flowField, int i, int j) override;
@@ -53,6 +56,7 @@ namespace Stencils {
     void applyTopWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
     void applyFrontWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
     void applyBackWall(const Parameters& parameters, FlowField& flowField, int i, int j, int k) override;
+#pragma omp end declare target
   };
 
 } // namespace Stencils

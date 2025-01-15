@@ -63,17 +63,16 @@ public:
   int lowOffset_;
   int highOffset_;
 
-  FlowFieldType& flowField_;
-  const Parameters& parameters_;
-
-  FieldIteratorGPU(FlowFieldType& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
+  FieldIteratorGPU(StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
 
   /** Volume iteration over the field.
    *
    * Volume iteration. The stencil will be applied to all cells in the domain plus the upper
    * boundaries. Lower boundaries are not included.
    */
-  virtual void iterate(StencilType type);
+  #pragma omp declare target
+  void iterate(StencilType type, const Parameters& parameters, FlowFieldType& flowField);
+  #pragma omp end declare target
 };
 
 template <class FlowFieldType>
@@ -92,13 +91,15 @@ public:
 
   GlobalBoundaryIteratorGPU(FlowFieldType& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
 
-  virtual ~GlobalBoundaryIteratorGPU() = default;
+  ~GlobalBoundaryIteratorGPU() = default;
 
   /** Surface iterator
    *
    * Iterates on the boundary cells. Only upper corners and edges are iterated.
    */
-  virtual void iterate(StencilType type);
+  #pragma omp declare target
+  void iterate(StencilType type);
+  #pragma omp end declare target
 };
 
 template <class FlowFieldType>

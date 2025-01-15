@@ -18,7 +18,7 @@
 enum StencilType { FGH, RHS, TURBFGH, VELOCITY, VISCOSITY, MAXU, MAXV, OBSTACLE, WALLFGH, WALLVELOCITY };
 
 class StencilDelegate;
-struct StencilDelegatePrts {
+struct StencilDelegatePtrs {
   StencilDelegate* stencilDelegateGPU_;
 
   RealType* fghLocalVelocityGPU_;
@@ -34,7 +34,7 @@ struct StencilDelegatePrts {
 
   RealType* maxUMaxValuesGPU_;
 
-  StencilDelegatePrts(
+  StencilDelegatePtrs(
     StencilDelegate* stencilDelegateGPU,
     RealType*        fghLocalVelocityGPU,
     RealType*        fghLocalMeshsizeGPU,
@@ -474,7 +474,7 @@ public:
   inline void setType(StencilType newType) { stencilType = newType; }
 
 
-  static StencilDelegatePrts mapToGPU(int hostDevice, int targetDevice, StencilDelegate& stencilDelegate) {
+  static StencilDelegatePtrs mapToGPU(int hostDevice, int targetDevice, StencilDelegate& stencilDelegate) {
     size_t    stencilDelegateSize = sizeof(stencilDelegate);
     RealType* fghLocalVelocityGPU;
     RealType* fghLocalMeshsizeGPU;
@@ -610,17 +610,17 @@ public:
     }
 
     // Max Visc
-    {
-      omp_target_memcpy(&(stencilDelegateGPU->maxViscStencil_.maxValue_), &(stencilDelegate.maxViscStencil_.maxValue_), sizeof(RealType), 0, 0, targetDevice, hostDevice);
-    }
+    { omp_target_memcpy(&(stencilDelegateGPU->maxViscStencil_.maxValue_), &(stencilDelegate.maxViscStencil_.maxValue_), sizeof(RealType), 0, 0, targetDevice, hostDevice); }
 
     // BFInputStencils
     {
       omp_target_memcpy(&(stencilDelegateGPU->bfInputFGHStencil_.stepSize_), &(stencilDelegate.bfInputFGHStencil_.stepSize_), sizeof(RealType), 0, 0, targetDevice, hostDevice);
-      omp_target_memcpy(&(stencilDelegateGPU->bfInputVelocityStencil_.stepSize_), &(stencilDelegate.bfInputVelocityStencil_.stepSize_), sizeof(RealType), 0, 0, targetDevice, hostDevice);
+      omp_target_memcpy(
+        &(stencilDelegateGPU->bfInputVelocityStencil_.stepSize_), &(stencilDelegate.bfInputVelocityStencil_.stepSize_), sizeof(RealType), 0, 0, targetDevice, hostDevice
+      );
     }
 
-    return StencilDelegatePrts(
+    return StencilDelegatePtrs(
       stencilDelegateGPU,
       fghLocalVelocityGPU,
       fghLocalMeshsizeGPU,
@@ -634,11 +634,9 @@ public:
     );
   }
 
-  static void mapToCPU(int hostDevice, int targetDevice, StencilDelegatePrts& simulationPtrs) {
-    return;
-  }
+  static void mapToCPU(int hostDevice, int targetDevice, StencilDelegatePtrs& simulationPtrs) { return; }
 
-  static void mapToCPUAndFree(int hostDevice, int targetDevice, StencilDelegate& stencilDelegate, StencilDelegatePrts& simulationPtrs) {
+  static void mapToCPUAndFree(int hostDevice, int targetDevice, StencilDelegate& stencilDelegate, StencilDelegatePtrs& simulationPtrs) {
 
     bool disassociatedStencilDelegate = omp_target_disassociate_ptr(&stencilDelegate, targetDevice) == 0;
     if (!disassociatedStencilDelegate) {

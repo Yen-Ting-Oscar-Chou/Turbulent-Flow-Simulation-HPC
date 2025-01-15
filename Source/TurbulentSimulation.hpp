@@ -12,16 +12,8 @@
 
 class TurbulentSimulation: public Simulation {
 private:
-  TurbulentFlowField&                             turbulentField_;
-  // Stencils::ViscosityStencil                      viscosityStencil_;
-  // FieldIterator<TurbulentFlowField>               viscosityIterator_;
-  // Stencils::TurbulentFGHStencil                   turbulentFGHStencil_;
-  // FieldIterator<TurbulentFlowField>               turbulentFGHIterator_;
-  // Stencils::MaxViscStencil                        maxViscStencil_;
-  // FieldIterator<TurbulentFlowField>               maxViscFieldIterator_;
-  // GlobalBoundaryIterator<TurbulentFlowField>      maxViscBoundaryIterator_;
-  ParallelManagers::TurbulentPetscParallelManager turbulentPetscParallelManager_;
-  FieldIteratorGPU<TurbulentFlowField> turbulentFieldIterator_;
+  TurbulentFlowField*                           turbulentField_;
+  FieldIteratorGPU<TurbulentFlowField>          turbulentFieldIterator_;
   GlobalBoundaryIteratorGPU<TurbulentFlowField> turbulentBoundaryIterator_;
 
 protected:

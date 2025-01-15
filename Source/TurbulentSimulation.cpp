@@ -4,17 +4,9 @@
 
 TurbulentSimulation::TurbulentSimulation(Parameters* parameters, TurbulentFlowField* flowField):
   Simulation(parameters, flowField),
-  turbulentField_(*flowField),
-  // viscosityStencil_(),
-  // viscosityIterator_(turbulentField_, parameters, viscosity*stencil_),
-  // turbulentFGHStencil_(),
-  // turbulentFGHIterator_(turbulentField_, parameters, turbulentFGH*stencil_),
-  // maxViscStencil_(),
-  // maxViscFieldIterator_(turbulentField_, parameters, maxVisc*stencil_),
-  // maxViscBoundaryIterator_(turbulentField_, parameters, maxVisc*stencil_),
+  turbulentField_(flowField),
   turbulentFieldIterator_(),
-  turbulentBoundaryIterator_(turbulentField_, *parameters_, *stencil_),
-  turbulentPetscParallelManager_(*parameters, turbulentField_) {}
+  turbulentBoundaryIterator_() {}
 
 void TurbulentSimulation::initializeFlowField() {
   Simulation::initializeFlowField();
@@ -25,51 +17,46 @@ void TurbulentSimulation::initializeFlowField() {
   GlobalBoundaryIterator<FlowField>                     obstBoundaryIterator(*flowField_, *parameters_, obstStencil, 1, 0);
   obstIterator.iterate();
   obstBoundaryIterator.iterate();
-  turbulentPetscParallelManager_.communicateObstacleCoordinates(coordinateList2D, coordinateList3D);
   if (parameters_->geometry.dim == 2) {
     Stencils::DistanceStencil         distStencil(coordinateList2D);
-    FieldIterator<TurbulentFlowField> distIterator(turbulentField_, *parameters_, distStencil);
+    FieldIterator<TurbulentFlowField> distIterator(*turbulentField_, *parameters_, distStencil);
     distIterator.iterate();
   } else {
     Stencils::DistanceStencil         distStencil(coordinateList3D);
-    FieldIterator<TurbulentFlowField> distIterator(turbulentField_, *parameters_, distStencil);
+    FieldIterator<TurbulentFlowField> distIterator(*turbulentField_, *parameters_, distStencil);
     distIterator.iterate();
   }
 }
 
 void TurbulentSimulation::plotVTK(int timeStep, RealType simulationTime) {
   Stencils::TurbulentVTKStencil     vtkStencil(*parameters_);
-  FieldIterator<TurbulentFlowField> vtkIterator(turbulentField_, *parameters_, vtkStencil, 1, 0);
+  FieldIterator<TurbulentFlowField> vtkIterator(*turbulentField_, *parameters_, vtkStencil, 1, 0);
 
   vtkIterator.iterate();
-  vtkStencil.write(turbulentField_, timeStep, simulationTime);
+  vtkStencil.write(*turbulentField_, timeStep, simulationTime);
 }
 
 void TurbulentSimulation::solveTimestep() {
-  // viscosityIterator_.iterate();
-  turbulentFieldIterator_.iterate(VISCOSITY, *parameters_, turbulentField_, *stencil_);
-  // TODO communicate viscosity
-  turbulentPetscParallelManager_.communicateViscosity();
+  turbulentFieldIterator_.iterate(VISCOSITY, *parameters_, *turbulentField_, *stencil_);
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
   // Compute FGH
-  // turbulentFGHIterator_.iterate();
-  turbulentFieldIterator_.iterate(TURBFGH, *parameters_, turbulentField_, *stencil_);
+  turbulentFieldIterator_.iterate(TURBFGH, *parameters_, *turbulentField_, *stencil_);
 
   Simulation::solveTimestepHelper();
 }
 
 void TurbulentSimulation::setTimeStep() {
-  RealType localMin, globalMin;
+  RealType localMin;
   ASSERTION(parameters_->geometry.dim == 2 || parameters_->geometry.dim == 3);
   RealType factor = 1.0 / (parameters_->meshsize->getDxMin() * parameters_->meshsize->getDxMin()) + 1.0 / (parameters_->meshsize->getDyMin() * parameters_->meshsize->getDyMin());
   // Determine maximum velocity
   stencil_->maxUStencil_.reset();
   stencil_->maxViscStencil_.reset();
   fieldIterator_.iterate(MAXU, *parameters_, *flowField_, *stencil_);
-  boundaryIterator_.iterate(MAXU);
-  turbulentFieldIterator_.iterate(MAXV, *parameters_, turbulentField_, *stencil_);
-  turbulentBoundaryIterator_.iterate(MAXV);
+  boundaryIterator_.iterate(MAXU, *parameters_, *flowField_, *stencil_);
+  turbulentFieldIterator_.iterate(MAXV, *parameters_, *turbulentField_, *stencil_);
+  turbulentBoundaryIterator_.iterate(MAXV, *parameters_, *turbulentField_, *stencil_);
   if (parameters_->geometry.dim == 3) {
     factor += 1.0 / (parameters_->meshsize->getDzMin() * parameters_->meshsize->getDzMin());
   }
@@ -82,9 +69,6 @@ void TurbulentSimulation::setTimeStep() {
   // data type for MPI. Not a concern for small simulations, but useful if using heterogeneous
   // machines.
 
-  globalMin = MY_FLOAT_MAX;
-  MPI_Allreduce(&localMin, &globalMin, 1, MY_MPI_FLOAT, MPI_MIN, PETSC_COMM_WORLD);
-
-  parameters_->timestep.dt = globalMin;
+  parameters_->timestep.dt = localMin;
   parameters_->timestep.dt *= parameters_->timestep.tau;
 }

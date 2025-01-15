@@ -70,90 +70,85 @@ void FieldIteratorGPU<FlowFieldType>::iterate(StencilType type, const Parameters
 }
 
 template <class FlowFieldType>
-GlobalBoundaryIteratorGPU<FlowFieldType>::GlobalBoundaryIteratorGPU(
-  FlowFieldType& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset, int highOffset
-):
-  flowField_(flowField),
-  parameters_(parameters),
-  stencil_(stencil),
+GlobalBoundaryIteratorGPU<FlowFieldType>::GlobalBoundaryIteratorGPU(int lowOffset, int highOffset):
   lowOffset_(lowOffset),
   highOffset_(highOffset) {}
 
 
 template <class FlowFieldType>
-void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type) {
-  stencil_.setType(type);
-  if (parameters_.geometry.dim == 2) {
-    if (parameters_.parallel.leftNb < 0) {
-      for (int j = lowOffset_; j < flowField_.getCellsY() + highOffset_; j++) {
-        stencil_.applyLeftWall(parameters_, flowField_, lowOffset_, j);
+void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type, const Parameters& parameters, FlowFieldType& flowField, StencilDelegate& stencil) {
+  stencil.setType(type);
+  if (parameters.geometry.dim == 2) {
+    if (parameters.parallel.leftNb < 0) {
+      for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
+        stencil.applyLeftWall(parameters, flowField, lowOffset_, j);
       }
     }
 
-    if (parameters_.parallel.rightNb < 0) {
-      for (int j = lowOffset_; j < flowField_.getCellsY() + highOffset_; j++) {
-        stencil_.applyRightWall(parameters_, flowField_, flowField_.getCellsX() + highOffset_ - 1, j);
+    if (parameters.parallel.rightNb < 0) {
+      for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
+        stencil.applyRightWall(parameters, flowField, flowField.getCellsX() + highOffset_ - 1, j);
       }
     }
 
-    if (parameters_.parallel.bottomNb < 0) {
-      for (int i = lowOffset_; i < flowField_.getCellsX() + highOffset_; i++) {
-        stencil_.applyBottomWall(parameters_, flowField_, i, lowOffset_);
+    if (parameters.parallel.bottomNb < 0) {
+      for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
+        stencil.applyBottomWall(parameters, flowField, i, lowOffset_);
       }
     }
 
-    if (parameters_.parallel.topNb < 0) {
-      for (int i = lowOffset_; i < flowField_.getCellsX() + highOffset_; i++) {
-        stencil_.applyTopWall(parameters_, flowField_, i, flowField_.getCellsY() + highOffset_ - 1);
+    if (parameters.parallel.topNb < 0) {
+      for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
+        stencil.applyTopWall(parameters, flowField, i, flowField.getCellsY() + highOffset_ - 1);
       }
     }
   }
 
-  if (parameters_.geometry.dim == 3) {
-    if (parameters_.parallel.leftNb < 0) {
-      for (int j = lowOffset_; j < flowField_.getCellsY() + highOffset_; j++) {
-        for (int k = lowOffset_; k < flowField_.getCellsZ() + highOffset_; k++) {
-          stencil_.applyLeftWall(parameters_, flowField_, lowOffset_, j, k);
+  if (parameters.geometry.dim == 3) {
+    if (parameters.parallel.leftNb < 0) {
+      for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
+        for (int k = lowOffset_; k < flowField.getCellsZ() + highOffset_; k++) {
+          stencil.applyLeftWall(parameters, flowField, lowOffset_, j, k);
         }
       }
     }
 
-    if (parameters_.parallel.rightNb < 0) {
-      for (int j = lowOffset_; j < flowField_.getCellsY() + highOffset_; j++) {
-        for (int k = lowOffset_; k < flowField_.getCellsZ() + highOffset_; k++) {
-          stencil_.applyRightWall(parameters_, flowField_, flowField_.getCellsX() + highOffset_ - 1, j, k);
+    if (parameters.parallel.rightNb < 0) {
+      for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
+        for (int k = lowOffset_; k < flowField.getCellsZ() + highOffset_; k++) {
+          stencil.applyRightWall(parameters, flowField, flowField.getCellsX() + highOffset_ - 1, j, k);
         }
       }
     }
 
-    if (parameters_.parallel.bottomNb < 0) {
-      for (int i = lowOffset_; i < flowField_.getCellsX() + highOffset_; i++) {
-        for (int k = lowOffset_; k < flowField_.getCellsZ() + highOffset_; k++) {
-          stencil_.applyBottomWall(parameters_, flowField_, i, lowOffset_, k);
+    if (parameters.parallel.bottomNb < 0) {
+      for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
+        for (int k = lowOffset_; k < flowField.getCellsZ() + highOffset_; k++) {
+          stencil.applyBottomWall(parameters, flowField, i, lowOffset_, k);
         }
       }
     }
 
-    if (parameters_.parallel.topNb < 0) {
-      for (int i = lowOffset_; i < flowField_.getCellsX() + highOffset_; i++) {
-        for (int k = lowOffset_; k < flowField_.getCellsZ() + highOffset_; k++) {
-          stencil_.applyTopWall(parameters_, flowField_, i, flowField_.getCellsY() + highOffset_ - 1, k);
+    if (parameters.parallel.topNb < 0) {
+      for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
+        for (int k = lowOffset_; k < flowField.getCellsZ() + highOffset_; k++) {
+          stencil.applyTopWall(parameters, flowField, i, flowField.getCellsY() + highOffset_ - 1, k);
         }
       }
     }
 
-    if (parameters_.parallel.frontNb < 0) {
-      for (int i = lowOffset_; i < flowField_.getCellsX() + highOffset_; i++) {
-        for (int j = lowOffset_; j < flowField_.getCellsY() + highOffset_; j++) {
-          stencil_.applyFrontWall(parameters_, flowField_, i, j, lowOffset_);
+    if (parameters.parallel.frontNb < 0) {
+      for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
+        for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
+          stencil.applyFrontWall(parameters, flowField, i, j, lowOffset_);
         }
       }
     }
 
-    if (parameters_.parallel.backNb < 0) {
-      for (int i = lowOffset_; i < flowField_.getCellsX() + highOffset_; i++) {
-        for (int j = lowOffset_; j < flowField_.getCellsY() + highOffset_; j++) {
-          stencil_.applyBackWall(parameters_, flowField_, i, j, flowField_.getCellsZ() + highOffset_ - 1);
+    if (parameters.parallel.backNb < 0) {
+      for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
+        for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
+          stencil.applyBackWall(parameters, flowField, i, j, flowField.getCellsZ() + highOffset_ - 1);
         }
       }
     }

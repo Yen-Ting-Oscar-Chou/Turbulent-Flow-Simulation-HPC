@@ -634,7 +634,26 @@ public:
     );
   }
 
-  static void mapToCPU(int hostDevice, int targetDevice, StencilDelegatePrts& simulationPtrs) {}
+  static void mapToCPU(int hostDevice, int targetDevice, StencilDelegatePrts& simulationPtrs) {
+    return;
+  }
 
-  static void mapToCPUAndFree(int hostDevice, int targetDevice, StencilDelegatePrts& simulationPtrs) {}
+  static void mapToCPUAndFree(int hostDevice, int targetDevice, StencilDelegate& stencilDelegate, StencilDelegatePrts& simulationPtrs) {
+
+    bool disassociatedStencilDelegate = omp_target_disassociate_ptr(&stencilDelegate, targetDevice) == 0;
+    if (!disassociatedStencilDelegate) {
+      std::cout << "Error: Could not disassociate StencilDelegate pointer." << std::endl;
+    }
+
+    omp_target_free(simulationPtrs.fghLocalVelocityGPU_, targetDevice);
+    omp_target_free(simulationPtrs.fghLocalMeshsizeGPU_, targetDevice);
+    omp_target_free(simulationPtrs.turbFGHLocalVelocityGPU_, targetDevice);
+    omp_target_free(simulationPtrs.turbFGHLocalMeshsizeGPU_, targetDevice);
+    omp_target_free(simulationPtrs.turbFGHLocalViscosityGPU_, targetDevice);
+    omp_target_free(simulationPtrs.viscLocalVelocityGPU_, targetDevice);
+    omp_target_free(simulationPtrs.viscLocalMeshsizeGPU_, targetDevice);
+    omp_target_free(simulationPtrs.viscCoordsGPU_, targetDevice);
+    omp_target_free(simulationPtrs.maxUMaxValuesGPU_, targetDevice);
+    omp_target_free(simulationPtrs.stencilDelegateGPU_, targetDevice);
+  }
 };

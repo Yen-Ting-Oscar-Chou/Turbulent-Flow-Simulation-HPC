@@ -1,14 +1,11 @@
 #pragma once
 
 #include "BoundaryType.hpp"
-#include "MixingLengths.hpp"
 #include "Definitions.hpp"
 #include "MeshsizeDelegate.hpp"
+#include "MixingLengths.hpp"
 
-enum ScenarioType {
-  CAVITY,
-  CHANNEL
-};
+enum ScenarioType { CAVITY, CHANNEL };
 
 //! Classes for the parts of the parameters
 //@{
@@ -20,10 +17,10 @@ public:
 
 class SimulationParameters {
 public:
-  RealType    finalTime = 0; //! Final time for the simulation
-  std::string type;          //! Type of the simulation (DNS vs. Turbulence)
-  ScenarioType scenario = CAVITY;      //! If channel or cavity, for example
-  std::string velocityProfile = "uniform"; //! block or parabolic, block by default
+  RealType     finalTime = 0;               //! Final time for the simulation
+  std::string  type;                        //! Type of the simulation (DNS vs. Turbulence)
+  ScenarioType scenario        = CAVITY;    //! If channel or cavity, for example
+  std::string  velocityProfile = "uniform"; //! block or parabolic, block by default
 };
 
 class EnvironmentalParameters {
@@ -40,8 +37,8 @@ public:
 };
 
 class TurbulenceParameters {
-  public: 
-    TurbulenceType deltaMixLen = ZERO;
+public:
+  TurbulenceType deltaMixLen = ZERO;
 };
 
 class SolverParameters {
@@ -133,11 +130,8 @@ public:
   int localSize[3];   //! Size for the local flow field
   int firstCorner[3]; //! Position of the first element. Used for plotting.
 
-#ifdef ENABLE_PETSC
   PetscInt* sizes[3]; //! Arrays with the sizes of the blocks in each direction.
-#else
-  int* sizes[3];
-#endif
+
 };
 
 class BFStepParameters {
@@ -155,7 +149,7 @@ public:
   Parameters(const GeometricParameters& geometricParameters, const ParallelParameters& parallelParameters);
   ~Parameters() = default;
 
-  Parameters(const Parameters& parameters): 
+  Parameters(const Parameters& parameters):
     simulation(parameters.simulation),
     timestep(parameters.timestep),
     environment(parameters.environment),
@@ -184,14 +178,12 @@ public:
   TurbulenceParameters    turbulence;
   MeshsizeDelegate        meshsize;
 };
-#pragma omp declare mapper(Parameters p) \
-  map(to: p) \
-  map(to: p.meshsize, p.meshsize.uniform, p.meshsize.tanh, p.meshsize.tanh.uniformMeshsize_) \
-  map(to: p.simulation) \
-  map(to: p.timestep) \
-  map(to: p.environment) \
-  map(to: p.flow) \
-  map(to: p.solver) \
-  map(to: p.geometry) \
-  map(to: p.walls, p.walls.vectorLeft[0:3], p.walls.vectorRight[0:3], p.walls.vectorBottom[0:3], p.walls.vectorTop[0:3], p.walls.vectorFront[0:3], p.walls.vectorBack[0:3]) \
-  map(to: p.turbulence)
+#pragma omp declare mapper(Parameters p) map(to : p) map(to : p.meshsize, p.meshsize.uniform, p.meshsize.tanh, p.meshsize.tanh.uniformMeshsize_) map(to : p.simulation \
+) map(to : p.timestep) map(to : p.environment) map(to : p.flow) map(to : p.solver) map(to : p.geometry) \
+  map(to : p.walls, \
+        p.walls.vectorLeft[0 : 3], \
+        p.walls.vectorRight[0 : 3], \
+        p.walls.vectorBottom[0 : 3], \
+        p.walls.vectorTop[0 : 3], \
+        p.walls.vectorFront[0 : 3], \
+        p.walls.vectorBack[0 : 3]) map(to : p.turbulence)

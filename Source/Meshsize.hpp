@@ -39,15 +39,14 @@ public:
 
 /** Implements a uniform, equidistant grid spacing */
 class UniformMeshsize: public Meshsize {
-private:
-  const RealType dx_;
-  const RealType dy_;
-  const RealType dz_;
-  const int      firstCornerX_;
-  const int      firstCornerY_;
-  const int      firstCornerZ_;
-
 public:
+  RealType dx_;
+  RealType dy_;
+  RealType dz_;
+  int      firstCornerX_;
+  int      firstCornerY_;
+  int      firstCornerZ_;
+
   UniformMeshsize(const GeometricParameters& geometricParameters, const ParallelParameters& parallelParameters);
   virtual ~UniformMeshsize() override = default;
 
@@ -80,24 +79,24 @@ public:
 class TanhMeshStretching: public Meshsize {
 
 public:
-  const UniformMeshsize uniformMeshsize_;
-  const RealType        lengthX_;
-  const RealType        lengthY_;
-  const RealType        lengthZ_;
-  const int             sizeX_;
-  const int             sizeY_;
-  const int             sizeZ_;
-  const int             firstCornerX_;
-  const int             firstCornerY_;
-  const int             firstCornerZ_;
-  const bool            stretchX_;
-  const bool            stretchY_;
-  const bool            stretchZ_;
-  const RealType        deltaS_;
-  const RealType        tanhDeltaS_;
-  const RealType        dxMin_;
-  const RealType        dyMin_;
-  const RealType        dzMin_;
+  UniformMeshsize uniformMeshsize_;
+  RealType        lengthX_;
+  RealType        lengthY_;
+  RealType        lengthZ_;
+  int             sizeX_;
+  int             sizeY_;
+  int             sizeZ_;
+  int             firstCornerX_;
+  int             firstCornerY_;
+  int             firstCornerZ_;
+  bool            stretchX_;
+  bool            stretchY_;
+  bool            stretchZ_;
+  RealType        deltaS_;
+  RealType        tanhDeltaS_;
+  RealType        dxMin_;
+  RealType        dyMin_;
+  RealType        dzMin_;
 
   // Computes the coordinate of the lower/left/front corner of the 1D-cell at index i w.r.t. having "size" cells along
   // an interval of length "length". We refer to local indexing, so "firstCorner" denotes the first non-ghost cell index

@@ -634,9 +634,7 @@ public:
     );
   }
 
-  static void mapToCPU(int hostDevice, int targetDevice, StencilDelegatePtrs& simulationPtrs) { return; }
-
-  static void mapToCPUAndFree(int hostDevice, int targetDevice, StencilDelegate& stencilDelegate, StencilDelegatePtrs& simulationPtrs) {
+  static void freeGPU(int hostDevice, int targetDevice, StencilDelegate& stencilDelegate, StencilDelegatePtrs& simulationPtrs) {
 
     bool disassociatedStencilDelegate = omp_target_disassociate_ptr(&stencilDelegate, targetDevice) == 0;
     if (!disassociatedStencilDelegate) {

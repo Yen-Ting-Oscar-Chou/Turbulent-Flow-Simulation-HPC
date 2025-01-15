@@ -12,7 +12,7 @@ TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowFi
   // maxViscStencil_(),
   // maxViscFieldIterator_(turbulentField_, parameters, maxViscStencil_),
   // maxViscBoundaryIterator_(turbulentField_, parameters, maxViscStencil_),
-  turbulentFieldIterator_(stencil_),
+  turbulentFieldIterator_(),
   turbulentBoundaryIterator_(turbulentField_, parameters_, stencil_),
   turbulentPetscParallelManager_(parameters, turbulentField_) {}
 
@@ -47,14 +47,14 @@ void TurbulentSimulation::plotVTK(int timeStep, RealType simulationTime) {
 
 void TurbulentSimulation::solveTimestep() {
   //viscosityIterator_.iterate();
-  turbulentFieldIterator_.iterate(VISCOSITY, parameters_, turbulentField_);
+  turbulentFieldIterator_.iterate(VISCOSITY, parameters_, turbulentField_, stencil_);
   // TODO communicate viscosity
   turbulentPetscParallelManager_.communicateViscosity();
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
   // Compute FGH
   //turbulentFGHIterator_.iterate();
-  turbulentFieldIterator_.iterate(TURBFGH, parameters_, turbulentField_);
+  turbulentFieldIterator_.iterate(TURBFGH, parameters_, turbulentField_, stencil_);
 
   Simulation::solveTimestepHelper();
 }
@@ -66,9 +66,9 @@ void TurbulentSimulation::setTimeStep() {
   // Determine maximum velocity
   stencil_.maxUStencil_.reset();
   stencil_.maxViscStencil_.reset();
-  fieldIterator_.iterate(MAXU, parameters_, flowField_);
+  fieldIterator_.iterate(MAXU, parameters_, flowField_, stencil_);
   boundaryIterator_.iterate(MAXU);
-  turbulentFieldIterator_.iterate(MAXV, parameters_, turbulentField_);
+  turbulentFieldIterator_.iterate(MAXV, parameters_, turbulentField_, stencil_);
   turbulentBoundaryIterator_.iterate(MAXV);
   if (parameters_.geometry.dim == 3) {
     factor += 1.0 / (parameters_.meshsize.getDzMin() * parameters_.meshsize.getDzMin());

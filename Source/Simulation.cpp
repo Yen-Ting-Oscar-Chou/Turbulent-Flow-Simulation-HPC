@@ -5,13 +5,13 @@
 #include "Solvers/PetscSolver.hpp"
 #include "Solvers/SORSolver.hpp"
 
-Simulation::Simulation(Parameters& parameters, FlowField& flowField):
+Simulation::Simulation(Parameters& parameters, FlowField flowField):
   parameters_(parameters),
   flowField_(flowField),
   vtkStencil(parameters),
   vtkIterator(flowField_, parameters_, vtkStencil, 1, 0),
   stencil_(),
-  fieldIterator_(stencil_),
+  fieldIterator_(),
   wallIterator_(flowField_, parameters_, stencil_, 1, 0),
   boundaryIterator_(flowField_, parameters_, stencil_)
 #ifdef ENABLE_PETSC
@@ -51,14 +51,15 @@ void Simulation::initializeFlowField() {
 }
 
 void Simulation::test() {
-  fieldIterator_.iterate(FGH, parameters_, flowField_);
+  printf("In test()\n");
+  fieldIterator_.iterate(FGH, parameters_, flowField_, stencil_);
 }
 
 void Simulation::solveTimestep() {
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
   // Compute FGH
-  fieldIterator_.iterate(FGH, parameters_, flowField_);
+  fieldIterator_.iterate(FGH, parameters_, flowField_, stencil_);
   solveTimestepHelper();
 }
 
@@ -66,14 +67,14 @@ void Simulation::solveTimestepHelper() {
   // Set global boundary values
   wallIterator_.iterate(WALLFGH);
   // Compute the right hand side (RHS)
-  fieldIterator_.iterate(RHS, parameters_, flowField_);
+  fieldIterator_.iterate(RHS, parameters_, flowField_, stencil_);
   // Solve for pressure
   solver_->solve();
   // TODO WS2: communicate pressure values
   // Compute velocity
-  fieldIterator_.iterate(VELOCITY, parameters_, flowField_);
+  fieldIterator_.iterate(VELOCITY, parameters_, flowField_, stencil_);
   // obstacleIterator_.iterate();
-  fieldIterator_.iterate(OBSTACLE, parameters_, flowField_);
+  fieldIterator_.iterate(OBSTACLE, parameters_, flowField_, stencil_);
   // TODO WS2: communicate velocity values
   // Iterate for velocities on the boundary
   wallIterator_.iterate(WALLVELOCITY);
@@ -90,7 +91,7 @@ void Simulation::setTimeStep() {
   RealType factor = 1.0 / (parameters_.meshsize.getDxMin() * parameters_.meshsize.getDxMin()) + 1.0 / (parameters_.meshsize.getDyMin() * parameters_.meshsize.getDyMin());
   // Determine maximum velocity
   stencil_.maxUStencil_.reset();
-  fieldIterator_.iterate(MAXU, parameters_, flowField_);
+  fieldIterator_.iterate(MAXU, parameters_, flowField_, stencil_);
   boundaryIterator_.iterate(MAXU);
   if (parameters_.geometry.dim == 3) {
     factor += 1.0 / (parameters_.meshsize.getDzMin() * parameters_.meshsize.getDzMin());

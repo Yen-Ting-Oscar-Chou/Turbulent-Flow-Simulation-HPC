@@ -1,13 +1,12 @@
 #include "StdAfx.hpp"
 
-#include "Clock.hpp"
-#include "Configuration.hpp"
-#include "Simulation.hpp"
-#include "TurbulentSimulation.hpp"
 #include <fenv.h>
 
-
+#include "Clock.hpp"
+#include "Configuration.hpp"
 #include "ParallelManagers/PetscParallelConfiguration.hpp"
+#include "Simulation.hpp"
+#include "TurbulentSimulation.hpp"
 
 int main(int argc, char* argv[]) {
   spdlog::set_level(spdlog::level::info);
@@ -52,11 +51,11 @@ int main(int argc, char* argv[]) {
   }
 
   // Read configuration and store information in parameters object
-  Configuration configuration(argv[1]);
-  Parameters parameters = configuration.loadParameters();
+  Configuration                                configuration(argv[1]);
+  Parameters                                   parameters = configuration.loadParameters();
   ParallelManagers::PetscParallelConfiguration parallelConfiguration(parameters);
-  FlowField*  flowField  = NULL;
-  Simulation* simulation = NULL;
+  FlowField*                                   flowField  = NULL;
+  Simulation*                                  simulation = NULL;
 
   spdlog::debug(
     "Processor {} with index {}, {}, {} is computing the size of its subdomain and obtains {}, {} and {}.",
@@ -71,16 +70,11 @@ int main(int argc, char* argv[]) {
   spdlog::debug("Left neighbour: {}, right neighbour: {}", parameters.parallel.leftNb, parameters.parallel.rightNb);
   spdlog::debug("Top neighbour: {}, bottom neighbour: {}", parameters.parallel.topNb, parameters.parallel.bottomNb);
   spdlog::debug("Front neighbour: {}, back neighbour: {}", parameters.parallel.frontNb, parameters.parallel.backNb);
-  spdlog::debug(
-    "Min. meshsizes: {}, {}, {}",
-    parameters.meshsize.getDxMin(),
-    parameters.meshsize.getDyMin(),
-    parameters.meshsize.getDzMin()
-  );
+  spdlog::debug("Min. meshsizes: {}, {}, {}", parameters.meshsize.getDxMin(), parameters.meshsize.getDyMin(), parameters.meshsize.getDzMin());
 
   // Initialise simulation
   if (parameters.simulation.type == "turbulence") {
-     if (rank == 0) {
+    if (rank == 0) {
       spdlog::info("Start turbulence simulation in {}D", parameters.geometry.dim);
     }
     TurbulentFlowField* turbulentFlowField = new TurbulentFlowField(parameters);
@@ -88,8 +82,8 @@ int main(int argc, char* argv[]) {
       throw std::runtime_error("turbulentFlowField == NULL!");
     }
     TurbulentSimulation* turbulentSimulation = new TurbulentSimulation(parameters, *turbulentFlowField);
-    flowField = turbulentFlowField;
-    simulation = turbulentSimulation;
+    flowField                                = turbulentFlowField;
+    simulation                               = turbulentSimulation;
   } else if (parameters.simulation.type == "dns") {
     if (rank == 0) {
       spdlog::info("Start DNS simulation in {}D", parameters.geometry.dim);
@@ -117,6 +111,46 @@ int main(int argc, char* argv[]) {
   // Plot initial state
   simulation->plotVTK(timeSteps, time);
 
+//   int hostDevice   = omp_get_initial_device();
+//   int targetDevice = omp_get_default_device();
+
+//   std::cout << "Host device: " << hostDevice << std::endl;
+//   std::cout << "Target device: " << targetDevice << std::endl;
+
+//   std::cout << "Pressure:" << std::endl;
+
+//   for (int i = 0; i < 2; i++) {
+//     for (int j = 0; j < 1; j++) {
+//       std::cout << flowField->getPressure().getScalar(i,j) << std::endl;
+//     }
+//   }
+
+//   std::cout << "Map to GPU" << std::endl;
+
+//   FlowFieldGPUPtrs ptrs         = FlowField::mapToGPU(hostDevice, targetDevice, *flowField);
+// #pragma omp target device(targetDevice)
+//   {
+//     for (int i = 0; i < 13; i++) {
+//       for (int j = 0; j < 13; j++) {
+//         flowField->getPressure().getScalar(i,j)  = i * -200.0;
+//       }
+//     }
+//   }
+
+//   std::cout << "Map back to CPU and free" << std::endl;
+
+//   FlowField::mapToCPUAndFree(hostDevice, targetDevice, *flowField, ptrs);
+
+//   std::cout << "Pressure:" << std::endl;
+
+//   for (int i = 0; i < 2; i++) {
+//     for (int j = 0; j < 1; j++) {
+//       std::cout << flowField->getPressure().getScalar(i,j) << std::endl;
+//     }
+//   }
+
+//   exit(0);
+
   Clock clock;
   // Time loop
   // TODO #pragma map to gpu and backwards
@@ -135,7 +169,7 @@ int main(int argc, char* argv[]) {
     if (timeVtk <= time) {
       simulation->plotVTK(timeSteps, time);
       timeVtk += parameters.vtk.interval;
-    } 
+    }
   }
   spdlog::info("Finished simulation with a duration of {}ns", clock.getTime());
 

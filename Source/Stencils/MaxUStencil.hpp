@@ -16,8 +16,7 @@ namespace Stencils {
    */
   class MaxUStencil: public FieldStencil<FlowField>, public BoundaryStencil<FlowField> {
   private:
-    RealType maxValues_[3]; //! Stores the maximum module of every component
-
+#pragma omp declare target
     /** Sets the maximum value arrays to the value of the cell if it surpasses the current one.
      *
      * 2D version of the function
@@ -36,8 +35,10 @@ namespace Stencils {
      * @param k Position in the Z direction.
      */
     void cellMaxValue(const Parameters& parameters, FlowField& flowField, int i, int j, int k);
+#pragma omp end declare target
 
   public:
+    RealType maxValues_[3]; //! Stores the maximum module of every component
     MaxUStencil();
     ~MaxUStencil() override = default;
 

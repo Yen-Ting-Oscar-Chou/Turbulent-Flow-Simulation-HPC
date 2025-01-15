@@ -19,6 +19,15 @@
 #include "Stencils/VelocityStencil.hpp"
 #include "Stencils/VTKStencil.hpp"
 
+class Simulation;
+
+struct SimulationPtrs {
+  Parameters* parametersPtr_;
+  FlowField* flowFieldPtr_;
+
+  SimulationPtrs(Parameters* parametersPtr, FlowField* flowFieldPtr)
+    : parametersPtr_(parametersPtr), flowFieldPtr_(flowFieldPtr) {}
+};;
 
 class Simulation {
 protected:
@@ -26,7 +35,6 @@ protected:
 
   FlowField& flowField_;
 
-  ParallelManagers::PetscParallelManager petscParallelManager_;
   std::unique_ptr<Solvers::LinearSolver> solver_;
 
   Stencils::VTKStencil<FlowField> vtkStencil;
@@ -52,4 +60,16 @@ public:
 
   /** Plots the flow field */
   virtual void plotVTK(int timeStep, RealType simulationTime);
+
+  /* static SimulationPtrs mapToGPU(int hostDevice, int targetDevice, Simulation& simulation) {
+
+  }
+
+  static void mapToCPU(int hostDevice, int targetDevice, SimulationPtrs& simulationPtrs) {
+
+  }
+
+  static void mapToCPUAndFree(int hostDevice, int targetDevice, SimulationPtrs& simulationPtrs) {
+
+  } */
 };

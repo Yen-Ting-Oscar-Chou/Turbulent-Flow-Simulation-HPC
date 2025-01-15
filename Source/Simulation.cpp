@@ -10,7 +10,6 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   flowField_(flowField),
   vtkStencil(parameters),
   vtkIterator(flowField_, parameters_, vtkStencil, 1, 0),
-  petscParallelManager_(parameters_, flowField_),
   stencil_(),
   fieldIterator_(flowField_, parameters_, stencil_),
   wallIterator_(flowField_, parameters_, stencil_, 1, 0),
@@ -59,7 +58,6 @@ void Simulation::solveTimestep() {
   solveTimestepHelper();
 }
 
-
 void Simulation::solveTimestepHelper() {
   // Set global boundary values
   wallIterator_.iterate(WALLFGH);
@@ -68,13 +66,11 @@ void Simulation::solveTimestepHelper() {
   // Solve for pressure
   solver_->solve();
   // TODO WS2: communicate pressure values
-  petscParallelManager_.communicatePressure();
   // Compute velocity
   fieldIterator_.iterate(VELOCITY);
   // obstacleIterator_.iterate();
   fieldIterator_.iterate(OBSTACLE);
   // TODO WS2: communicate velocity values
-  petscParallelManager_.communicateVelocities();
   // Iterate for velocities on the boundary
   wallIterator_.iterate(WALLVELOCITY);
 }

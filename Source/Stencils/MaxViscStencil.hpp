@@ -10,10 +10,10 @@ namespace Stencils {
   /** Compute all velocities on obstacle cells
    */
   class MaxViscStencil: public FieldStencil<TurbulentFlowField>, public BoundaryStencil<TurbulentFlowField> {
-  private:
-    RealType maxValue_; //! Stores the maximum module of every component
 
   public:
+    RealType maxValue_; //! Stores the maximum module of every component
+    
     MaxViscStencil();
     ~MaxViscStencil() override = default;
 

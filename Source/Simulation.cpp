@@ -8,32 +8,19 @@
 Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   parameters_(parameters),
   flowField_(flowField),
-  maxUStencil_(),
-  maxUFieldIterator_(flowField_, parameters, maxUStencil_),
-  maxUBoundaryIterator_(flowField_, parameters, maxUStencil_),
-  globalBoundaryFactory_(parameters),
-  wallVelocityIterator_(globalBoundaryFactory_.getGlobalBoundaryVelocityIterator(flowField_)),
-  wallFGHIterator_(globalBoundaryFactory_.getGlobalBoundaryFGHIterator(flowField_)),
-  fghStencil_(),
-  fghIterator_(flowField_, parameters, fghStencil_),
-  rhsStencil_(),
-  rhsIterator_(flowField_, parameters, rhsStencil_),
-  velocityStencil_(),
-  obstacleStencil_(),
-  velocityIterator_(flowField_, parameters, velocityStencil_),
-  obstacleIterator_(flowField_, parameters, obstacleStencil_),
   vtkStencil(parameters),
   vtkIterator(flowField_, parameters_, vtkStencil, 1, 0),
-  petscParallelManager_(parameters, flowField),
+  petscParallelManager_(parameters_, flowField_),
   stencil_(),
-  fieldIterator_(flowField_, parameters, stencil_),
-  boundaryIterator_(flowField_, parameters, stencil_)
+  fieldIterator_(flowField_, parameters_, stencil_),
+  wallIterator_(flowField_, parameters_, stencil_, 1, 0),
+  boundaryIterator_(flowField_, parameters_, stencil_)
 #ifdef ENABLE_PETSC
   ,
   solver_(std::make_unique<Solvers::PetscSolver>(flowField_, parameters))
 #else
   ,
-  solver_(std::make_unique<Solvers::SORSolver>(flowField_, parameters))
+  solver_(std::make_unique<Solvers::SORSolver>(flowField_, parameters_))
 #endif
 {
 }
@@ -68,7 +55,6 @@ void Simulation::solveTimestep() {
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
   // Compute FGH
-  // fghIterator_.iterate();
   fieldIterator_.iterate(FGH);
   solveTimestepHelper();
 }
@@ -76,26 +62,21 @@ void Simulation::solveTimestep() {
 
 void Simulation::solveTimestepHelper() {
   // Set global boundary values
-  wallFGHIterator_.iterate();
-  // TODO
-  // boundaryIterator_.iterate(WALLFGH);
+  wallIterator_.iterate(WALLFGH);
   // Compute the right hand side (RHS)
-  // rhsIterator_.iterate();
   fieldIterator_.iterate(RHS);
   // Solve for pressure
   solver_->solve();
   // TODO WS2: communicate pressure values
   petscParallelManager_.communicatePressure();
   // Compute velocity
-  // velocityIterator_.iterate();
   fieldIterator_.iterate(VELOCITY);
   // obstacleIterator_.iterate();
   fieldIterator_.iterate(OBSTACLE);
   // TODO WS2: communicate velocity values
   petscParallelManager_.communicateVelocities();
   // Iterate for velocities on the boundary
-  // wallVelocityIterator_.iterate();
-  boundaryIterator_.iterate(WALLVELOCITY);
+  wallIterator_.iterate(WALLVELOCITY);
 }
 
 void Simulation::plotVTK(int timeStep, RealType simulationTime) {
@@ -109,8 +90,6 @@ void Simulation::setTimeStep() {
   RealType factor = 1.0 / (parameters_.meshsize.getDxMin() * parameters_.meshsize.getDxMin()) + 1.0 / (parameters_.meshsize.getDyMin() * parameters_.meshsize.getDyMin());
   // Determine maximum velocity
   stencil_.maxUStencil_.reset();
-  // maxUFieldIterator_.iterate();
-  // maxUBoundaryIterator_.iterate();
   fieldIterator_.iterate(MAXU);
   boundaryIterator_.iterate(MAXU);
   if (parameters_.geometry.dim == 3) {

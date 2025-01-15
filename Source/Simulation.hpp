@@ -26,35 +26,16 @@ protected:
 
   FlowField& flowField_;
 
-  Stencils::MaxUStencil             maxUStencil_;
-  FieldIterator<FlowField>          maxUFieldIterator_;
-  GlobalBoundaryIterator<FlowField> maxUBoundaryIterator_;
-
-  //Set up the boundary conditions
-  GlobalBoundaryFactory             globalBoundaryFactory_;
-  GlobalBoundaryIterator<FlowField> wallVelocityIterator_;
-  GlobalBoundaryIterator<FlowField> wallFGHIterator_;
-
-  Stencils::FGHStencil     fghStencil_;
-  FieldIterator<FlowField> fghIterator_;
-
-  Stencils::RHSStencil     rhsStencil_;
-  FieldIterator<FlowField> rhsIterator_;
-
-  Stencils::VelocityStencil velocityStencil_;
-  Stencils::ObstacleStencil obstacleStencil_;
-  FieldIterator<FlowField>  velocityIterator_;
-  FieldIterator<FlowField>  obstacleIterator_;
-
   ParallelManagers::PetscParallelManager petscParallelManager_;
   std::unique_ptr<Solvers::LinearSolver> solver_;
 
   Stencils::VTKStencil<FlowField> vtkStencil;
   FieldIterator<FlowField>        vtkIterator;
 
-  StencilDelegate stencil_;
-  FieldIteratorGPU<FlowField> fieldIterator_;
+  StencilDelegate                      stencil_;
+  FieldIteratorGPU<FlowField>          fieldIterator_;
   GlobalBoundaryIteratorGPU<FlowField> boundaryIterator_;
+  GlobalBoundaryIteratorGPU<FlowField> wallIterator_;
 
   virtual void setTimeStep();
 

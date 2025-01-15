@@ -5,7 +5,7 @@
 #include "GlobalBoundaryFactory.hpp"
 #include "Iterators.hpp"
 #include "ParallelManagers/PetscParallelManager.hpp"
-#include "Solvers/LinearSolver.hpp"
+#include "Solvers/SORSolver.hpp"
 #include "Stencils/BFInputStencils.hpp"
 #include "Stencils/BFStepInitStencil.hpp"
 #include "Stencils/FGHStencil.hpp"
@@ -39,7 +39,7 @@ public:
   Parameters* parameters_;
   FlowField*  flowField_;
 
-  std::unique_ptr<Solvers::LinearSolver> solver_;
+  std::unique_ptr<Solvers::SORSolver> solver_;
 
   Stencils::VTKStencil<FlowField> vtkStencil;
   FieldIterator<FlowField>        vtkIterator;

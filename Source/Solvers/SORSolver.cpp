@@ -2,32 +2,29 @@
 
 #include "SORSolver.hpp"
 
-Solvers::SORSolver::SORSolver(FlowField& flowField, const Parameters& parameters):
-  LinearSolver(flowField, parameters) {}
-
-void Solvers::SORSolver::solve() {
+void Solvers::SORSolver::solve(FlowField& flowField, const Parameters& parameters) {
   RealType resnorm = DBL_MAX, tol = 1e-4;
 
   double omg        = 1.7;
   int    iterations = -1;
   int    it         = 0;
 
-  int          nx = flowField_.getNx(), ny = flowField_.getNy(), nz = flowField_.getNz();
-  ScalarField& P = flowField_.getPressure();
-  if (parameters_.geometry.dim == 3) {
+  int          nx = flowField.getNx(), ny = flowField.getNy(), nz = flowField.getNz();
+  ScalarField& P = flowField.getPressure();
+  if (parameters.geometry.dim == 3) {
     do {
       for (int k = 2; k < nz + 2; k++) {
         for (int j = 2; j < ny + 2; j++) {
           for (int i = 2; i < nx + 2; i++) {
-            const RealType dx_0  = parameters_.meshsize->getDx(i, j, k);
-            const RealType dx_M1 = parameters_.meshsize->getDx(i - 1, j, k);
-            const RealType dx_P1 = parameters_.meshsize->getDx(i + 1, j, k);
-            const RealType dy_0  = parameters_.meshsize->getDy(i, j, k);
-            const RealType dy_M1 = parameters_.meshsize->getDy(i, j - 1, k);
-            const RealType dy_P1 = parameters_.meshsize->getDy(i, j + 1, k);
-            const RealType dz_0  = parameters_.meshsize->getDz(i, j, k);
-            const RealType dz_M1 = parameters_.meshsize->getDz(i, j, k - 1);
-            const RealType dz_P1 = parameters_.meshsize->getDz(i, j, k + 1);
+            const RealType dx_0  = parameters.meshsize->getDx(i, j, k);
+            const RealType dx_M1 = parameters.meshsize->getDx(i - 1, j, k);
+            const RealType dx_P1 = parameters.meshsize->getDx(i + 1, j, k);
+            const RealType dy_0  = parameters.meshsize->getDy(i, j, k);
+            const RealType dy_M1 = parameters.meshsize->getDy(i, j - 1, k);
+            const RealType dy_P1 = parameters.meshsize->getDy(i, j + 1, k);
+            const RealType dz_0  = parameters.meshsize->getDz(i, j, k);
+            const RealType dz_M1 = parameters.meshsize->getDz(i, j, k - 1);
+            const RealType dz_P1 = parameters.meshsize->getDz(i, j, k + 1);
 
             const RealType dx_W = 0.5 * (dx_0 + dx_M1);
             const RealType dx_E = 0.5 * (dx_0 + dx_P1);
@@ -47,7 +44,7 @@ void Solvers::SORSolver::solve() {
             P.getScalar(
               i, j, k
             ) = omg / a_C
-                  * (flowField_.getRHS().getScalar(i, j, k) - a_W * P.getScalar(i - 1, j, k) - a_E * P.getScalar(i + 1, j, k) - a_S * P.getScalar(i, j - 1, k) - a_N * P.getScalar(i, j + 1, k) - a_B * P.getScalar(i, j, k - 1) - a_T * P.getScalar(i, j, k + 1))
+                  * (flowField.getRHS().getScalar(i, j, k) - a_W * P.getScalar(i - 1, j, k) - a_E * P.getScalar(i + 1, j, k) - a_S * P.getScalar(i, j - 1, k) - a_N * P.getScalar(i, j + 1, k) - a_B * P.getScalar(i, j, k - 1) - a_T * P.getScalar(i, j, k + 1))
                 + (1.0 - omg) * P.getScalar(i, j, k);
           }
         }
@@ -78,15 +75,15 @@ void Solvers::SORSolver::solve() {
       for (int k = 2; k < nz + 2; k++) {
         for (int j = 2; j < ny + 2; j++) {
           for (int i = 2; i < nx + 2; i++) {
-            const RealType dx_0  = parameters_.meshsize->getDx(i, j, k);
-            const RealType dx_M1 = parameters_.meshsize->getDx(i - 1, j, k);
-            const RealType dx_P1 = parameters_.meshsize->getDx(i + 1, j, k);
-            const RealType dy_0  = parameters_.meshsize->getDy(i, j, k);
-            const RealType dy_M1 = parameters_.meshsize->getDy(i, j - 1, k);
-            const RealType dy_P1 = parameters_.meshsize->getDy(i, j + 1, k);
-            const RealType dz_0  = parameters_.meshsize->getDz(i, j, k);
-            const RealType dz_M1 = parameters_.meshsize->getDz(i, j, k - 1);
-            const RealType dz_P1 = parameters_.meshsize->getDz(i, j, k + 1);
+            const RealType dx_0  = parameters.meshsize->getDx(i, j, k);
+            const RealType dx_M1 = parameters.meshsize->getDx(i - 1, j, k);
+            const RealType dx_P1 = parameters.meshsize->getDx(i + 1, j, k);
+            const RealType dy_0  = parameters.meshsize->getDy(i, j, k);
+            const RealType dy_M1 = parameters.meshsize->getDy(i, j - 1, k);
+            const RealType dy_P1 = parameters.meshsize->getDy(i, j + 1, k);
+            const RealType dz_0  = parameters.meshsize->getDz(i, j, k);
+            const RealType dz_M1 = parameters.meshsize->getDz(i, j, k - 1);
+            const RealType dz_P1 = parameters.meshsize->getDz(i, j, k + 1);
 
             const RealType dx_W = 0.5 * (dx_0 + dx_M1);
             const RealType dx_E = 0.5 * (dx_0 + dx_P1);
@@ -104,31 +101,32 @@ void Solvers::SORSolver::solve() {
             const RealType a_C = -2.0 / (dx_E * dx_W) - 2.0 / (dx_N * dx_S) - 2.0 / (dx_B * dx_T);
 
             resnorm += pow(
-              (flowField_.getRHS().getScalar(i, j, k) - a_W * P.getScalar(i - 1, j, k) - a_E * P.getScalar(i + 1, j, k)
-               - a_S * P.getScalar(i, j - 1, k) - a_N * P.getScalar(i, j + 1, k) - a_B * P.getScalar(i, j, k - 1)
-               - a_T * P.getScalar(i, j, k + 1) - a_C * P.getScalar(i, j, k)),
+              (flowField.getRHS().getScalar(i, j, k) - a_W * P.getScalar(i - 1, j, k) - a_E * P.getScalar(i + 1, j, k) - a_S * P.getScalar(i, j - 1, k)
+               - a_N * P.getScalar(i, j + 1, k) - a_B * P.getScalar(i, j, k - 1) - a_T * P.getScalar(i, j, k + 1) - a_C * P.getScalar(i, j, k)),
               2
             );
           }
         }
       }
       resnorm = sqrt(resnorm / (nx * ny * nz));
+#ifndef NDEBUG
       spdlog::debug("Residual norm : {}", resnorm);
+#endif
 
       it++;
       iterations--;
     } while (resnorm > tol && iterations);
   }
-  if (parameters_.geometry.dim == 2) {
+  if (parameters.geometry.dim == 2) {
     do {
       for (int j = 2; j < ny + 2; j++) {
         for (int i = 2; i < nx + 2; i++) {
-          const RealType dx_0  = parameters_.meshsize->getDx(i, j);
-          const RealType dx_M1 = parameters_.meshsize->getDx(i - 1, j);
-          const RealType dx_P1 = parameters_.meshsize->getDx(i + 1, j);
-          const RealType dy_0  = parameters_.meshsize->getDy(i, j);
-          const RealType dy_M1 = parameters_.meshsize->getDy(i, j - 1);
-          const RealType dy_P1 = parameters_.meshsize->getDy(i, j + 1);
+          const RealType dx_0  = parameters.meshsize->getDx(i, j);
+          const RealType dx_M1 = parameters.meshsize->getDx(i - 1, j);
+          const RealType dx_P1 = parameters.meshsize->getDx(i + 1, j);
+          const RealType dy_0  = parameters.meshsize->getDy(i, j);
+          const RealType dy_M1 = parameters.meshsize->getDy(i, j - 1);
+          const RealType dy_P1 = parameters.meshsize->getDy(i, j + 1);
 
           const RealType dx_W = 0.5 * (dx_0 + dx_M1);
           const RealType dx_E = 0.5 * (dx_0 + dx_P1);
@@ -143,7 +141,7 @@ void Solvers::SORSolver::solve() {
 
           const RealType gaussSeidel
             = 1.0 / a_C
-              * (flowField_.getRHS().getScalar(i, j) - a_W * P.getScalar(i - 1, j) - a_E * P.getScalar(i + 1, j) - a_S * P.getScalar(i, j - 1) - a_N * P.getScalar(i, j + 1));
+              * (flowField.getRHS().getScalar(i, j) - a_W * P.getScalar(i - 1, j) - a_E * P.getScalar(i + 1, j) - a_S * P.getScalar(i, j - 1) - a_N * P.getScalar(i, j + 1));
           P.getScalar(i, j) = omg * gaussSeidel + (1.0 - omg) * P.getScalar(i, j);
         }
       }
@@ -151,12 +149,12 @@ void Solvers::SORSolver::solve() {
       resnorm = 0.0;
       for (int j = 2; j < ny + 2; j++) {
         for (int i = 2; i < nx + 2; i++) {
-          const RealType dx_0  = parameters_.meshsize->getDx(i, j);
-          const RealType dx_M1 = parameters_.meshsize->getDx(i - 1, j);
-          const RealType dx_P1 = parameters_.meshsize->getDx(i + 1, j);
-          const RealType dy_0  = parameters_.meshsize->getDy(i, j);
-          const RealType dy_M1 = parameters_.meshsize->getDy(i, j - 1);
-          const RealType dy_P1 = parameters_.meshsize->getDy(i, j + 1);
+          const RealType dx_0  = parameters.meshsize->getDx(i, j);
+          const RealType dx_M1 = parameters.meshsize->getDx(i - 1, j);
+          const RealType dx_P1 = parameters.meshsize->getDx(i + 1, j);
+          const RealType dy_0  = parameters.meshsize->getDy(i, j);
+          const RealType dy_M1 = parameters.meshsize->getDy(i, j - 1);
+          const RealType dy_P1 = parameters.meshsize->getDy(i, j + 1);
 
           const RealType dx_W = 0.5 * (dx_0 + dx_M1);
           const RealType dx_E = 0.5 * (dx_0 + dx_P1);
@@ -169,8 +167,7 @@ void Solvers::SORSolver::solve() {
           const RealType a_S = 2.0 / (dx_S * (dx_N + dx_S));
           const RealType a_C = -2.0 / (dx_E * dx_W) - 2.0 / (dx_N * dx_S);
 
-          const RealType residual = flowField_.getRHS().getScalar(i, j) - a_W * P.getScalar(i - 1, j)
-                                    - a_E * P.getScalar(i + 1, j) - a_S * P.getScalar(i, j - 1)
+          const RealType residual = flowField.getRHS().getScalar(i, j) - a_W * P.getScalar(i - 1, j) - a_E * P.getScalar(i + 1, j) - a_S * P.getScalar(i, j - 1)
                                     - a_N * P.getScalar(i, j + 1) - a_C * P.getScalar(i, j);
           resnorm += residual * residual;
         }
@@ -187,11 +184,15 @@ void Solvers::SORSolver::solve() {
         P.getScalar(i, ny + 2) = P.getScalar(i, ny + 1);
       }
 
+#ifndef NDEBUG
       spdlog::debug("Residual norm : {}", resnorm);
+#endif
       iterations--;
       it++;
     } while (resnorm > tol && iterations);
   }
 
+#ifndef NDEBUG
   spdlog::debug("SORSolver needed {} iterations", it);
+#endif
 }

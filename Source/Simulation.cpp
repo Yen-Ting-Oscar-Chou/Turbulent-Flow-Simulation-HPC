@@ -2,7 +2,7 @@
 
 #include "Simulation.hpp"
 
-#include "Solvers/PetscSolver.hpp"
+// #include "Solvers/PetscSolver.hpp"
 #include "Solvers/SORSolver.hpp"
 
 Simulation::Simulation(Parameters* parameters, FlowField* flowField):
@@ -14,13 +14,13 @@ Simulation::Simulation(Parameters* parameters, FlowField* flowField):
   fieldIterator_(),
   wallIterator_(1, 0),
   boundaryIterator_()
-#ifdef ENABLE_PETSC
+// #ifdef ENABLE_PETSC
+//   ,
+//   solver_(std::make_unique<Solvers::PetscSolver>(*flowField_, *parameters))
+// #else
   ,
-  solver_(std::make_unique<Solvers::PetscSolver>(*flowField_, *parameters))
-#else
-  ,
-  solver_(std::make_unique<Solvers::SORSolver>(*flowField_, *parameters_))
-#endif
+  solver_(std::make_unique<Solvers::SORSolver>())
+// #endif
 {
 }
 
@@ -64,7 +64,8 @@ void Simulation::solveTimestepHelper() {
   // Compute the right hand side (RHS)
   fieldIterator_.iterate(RHS, *parameters_, *flowField_, *stencil_);
   // Solve for pressure
-  solver_->solve();
+  // TODO put on GPU
+  solver_->solve(*flowField_, *parameters_);
   // TODO WS2: communicate pressure values
   // Compute velocity
   fieldIterator_.iterate(VELOCITY, *parameters_, *flowField_, *stencil_);

@@ -1,7 +1,7 @@
-#include "StdAfx.hpp"
+// #include "StdAfx.hpp"
 
-#include "LinearSolver.hpp"
+// #include "LinearSolver.hpp"
 
-Solvers::LinearSolver::LinearSolver(FlowField& flowField, const Parameters& parameters):
-  flowField_(flowField),
-  parameters_(parameters) {}
+// Solvers::LinearSolver::LinearSolver(FlowField& flowField, const Parameters& parameters):
+//   flowField_(flowField),
+//   parameters_(parameters) {}

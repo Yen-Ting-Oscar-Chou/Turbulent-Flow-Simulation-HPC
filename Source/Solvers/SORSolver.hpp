@@ -1,15 +1,21 @@
 #pragma once
 
-#include "LinearSolver.hpp"
+#include "Definitions.hpp"
+#include "FlowField.hpp"
+#include "Parameters.hpp"
 
 namespace Solvers {
 
-  class SORSolver: public LinearSolver {
+  class SORSolver {
   public:
-    SORSolver(FlowField& flowField, const Parameters& parameters);
-    ~SORSolver() override = default;
+    SORSolver()  = default;
+    ~SORSolver() = default;
 
-    void solve() override;
+#pragma omp declare target
+    void solve(FlowField& flowField, const Parameters& parameters);
+#pragma omp end declare target
+
+    inline void reInitMatrix() {};
   };
 
 } // namespace Solvers

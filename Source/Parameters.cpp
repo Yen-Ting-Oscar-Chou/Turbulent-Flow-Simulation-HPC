@@ -17,3 +17,10 @@ Parameters::Parameters(const GeometricParameters& geometricParameters, const Par
   turbulence{},
   meshsize(new MeshsizeDelegate(geometry, parallel)) {
 }
+
+Parameters::~Parameters() {
+  if (meshsize != NULL) {
+    delete meshsize;
+  }
+  meshsize = NULL;
+}

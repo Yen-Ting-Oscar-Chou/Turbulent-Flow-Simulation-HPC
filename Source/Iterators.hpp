@@ -58,12 +58,10 @@ public:
 template <class FlowFieldType>
 class FieldIteratorGPU {
 public:
-  StencilDelegate& stencil_;
-
   int lowOffset_;
   int highOffset_;
 
-  FieldIteratorGPU(StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
+  FieldIteratorGPU(int lowOffset = 0, int highOffset = 0);
 
   /** Volume iteration over the field.
    *
@@ -71,7 +69,7 @@ public:
    * boundaries. Lower boundaries are not included.
    */
   #pragma omp declare target
-  void iterate(StencilType type, const Parameters& parameters, FlowFieldType& flowField);
+  void iterate(StencilType type, const Parameters& parameters, FlowFieldType& flowField, StencilDelegate& stencil);
   #pragma omp end declare target
 };
 

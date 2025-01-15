@@ -37,24 +37,23 @@ void FieldIterator<FlowFieldType>::iterate() {
 }
 
 template <class FlowFieldType>
-FieldIteratorGPU<FlowFieldType>::FieldIteratorGPU(StencilDelegate& stencil, int lowOffset, int highOffset):
-  stencil_(stencil),
+FieldIteratorGPU<FlowFieldType>::FieldIteratorGPU(int lowOffset, int highOffset):
   lowOffset_(lowOffset),
   highOffset_(highOffset) {}
 
 template <class FlowFieldType>
-void FieldIteratorGPU<FlowFieldType>::iterate(StencilType type, const Parameters& parameters, FlowFieldType& flowField) {
+void FieldIteratorGPU<FlowFieldType>::iterate(StencilType type, const Parameters& parameters, FlowFieldType& flowField, StencilDelegate& stencil) {
   const int cellsX = flowField.getCellsX();
   const int cellsY = flowField.getCellsY();
   const int cellsZ = flowField.getCellsZ();
-  stencil_.setType(type);
+  stencil.setType(type);
   // The index k can be used for the 2D and 3D cases.
   if (parameters.geometry.dim == 2) {
     // Loop without lower boundaries. These will be dealt with by the global boundary stencils
     // or by the subdomain boundary iterators.
     for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
       for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
-        stencil_.apply(parameters, flowField, i, j);
+        stencil.apply(parameters, flowField, i, j);
       }
     }
   }
@@ -63,7 +62,7 @@ void FieldIteratorGPU<FlowFieldType>::iterate(StencilType type, const Parameters
     for (int k = 1 + lowOffset_; k < cellsZ - 1 + highOffset_; k++) {
       for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
         for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
-          stencil_.apply(parameters, flowField, i, j, k);
+          stencil.apply(parameters, flowField, i, j, k);
         }
       }
     }
@@ -122,9 +121,7 @@ void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type) {
     if (parameters_.parallel.rightNb < 0) {
       for (int j = lowOffset_; j < flowField_.getCellsY() + highOffset_; j++) {
         for (int k = lowOffset_; k < flowField_.getCellsZ() + highOffset_; k++) {
-          stencil_.applyRightWall(
-            parameters_, flowField_, flowField_.getCellsX() + highOffset_ - 1, j, k
-          );
+          stencil_.applyRightWall(parameters_, flowField_, flowField_.getCellsX() + highOffset_ - 1, j, k);
         }
       }
     }
@@ -156,9 +153,7 @@ void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type) {
     if (parameters_.parallel.backNb < 0) {
       for (int i = lowOffset_; i < flowField_.getCellsX() + highOffset_; i++) {
         for (int j = lowOffset_; j < flowField_.getCellsY() + highOffset_; j++) {
-          stencil_.applyBackWall(
-            parameters_, flowField_, i, j, flowField_.getCellsZ() + highOffset_ - 1
-          );
+          stencil_.applyBackWall(parameters_, flowField_, i, j, flowField_.getCellsZ() + highOffset_ - 1);
         }
       }
     }

@@ -28,7 +28,7 @@ protected:
   void setTimeStep() override;
 
 public:
-  TurbulentSimulation(Parameters& parameters, TurbulentFlowField& flowField);
+  TurbulentSimulation(Parameters* parameters, TurbulentFlowField* flowField);
   virtual ~TurbulentSimulation() = default;
 
   /** Initialises the flow field according to the scenario */

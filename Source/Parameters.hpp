@@ -208,7 +208,7 @@ struct ParametersGPUPtrs {
 class Parameters {
 public:
   Parameters(const GeometricParameters& geometricParameters, const ParallelParameters& parallelParameters);
-  ~Parameters() = default;
+  ~Parameters();
 
   Parameters(const Parameters& parameters):
     simulation(parameters.simulation),

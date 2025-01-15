@@ -31,8 +31,8 @@ void Stencils::MaxUStencil::applyBackWall(const Parameters& parameters, FlowFiel
 void Stencils::MaxUStencil::cellMaxValue(const Parameters& parameters, FlowField& flowField, int i, int j) {
   const RealType velocityX = flowField.getVelocity().getVectorElement(i, j, 0);
   const RealType velocityY = flowField.getVelocity().getVectorElement(i, j, 1);
-  const RealType dx        = parameters.meshsize.getDx(i, j);
-  const RealType dy        = parameters.meshsize.getDy(i, j);
+  const RealType dx        = parameters.meshsize->getDx(i, j);
+  const RealType dy        = parameters.meshsize->getDy(i, j);
 
   const RealType scaledVelocityX = fabs(velocityX) / dx;
   const RealType scaledVelocityY = fabs(velocityY) / dy;
@@ -49,9 +49,9 @@ void Stencils::MaxUStencil::cellMaxValue(const Parameters& parameters, FlowField
   const RealType velocityX = flowField.getVelocity().getVectorElement(i, j, k, 0);
   const RealType velocityY = flowField.getVelocity().getVectorElement(i, j, k, 1);
   const RealType velocityZ = flowField.getVelocity().getVectorElement(i, j, k, 2);
-  const RealType dx        = parameters.meshsize.getDx(i, j, k);
-  const RealType dy        = parameters.meshsize.getDy(i, j, k);
-  const RealType dz        = parameters.meshsize.getDz(i, j, k);
+  const RealType dx        = parameters.meshsize->getDx(i, j, k);
+  const RealType dy        = parameters.meshsize->getDy(i, j, k);
+  const RealType dz        = parameters.meshsize->getDz(i, j, k);
 
   const RealType scaledVelocityX = fabs(velocityX) / dx;
   const RealType scaledVelocityY = fabs(velocityY) / dy;

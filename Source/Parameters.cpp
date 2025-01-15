@@ -15,5 +15,5 @@ Parameters::Parameters(const GeometricParameters& geometricParameters, const Par
   stdOut{},
   bfStep{},
   turbulence{},
-  meshsize(MeshsizeDelegate(geometry, parallel)) {
+  meshsize(new MeshsizeDelegate(geometry, parallel)) {
 }

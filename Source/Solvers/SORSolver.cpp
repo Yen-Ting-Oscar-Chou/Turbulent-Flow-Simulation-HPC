@@ -19,15 +19,15 @@ void Solvers::SORSolver::solve() {
       for (int k = 2; k < nz + 2; k++) {
         for (int j = 2; j < ny + 2; j++) {
           for (int i = 2; i < nx + 2; i++) {
-            const RealType dx_0  = parameters_.meshsize.getDx(i, j, k);
-            const RealType dx_M1 = parameters_.meshsize.getDx(i - 1, j, k);
-            const RealType dx_P1 = parameters_.meshsize.getDx(i + 1, j, k);
-            const RealType dy_0  = parameters_.meshsize.getDy(i, j, k);
-            const RealType dy_M1 = parameters_.meshsize.getDy(i, j - 1, k);
-            const RealType dy_P1 = parameters_.meshsize.getDy(i, j + 1, k);
-            const RealType dz_0  = parameters_.meshsize.getDz(i, j, k);
-            const RealType dz_M1 = parameters_.meshsize.getDz(i, j, k - 1);
-            const RealType dz_P1 = parameters_.meshsize.getDz(i, j, k + 1);
+            const RealType dx_0  = parameters_.meshsize->getDx(i, j, k);
+            const RealType dx_M1 = parameters_.meshsize->getDx(i - 1, j, k);
+            const RealType dx_P1 = parameters_.meshsize->getDx(i + 1, j, k);
+            const RealType dy_0  = parameters_.meshsize->getDy(i, j, k);
+            const RealType dy_M1 = parameters_.meshsize->getDy(i, j - 1, k);
+            const RealType dy_P1 = parameters_.meshsize->getDy(i, j + 1, k);
+            const RealType dz_0  = parameters_.meshsize->getDz(i, j, k);
+            const RealType dz_M1 = parameters_.meshsize->getDz(i, j, k - 1);
+            const RealType dz_P1 = parameters_.meshsize->getDz(i, j, k + 1);
 
             const RealType dx_W = 0.5 * (dx_0 + dx_M1);
             const RealType dx_E = 0.5 * (dx_0 + dx_P1);
@@ -78,15 +78,15 @@ void Solvers::SORSolver::solve() {
       for (int k = 2; k < nz + 2; k++) {
         for (int j = 2; j < ny + 2; j++) {
           for (int i = 2; i < nx + 2; i++) {
-            const RealType dx_0  = parameters_.meshsize.getDx(i, j, k);
-            const RealType dx_M1 = parameters_.meshsize.getDx(i - 1, j, k);
-            const RealType dx_P1 = parameters_.meshsize.getDx(i + 1, j, k);
-            const RealType dy_0  = parameters_.meshsize.getDy(i, j, k);
-            const RealType dy_M1 = parameters_.meshsize.getDy(i, j - 1, k);
-            const RealType dy_P1 = parameters_.meshsize.getDy(i, j + 1, k);
-            const RealType dz_0  = parameters_.meshsize.getDz(i, j, k);
-            const RealType dz_M1 = parameters_.meshsize.getDz(i, j, k - 1);
-            const RealType dz_P1 = parameters_.meshsize.getDz(i, j, k + 1);
+            const RealType dx_0  = parameters_.meshsize->getDx(i, j, k);
+            const RealType dx_M1 = parameters_.meshsize->getDx(i - 1, j, k);
+            const RealType dx_P1 = parameters_.meshsize->getDx(i + 1, j, k);
+            const RealType dy_0  = parameters_.meshsize->getDy(i, j, k);
+            const RealType dy_M1 = parameters_.meshsize->getDy(i, j - 1, k);
+            const RealType dy_P1 = parameters_.meshsize->getDy(i, j + 1, k);
+            const RealType dz_0  = parameters_.meshsize->getDz(i, j, k);
+            const RealType dz_M1 = parameters_.meshsize->getDz(i, j, k - 1);
+            const RealType dz_P1 = parameters_.meshsize->getDz(i, j, k + 1);
 
             const RealType dx_W = 0.5 * (dx_0 + dx_M1);
             const RealType dx_E = 0.5 * (dx_0 + dx_P1);
@@ -123,12 +123,12 @@ void Solvers::SORSolver::solve() {
     do {
       for (int j = 2; j < ny + 2; j++) {
         for (int i = 2; i < nx + 2; i++) {
-          const RealType dx_0  = parameters_.meshsize.getDx(i, j);
-          const RealType dx_M1 = parameters_.meshsize.getDx(i - 1, j);
-          const RealType dx_P1 = parameters_.meshsize.getDx(i + 1, j);
-          const RealType dy_0  = parameters_.meshsize.getDy(i, j);
-          const RealType dy_M1 = parameters_.meshsize.getDy(i, j - 1);
-          const RealType dy_P1 = parameters_.meshsize.getDy(i, j + 1);
+          const RealType dx_0  = parameters_.meshsize->getDx(i, j);
+          const RealType dx_M1 = parameters_.meshsize->getDx(i - 1, j);
+          const RealType dx_P1 = parameters_.meshsize->getDx(i + 1, j);
+          const RealType dy_0  = parameters_.meshsize->getDy(i, j);
+          const RealType dy_M1 = parameters_.meshsize->getDy(i, j - 1);
+          const RealType dy_P1 = parameters_.meshsize->getDy(i, j + 1);
 
           const RealType dx_W = 0.5 * (dx_0 + dx_M1);
           const RealType dx_E = 0.5 * (dx_0 + dx_P1);
@@ -151,12 +151,12 @@ void Solvers::SORSolver::solve() {
       resnorm = 0.0;
       for (int j = 2; j < ny + 2; j++) {
         for (int i = 2; i < nx + 2; i++) {
-          const RealType dx_0  = parameters_.meshsize.getDx(i, j);
-          const RealType dx_M1 = parameters_.meshsize.getDx(i - 1, j);
-          const RealType dx_P1 = parameters_.meshsize.getDx(i + 1, j);
-          const RealType dy_0  = parameters_.meshsize.getDy(i, j);
-          const RealType dy_M1 = parameters_.meshsize.getDy(i, j - 1);
-          const RealType dy_P1 = parameters_.meshsize.getDy(i, j + 1);
+          const RealType dx_0  = parameters_.meshsize->getDx(i, j);
+          const RealType dx_M1 = parameters_.meshsize->getDx(i - 1, j);
+          const RealType dx_P1 = parameters_.meshsize->getDx(i + 1, j);
+          const RealType dy_0  = parameters_.meshsize->getDy(i, j);
+          const RealType dy_M1 = parameters_.meshsize->getDy(i, j - 1);
+          const RealType dy_P1 = parameters_.meshsize->getDy(i, j + 1);
 
           const RealType dx_W = 0.5 * (dx_0 + dx_M1);
           const RealType dx_E = 0.5 * (dx_0 + dx_P1);

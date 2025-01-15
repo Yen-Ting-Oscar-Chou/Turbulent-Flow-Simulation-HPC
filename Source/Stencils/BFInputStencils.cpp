@@ -3,10 +3,10 @@
 #include "BFInputStencils.hpp"
 
 RealType computeVelocity3D(int i, int j, int k, RealType stepSize, const Parameters& parameters) {
-  const RealType posY = parameters.meshsize.getPosY(i, j, k);
-  const RealType posZ = parameters.meshsize.getPosZ(i, j, k);
-  const RealType dy   = parameters.meshsize.getDy(i, j, k);
-  const RealType dz   = parameters.meshsize.getDz(i, j, k);
+  const RealType posY = parameters.meshsize->getPosY(i, j, k);
+  const RealType posZ = parameters.meshsize->getPosZ(i, j, k);
+  const RealType dy   = parameters.meshsize->getDy(i, j, k);
+  const RealType dz   = parameters.meshsize->getDz(i, j, k);
 
   if (posY + 0.5 * dy >= stepSize) {
     // Get the size of the inlet in Y. A 3 is subtracted because of the boundary cells.
@@ -23,8 +23,8 @@ RealType computeVelocity3D(int i, int j, int k, RealType stepSize, const Paramet
 }
 
 RealType computeVelocity2D(int i, int j, RealType stepSize, const Parameters& parameters) {
-  const RealType posY = parameters.meshsize.getPosY(i, j);
-  const RealType dy   = parameters.meshsize.getDy(i, j);
+  const RealType posY = parameters.meshsize->getPosY(i, j);
+  const RealType dy   = parameters.meshsize->getDy(i, j);
 
   if (posY + 0.5 * dy >= stepSize) {
     // Get the size of the inlet in Y. A 3 is subtracted because of the boundary cells.
@@ -47,14 +47,14 @@ void Stencils::BFInputVelocityStencil::initStepSize(const Parameters& parameters
   stepSize_ = parameters.bfStep.yRatio > 0.0 ? parameters.bfStep.yRatio * parameters.geometry.lengthY : 0.0;
 
   if (parameters.geometry.dim == 2) {
-    RealType posY   = parameters.meshsize.getPosY(0, 0);
-    RealType dy     = parameters.meshsize.getDy(0, 0);
-    RealType nextDy = parameters.meshsize.getDy(0, 1);
+    RealType posY   = parameters.meshsize->getPosY(0, 0);
+    RealType dy     = parameters.meshsize->getDy(0, 0);
+    RealType nextDy = parameters.meshsize->getDy(0, 1);
 
     for (int j = 0; j < parameters.geometry.sizeY - 1; ++j) {
-      posY   = parameters.meshsize.getPosY(0, j);
-      dy     = parameters.meshsize.getDy(0, j);
-      nextDy = parameters.meshsize.getDy(0, j + 1);
+      posY   = parameters.meshsize->getPosY(0, j);
+      dy     = parameters.meshsize->getDy(0, j);
+      nextDy = parameters.meshsize->getDy(0, j + 1);
 
       // Check if stepSize is in this cell
       if (posY + 0.5 * dy < stepSize_ && stepSize_ <= posY + dy + 0.5 * nextDy) {
@@ -63,14 +63,14 @@ void Stencils::BFInputVelocityStencil::initStepSize(const Parameters& parameters
       }
     }
   } else if (parameters.geometry.dim == 3) {
-    RealType posY   = parameters.meshsize.getPosY(0, 0, 0);
-    RealType dy     = parameters.meshsize.getDy(0, 0, 0);
-    RealType nextDy = parameters.meshsize.getDy(0, 1, 0);
+    RealType posY   = parameters.meshsize->getPosY(0, 0, 0);
+    RealType dy     = parameters.meshsize->getDy(0, 0, 0);
+    RealType nextDy = parameters.meshsize->getDy(0, 1, 0);
 
     for (int j = 0; j < parameters.geometry.sizeY - 1; ++j) {
-      posY   = parameters.meshsize.getPosY(0, j, 0);
-      dy     = parameters.meshsize.getDy(0, j, 0);
-      nextDy = parameters.meshsize.getDy(0, j + 1, 0);
+      posY   = parameters.meshsize->getPosY(0, j, 0);
+      dy     = parameters.meshsize->getDy(0, j, 0);
+      nextDy = parameters.meshsize->getDy(0, j + 1, 0);
 
       if (posY + 0.5 * dy < stepSize_ && stepSize_ <= posY + dy + 0.5 * nextDy) {
         stepSize_ = posY + dy;

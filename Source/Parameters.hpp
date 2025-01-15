@@ -223,7 +223,7 @@ public:
     stdOut(parameters.stdOut),
     bfStep(parameters.bfStep),
     turbulence(parameters.turbulence),
-    meshsize(MeshsizeDelegate(parameters.geometry, parameters.parallel)) {}
+    meshsize(new MeshsizeDelegate(parameters.geometry, parameters.parallel)) {}
 
   SimulationParameters    simulation;
   TimestepParameters      timestep;
@@ -237,7 +237,7 @@ public:
   StdOutParameters        stdOut;
   BFStepParameters        bfStep;
   TurbulenceParameters    turbulence;
-  MeshsizeDelegate        meshsize;
+  MeshsizeDelegate*        meshsize;
 
   static ParametersGPUPtrs mapToGPU(int hostDevice, int targetDevice, Parameters& parameters) {
     size_t      parametersSize = sizeof(parameters);
@@ -530,8 +530,8 @@ public:
 
     // MeshsizeDelegate
     {
-      meshsizeGPUPtr = MeshsizeDelegate::mapToGPU(hostDevice, targetDevice, parameters.meshsize);
-      omp_target_memcpy(&parametersGPU->meshsize, meshsizeGPUPtr, sizeof(MeshsizeDelegate*), 0, 0, targetDevice, hostDevice);
+      meshsizeGPUPtr = MeshsizeDelegate::mapToGPU(hostDevice, targetDevice, *parameters.meshsize);
+      omp_target_memcpy(&parametersGPU->meshsize, &meshsizeGPUPtr, sizeof(MeshsizeDelegate*), 0, 0, targetDevice, hostDevice);
     }
 
     return ParametersGPUPtrs(
@@ -564,7 +564,7 @@ public:
     omp_target_free(parameterPtrs.firstCornerGPUPtr_, targetDevice);
     omp_target_free(parameterPtrs.indicesGPUPtr_, targetDevice);
     omp_target_free(parameterPtrs.localSizeGPUPtr_, targetDevice);
-    MeshsizeDelegate::freeGPU(hostDevice, targetDevice, parameterPtrs.meshsizeDelegateGPUPtr_, parameters.meshsize);
+    MeshsizeDelegate::freeGPU(hostDevice, targetDevice, parameterPtrs.meshsizeDelegateGPUPtr_, *parameters.meshsize);
     omp_target_free(parameterPtrs.numProcessorsGPUPtr_, targetDevice);
     omp_target_free(parameterPtrs.sizesGPUPtr1_, targetDevice);
     omp_target_free(parameterPtrs.sizesGPUPtr2_, targetDevice);
@@ -579,12 +579,3 @@ public:
     omp_target_free(parameterPtrs.parametersGPUPtrs_, targetDevice);
   }
 };
-/* #pragma omp declare mapper(Parameters p) map(to : p) map(to : p.meshsize, p.meshsize.uniform, p.meshsize.tanh, p.meshsize.tanh.uniformMeshsize_) map(to : p.simulation \
-) map(to : p.timestep) map(to : p.environment) map(to : p.flow) map(to : p.solver) map(to : p.geometry) \
-  map(to : p.walls, \
-        p.walls.vectorLeft[0 : 3], \
-        p.walls.vectorRight[0 : 3], \
-        p.walls.vectorBottom[0 : 3], \
-        p.walls.vectorTop[0 : 3], \
-        p.walls.vectorFront[0 : 3], \
-        p.walls.vectorBack[0 : 3]) map(to : p.turbulence) */

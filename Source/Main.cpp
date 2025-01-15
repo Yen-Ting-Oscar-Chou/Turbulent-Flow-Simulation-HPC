@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
   spdlog::debug("Left neighbour: {}, right neighbour: {}", parameters.parallel.leftNb, parameters.parallel.rightNb);
   spdlog::debug("Top neighbour: {}, bottom neighbour: {}", parameters.parallel.topNb, parameters.parallel.bottomNb);
   spdlog::debug("Front neighbour: {}, back neighbour: {}", parameters.parallel.frontNb, parameters.parallel.backNb);
-  spdlog::debug("Min. meshsizes: {}, {}, {}", parameters.meshsize.getDxMin(), parameters.meshsize.getDyMin(), parameters.meshsize.getDzMin());
+  spdlog::debug("Min. meshsizes: {}, {}, {}", parameters.meshsize->getDxMin(), parameters.meshsize->getDyMin(), parameters.meshsize->getDzMin());
 
   // Initialise simulation
   if (parameters.simulation.type == "turbulence") {
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
     if (turbulentFlowField == NULL) {
       throw std::runtime_error("turbulentFlowField == NULL!");
     }
-    TurbulentSimulation* turbulentSimulation = new TurbulentSimulation(parameters, *turbulentFlowField);
+    TurbulentSimulation* turbulentSimulation = new TurbulentSimulation(&parameters, turbulentFlowField);
     flowField                                = turbulentFlowField;
     simulation                               = turbulentSimulation;
   } else if (parameters.simulation.type == "dns") {
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
     if (flowField == NULL) {
       throw std::runtime_error("flowField == NULL!");
     }
-    simulation = new Simulation(parameters, *flowField);
+    simulation = new Simulation(&parameters, flowField);
   } else {
     throw std::runtime_error("Unknown simulation type! Currently supported: dns, turbulence");
   }
@@ -111,51 +111,17 @@ int main(int argc, char* argv[]) {
   // Plot initial state
   simulation->plotVTK(timeSteps, time);
 
-//   int hostDevice   = omp_get_initial_device();
-//   int targetDevice = omp_get_default_device();
-
-//   std::cout << "Host device: " << hostDevice << std::endl;
-//   std::cout << "Target device: " << targetDevice << std::endl;
-
-//   std::cout << "Pressure:" << std::endl;
-
-//   for (int i = 0; i < 2; i++) {
-//     for (int j = 0; j < 1; j++) {
-//       std::cout << flowField->getPressure().getScalar(i,j) << std::endl;
-//     }
-//   }
-
-//   std::cout << "Map to GPU" << std::endl;
-
-//   FlowFieldGPUPtrs ptrs         = FlowField::mapToGPU(hostDevice, targetDevice, *flowField);
-// #pragma omp target device(targetDevice)
-//   {
-//     for (int i = 0; i < 13; i++) {
-//       for (int j = 0; j < 13; j++) {
-//         flowField->getPressure().getScalar(i,j)  = i * -200.0;
-//       }
-//     }
-//   }
-
-//   std::cout << "Map back to CPU and free" << std::endl;
-
-//   FlowField::mapToCPUAndFree(hostDevice, targetDevice, *flowField, ptrs);
-
-//   std::cout << "Pressure:" << std::endl;
-
-//   for (int i = 0; i < 2; i++) {
-//     for (int j = 0; j < 1; j++) {
-//       std::cout << flowField->getPressure().getScalar(i,j) << std::endl;
-//     }
-//   }
-
-//   exit(0);
-
   Clock clock;
+  int   hostDevice   = omp_get_initial_device();
+  int   targetDevice = omp_get_default_device();
+
   // Time loop
   // TODO #pragma map to gpu and backwards
   while (time < parameters.simulation.finalTime) {
-    simulation->solveTimestep();
+    auto ptrs = Simulation::mapToGPU(hostDevice, targetDevice, *simulation);
+#pragma omp target device(targetDevice)
+    { simulation->solveTimestep(); }
+    Simulation::mapToCPUAndFree(hostDevice, targetDevice, *simulation, ptrs);
 
     timeSteps++;
     time += parameters.timestep.dt;

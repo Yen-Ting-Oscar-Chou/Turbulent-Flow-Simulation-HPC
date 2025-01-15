@@ -39,7 +39,7 @@ public:
   Parameters* parameters_;
   FlowField*  flowField_;
 
-  std::unique_ptr<Solvers::SORSolver> solver_;
+  Solvers::SORSolver solver_;
 
   Stencils::VTKStencil<FlowField> vtkStencil;
   FieldIterator<FlowField>        vtkIterator;
@@ -120,6 +120,7 @@ public:
 
     FlowField::mapToCPUAndFree(hostDevice, targetDevice, *simulation.flowField_, simulationPtrs.flowFieldGPUptrs_);
     StencilDelegate::freeGPU(hostDevice, targetDevice, *simulation.stencil_, simulationPtrs.stencilDelegatePtrs_);
+    omp_target_memcpy(&simulation.parameters_->timestep.dt, &simulationPtrs.parameterPtrs_.parametersGPUPtrs_->timestep.dt, sizeof(RealType), 0, 0, hostDevice, targetDevice);
     Parameters::freeGPU(hostDevice, targetDevice, *simulation.parameters_, simulationPtrs.parameterPtrs_);
   }
 };

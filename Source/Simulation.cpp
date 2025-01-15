@@ -19,7 +19,7 @@ Simulation::Simulation(Parameters* parameters, FlowField* flowField):
 //   solver_(std::make_unique<Solvers::PetscSolver>(*flowField_, *parameters))
 // #else
   ,
-  solver_(std::make_unique<Solvers::SORSolver>())
+  solver_()
 // #endif
 {
 }
@@ -43,11 +43,10 @@ void Simulation::initializeFlowField() {
     Stencils::BFStepInitStencil bfStepInitStencil(*parameters_);
     FieldIterator<FlowField>    bfStepIterator(*flowField_, *parameters_, bfStepInitStencil, 0, 1);
     bfStepIterator.iterate();
-    // wallVelocityIterator_.iterate();
     boundaryIterator_.iterate(WALLVELOCITY, *parameters_, *flowField_, *stencil_);
   }
 
-  solver_->reInitMatrix();
+  solver_.reInitMatrix();
 }
 
 void Simulation::solveTimestep() {
@@ -64,8 +63,7 @@ void Simulation::solveTimestepHelper() {
   // Compute the right hand side (RHS)
   fieldIterator_.iterate(RHS, *parameters_, *flowField_, *stencil_);
   // Solve for pressure
-  // TODO put on GPU
-  solver_->solve(*flowField_, *parameters_);
+  solver_.solve(*flowField_, *parameters_);
   // TODO WS2: communicate pressure values
   // Compute velocity
   fieldIterator_.iterate(VELOCITY, *parameters_, *flowField_, *stencil_);

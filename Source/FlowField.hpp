@@ -134,7 +134,7 @@ private:
       std::cout << "Error: Copying flags data pointer to flags object not successful." << std::endl;
       return nullptr;
     }
-
+    
     omp_target_memcpy(&(flowFieldGPU->flags_.sizeX_), &(flowField.flags_.sizeX_), sizeof(int), 0, 0, targetDevice, hostDevice);
     omp_target_memcpy(&(flowFieldGPU->flags_.sizeY_), &(flowField.flags_.sizeY_), sizeof(int), 0, 0, targetDevice, hostDevice);
     omp_target_memcpy(&(flowFieldGPU->flags_.sizeZ_), &(flowField.flags_.sizeZ_), sizeof(int), 0, 0, targetDevice, hostDevice);
@@ -318,11 +318,6 @@ public:
     size_t scalarFieldDataSize    = flowField.RHS_.size_ * sizeof(RealType);
     size_t vectorFieldDataSize    = flowField.velocity_.size_ * sizeof(RealType);
     size_t intScalarFieldDataSize = flowField.flags_.size_ * sizeof(int);
-
-    std::cout << "FlowField size: " << flowFieldSize << " bytes" << std::endl;
-    std::cout << "ScalarField data size: " << scalarFieldDataSize << " bytes" << std::endl;
-    std::cout << "VectorField data size: " << vectorFieldDataSize << " bytes" << std::endl;
-    std::cout << "IntScalarField data size: " << intScalarFieldDataSize << " bytes" << std::endl;
 
     if (!omp_target_is_present(&flowField, targetDevice)) {
       std::cout << "Error: FlowField is not a valid target pointer." << std::endl;

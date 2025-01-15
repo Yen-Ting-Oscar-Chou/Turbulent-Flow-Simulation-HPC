@@ -240,7 +240,7 @@ public:
   MeshsizeDelegate        meshsize;
 
   static ParametersGPUPtrs mapToGPU(int hostDevice, int targetDevice, Parameters& parameters) {
-    size_t      parametersSize = sizeof(Parameters);
+    size_t      parametersSize = sizeof(parameters);
     size_t      realTypeSize   = sizeof(RealType);
     size_t      intSize        = sizeof(int);
     size_t      vectorDataSize = 3 * realTypeSize;
@@ -334,7 +334,8 @@ public:
       if (!copiedVectorLeftData) {
         std::cout << "Error: Copying vectorLeft data to GPU not successful." << std::endl;
       }
-      bool copiedVectorLeftPtr = omp_target_memcpy(&parametersGPU->walls.vectorLeft, &vectorLeftGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
+
+      bool copiedVectorLeftPtr = omp_target_memcpy(&parametersGPU->walls.vectorLeft, vectorLeftGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedVectorLeftPtr) {
         std::cout << "Error: Copying vectorLeft data pointer to parameters object not successful." << std::endl;
       }
@@ -347,7 +348,7 @@ public:
       if (!copiedVectorRightData) {
         std::cout << "Error: Copying vectorRight data to GPU not successful." << std::endl;
       }
-      bool copiedVectorRightPtr = omp_target_memcpy(&parametersGPU->walls.vectorRight, &vectorRightGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
+      bool copiedVectorRightPtr = omp_target_memcpy(&parametersGPU->walls.vectorRight, vectorRightGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedVectorRightPtr) {
         std::cout << "Error: Copying vectorRight data pointer to parameters object not successful." << std::endl;
       }
@@ -361,7 +362,7 @@ public:
       if (!copiedVectorTopData) {
         std::cout << "Error: Copying vectorTop data to GPU not successful." << std::endl;
       }
-      bool copiedVectorTopPtr = omp_target_memcpy(&parametersGPU->walls.vectorTop, &vectorTopGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
+      bool copiedVectorTopPtr = omp_target_memcpy(&parametersGPU->walls.vectorTop, vectorTopGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedVectorTopPtr) {
         std::cout << "Error: Copying vectorTop data pointer to parameters object not successful." << std::endl;
       }
@@ -375,7 +376,7 @@ public:
       if (!copiedVectorBottomData) {
         std::cout << "Error: Copying vectorBottom data to GPU not successful." << std::endl;
       }
-      bool copiedVectorBottomPtr = omp_target_memcpy(&parametersGPU->walls.vectorBottom, &vectorBottomGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
+      bool copiedVectorBottomPtr = omp_target_memcpy(&parametersGPU->walls.vectorBottom, vectorBottomGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedVectorBottomPtr) {
         std::cout << "Error: Copying vectorBottom data pointer to parameters object not successful." << std::endl;
       }
@@ -389,7 +390,7 @@ public:
       if (!copiedVectorFrontData) {
         std::cout << "Error: Copying vectorFront data to GPU not successful." << std::endl;
       }
-      bool copiedVectorFrontPtr = omp_target_memcpy(&parametersGPU->walls.vectorFront, &vectorFrontGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
+      bool copiedVectorFrontPtr = omp_target_memcpy(&parametersGPU->walls.vectorFront, vectorFrontGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedVectorFrontPtr) {
         std::cout << "Error: Copying vectorFront data pointer to parameters object not successful." << std::endl;
       }
@@ -403,7 +404,7 @@ public:
       if (!copiedVectorBackData) {
         std::cout << "Error: Copying vectorBack data to GPU not successful." << std::endl;
       }
-      bool copiedVectorBackPtr = omp_target_memcpy(&parametersGPU->walls.vectorBack, &vectorBackGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
+      bool copiedVectorBackPtr = omp_target_memcpy(&parametersGPU->walls.vectorBack, vectorBackGPUPtr, sizeof(RealType*), 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedVectorBackPtr) {
         std::cout << "Error: Copying vectorBack data pointer to parameters object not successful." << std::endl;
       }
@@ -427,7 +428,7 @@ public:
       if (!copiedNumProcessorsData) {
         std::cout << "Error: Copying copiedNumProcessorsData data to GPU not successful." << std::endl;
       }
-      bool copiedNumProcessorsPtr = omp_target_memcpy(&parametersGPU->parallel.numProcessors, &numProcessorsGPUPtr, sizeof(int*), 0, 0, targetDevice, hostDevice) == 0;
+      bool copiedNumProcessorsPtr = omp_target_memcpy(&parametersGPU->parallel.numProcessors, numProcessorsGPUPtr, sizeof(int*), 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedNumProcessorsPtr) {
         std::cout << "Error: Copying numProcessors data pointer to parameters object not successful." << std::endl;
       }
@@ -441,7 +442,7 @@ public:
       if (!copiedIndicesData) {
         std::cout << "Error: Copying copiedIndicesData data to GPU not successful." << std::endl;
       }
-      bool copiedIndicesPtr = omp_target_memcpy(&parametersGPU->parallel.indices, &indicesGPUPtr, sizeof(int*), 0, 0, targetDevice, hostDevice) == 0;
+      bool copiedIndicesPtr = omp_target_memcpy(&parametersGPU->parallel.indices, indicesGPUPtr, sizeof(int*), 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedIndicesPtr) {
         std::cout << "Error: Copying indices data pointer to parameters object not successful." << std::endl;
       }
@@ -455,7 +456,7 @@ public:
       if (!copiedLocalSizeData) {
         std::cout << "Error: Copying copiedLocalSizeData data to GPU not successful." << std::endl;
       }
-      bool copiedLocalSizePtr = omp_target_memcpy(&parametersGPU->parallel.localSize, &localSizeGPUPtr, sizeof(int*), 0, 0, targetDevice, hostDevice) == 0;
+      bool copiedLocalSizePtr = omp_target_memcpy(&parametersGPU->parallel.localSize, localSizeGPUPtr, sizeof(int*), 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedLocalSizePtr) {
         std::cout << "Error: Copying localSize data pointer to parameters object not successful." << std::endl;
       }
@@ -469,7 +470,7 @@ public:
       if (!copiedFirstCornerData) {
         std::cout << "Error: Copying copiedFirstCornerData data to GPU not successful." << std::endl;
       }
-      bool copiedFirstCornerPtr = omp_target_memcpy(&parametersGPU->parallel.firstCorner, &firstCornerGPUPtr, sizeof(int*), 0, 0, targetDevice, hostDevice) == 0;
+      bool copiedFirstCornerPtr = omp_target_memcpy(&parametersGPU->parallel.firstCorner, firstCornerGPUPtr, sizeof(int*), 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedFirstCornerPtr) {
         std::cout << "Error: Copying firstCorner data pointer to parameters object not successful." << std::endl;
       }
@@ -504,12 +505,12 @@ public:
         if (!copiedSizesGPUData3) {
           std::cout << "Error: Copying copiedSizesGPUData3 data to GPU not successful." << std::endl;
         }
-        bool copiedSizesGPUPtr3 = omp_target_memcpy(&sizesGPUPtr[2], &sizesGPUPtr1, sizeof(PetscInt*), 0, 0, targetDevice, hostDevice) == 0;
+        bool copiedSizesGPUPtr3 = omp_target_memcpy(&sizesGPUPtr[2], &sizesGPUPtr3, sizeof(PetscInt*), 0, 0, targetDevice, hostDevice) == 0;
         if (!copiedSizesGPUPtr3) {
           std::cout << "Error: Copying copiedSizesGPUPtr3 pointer to GPU not successful." << std::endl;
         }
       }
-      bool copiedSizesGPUPtr = omp_target_memcpy(&parametersGPU->parallel.sizes, &sizesGPUPtr, sizeof(PetscInt*) * 3, 0, 0, targetDevice, hostDevice) == 0;
+      bool copiedSizesGPUPtr = omp_target_memcpy(&parametersGPU->parallel.sizes, sizesGPUPtr, sizeof(PetscInt**) * 3, 0, 0, targetDevice, hostDevice) == 0;
       if (!copiedSizesGPUPtr) {
         std::cout << "Error: Copying sizesGPU data pointer to parameters object not successful." << std::endl;
       }

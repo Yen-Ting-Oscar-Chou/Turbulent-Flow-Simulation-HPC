@@ -5,13 +5,15 @@
 TurbulentSimulation::TurbulentSimulation(Parameters& parameters, TurbulentFlowField& flowField):
   Simulation(parameters, flowField),
   turbulentField_(flowField),
-  viscosityStencil_(),
-  viscosityIterator_(turbulentField_, parameters, viscosityStencil_),
-  turbulentFGHStencil_(),
-  turbulentFGHIterator_(turbulentField_, parameters, turbulentFGHStencil_),
-  maxViscStencil_(),
-  maxViscFieldIterator_(turbulentField_, parameters, maxViscStencil_),
-  maxViscBoundaryIterator_(turbulentField_, parameters, maxViscStencil_),
+  // viscosityStencil_(),
+  // viscosityIterator_(turbulentField_, parameters, viscosityStencil_),
+  // turbulentFGHStencil_(),
+  // turbulentFGHIterator_(turbulentField_, parameters, turbulentFGHStencil_),
+  // maxViscStencil_(),
+  // maxViscFieldIterator_(turbulentField_, parameters, maxViscStencil_),
+  // maxViscBoundaryIterator_(turbulentField_, parameters, maxViscStencil_),
+  turbulentFieldIterator_(turbulentField_, parameters_, stencil_),
+  turbulentBoundaryIterator_(turbulentField_, parameters_, stencil_),
   turbulentPetscParallelManager_(parameters, turbulentField_) {}
 
 void TurbulentSimulation::initializeFlowField() {
@@ -44,13 +46,15 @@ void TurbulentSimulation::plotVTK(int timeStep, RealType simulationTime) {
 }
 
 void TurbulentSimulation::solveTimestep() {
-  viscosityIterator_.iterate();
+  //viscosityIterator_.iterate();
+  turbulentFieldIterator_.iterate(VISCOSITY);
   // TODO communicate viscosity
   turbulentPetscParallelManager_.communicateViscosity();
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
   // Compute FGH
-  turbulentFGHIterator_.iterate();
+  //turbulentFGHIterator_.iterate();
+  turbulentFieldIterator_.iterate(TURBFGH);
 
   Simulation::solveTimestepHelper();
 }
@@ -60,19 +64,19 @@ void TurbulentSimulation::setTimeStep() {
   ASSERTION(parameters_.geometry.dim == 2 || parameters_.geometry.dim == 3);
   RealType factor = 1.0 / (parameters_.meshsize.getDxMin() * parameters_.meshsize.getDxMin()) + 1.0 / (parameters_.meshsize.getDyMin() * parameters_.meshsize.getDyMin());
   // Determine maximum velocity
-  maxUStencil_.reset();
-  maxViscStencil_.reset();
-  maxUFieldIterator_.iterate();
-  maxUBoundaryIterator_.iterate();
-  maxViscFieldIterator_.iterate();
-  maxViscBoundaryIterator_.iterate();
+  stencil_.maxUStencil_.reset();
+  stencil_.maxViscStencil_.reset();
+  fieldIterator_.iterate(MAXU);
+  boundaryIterator_.iterate(MAXU);
+  turbulentFieldIterator_.iterate(MAXV);
+  turbulentBoundaryIterator_.iterate(MAXV);
   if (parameters_.geometry.dim == 3) {
     factor += 1.0 / (parameters_.meshsize.getDzMin() * parameters_.meshsize.getDzMin());
   }
 
-  parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValue() + EPSILON);
+  parameters_.timestep.dt = 1.0 / (stencil_.maxUStencil_.getMaxValue() + EPSILON);
 
-  localMin = std::min(1 / (2 * (1 / parameters_.flow.Re + maxViscStencil_.getMaxValue()) * factor), parameters_.timestep.dt);
+  localMin = std::min(1 / (2 * (1 / parameters_.flow.Re + stencil_.maxViscStencil_.getMaxValue()) * factor), parameters_.timestep.dt);
 
   // Here, we select the type of operation before compiling. This allows to use the correct
   // data type for MPI. Not a concern for small simulations, but useful if using heterogeneous

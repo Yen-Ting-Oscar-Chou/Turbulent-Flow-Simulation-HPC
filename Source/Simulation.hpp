@@ -30,7 +30,7 @@ protected:
   FieldIterator<FlowField>          maxUFieldIterator_;
   GlobalBoundaryIterator<FlowField> maxUBoundaryIterator_;
 
-  // Set up the boundary conditions
+  //Set up the boundary conditions
   GlobalBoundaryFactory             globalBoundaryFactory_;
   GlobalBoundaryIterator<FlowField> wallVelocityIterator_;
   GlobalBoundaryIterator<FlowField> wallFGHIterator_;
@@ -51,6 +51,10 @@ protected:
 
   Stencils::VTKStencil<FlowField> vtkStencil;
   FieldIterator<FlowField>        vtkIterator;
+
+  StencilDelegate stencil_;
+  FieldIteratorGPU<FlowField> fieldIterator_;
+  GlobalBoundaryIteratorGPU<FlowField> boundaryIterator_;
 
   virtual void setTimeStep();
 

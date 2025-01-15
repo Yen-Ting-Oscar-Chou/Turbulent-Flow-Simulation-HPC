@@ -56,12 +56,15 @@ public:
 };
 
 template <class FlowFieldType>
-class FieldIteratorGPU: public Iterator<FlowFieldType> {
+class FieldIteratorGPU {
 public:
   StencilDelegate& stencil_;
 
   int lowOffset_;
   int highOffset_;
+
+  FlowFieldType& flowField_;
+  const Parameters& parameters_;
 
   FieldIteratorGPU(FlowFieldType& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
 
@@ -70,7 +73,32 @@ public:
    * Volume iteration. The stencil will be applied to all cells in the domain plus the upper
    * boundaries. Lower boundaries are not included.
    */
-  virtual void iterate(StencilType type) override;
+  virtual void iterate(StencilType type);
+};
+
+template <class FlowFieldType>
+class GlobalBoundaryIteratorGPU {
+private:
+  const int lowOffset_;
+  const int highOffset_;
+
+  // This iterator has a reference to a stencil for each side, and will call its methods.
+  StencilDelegate& stencil_;
+
+public:
+
+  FlowFieldType& flowField_;
+  const Parameters& parameters_;
+
+  GlobalBoundaryIteratorGPU(FlowFieldType& flowField, const Parameters& parameters, StencilDelegate& stencil, int lowOffset = 0, int highOffset = 0);
+
+  virtual ~GlobalBoundaryIteratorGPU() = default;
+
+  /** Surface iterator
+   *
+   * Iterates on the boundary cells. Only upper corners and edges are iterated.
+   */
+  virtual void iterate(StencilType type);
 };
 
 template <class FlowFieldType>

@@ -2,18 +2,18 @@
 
 #include "StencilDelegate.hpp"
 
-StencilDelegate::StencilDelegate(StencilType type):
-  stencilType(type),
-  fghStencil(),
-  turbulentFGHStencil(),
-  velocityStencil(),
-  viscosityStencil(),
-  rhsStencil(),
-  maxUStencil(),
-  obstacleStencil(),
-  neumannFGHBoundaryStencil(),
-  neumannVelocityBoundaryStencil(),
-  movingWallFGHStencil(),
-  movingWallVelocityStencil(),
-  bfInputFGHStencil(),
-  bfInputVelocityStencil() {};
+StencilDelegate::StencilDelegate():
+  fghStencil_(),
+  turbulentFGHStencil_(),
+  velocityStencil_(),
+  viscosityStencil_(),
+  rhsStencil_(),
+  maxUStencil_(),
+  obstacleStencil_(),
+  neumannFGHBoundaryStencil_(),
+  neumannVelocityBoundaryStencil_(),
+  movingWallFGHStencil_(),
+  movingWallVelocityStencil_(),
+  bfInputFGHStencil_(),
+  bfInputVelocityStencil_(),
+  maxViscStencil_() {};

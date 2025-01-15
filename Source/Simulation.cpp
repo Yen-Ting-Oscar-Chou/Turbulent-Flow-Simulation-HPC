@@ -24,7 +24,10 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
   obstacleIterator_(flowField_, parameters, obstacleStencil_),
   vtkStencil(parameters),
   vtkIterator(flowField_, parameters_, vtkStencil, 1, 0),
-  petscParallelManager_(parameters, flowField)
+  petscParallelManager_(parameters, flowField),
+  stencil_(),
+  fieldIterator_(flowField_, parameters, stencil_),
+  boundaryIterator_(flowField_, parameters, stencil_)
 #ifdef ENABLE_PETSC
   ,
   solver_(std::make_unique<Solvers::PetscSolver>(flowField_, parameters))
@@ -36,11 +39,26 @@ Simulation::Simulation(Parameters& parameters, FlowField& flowField):
 }
 
 void Simulation::initializeFlowField() {
-  if (parameters_.simulation.scenario == CHANNEL) {
-    Stencils::BFStepInitStencil stencil(parameters_);
-    FieldIterator<FlowField>    iterator(flowField_, parameters_, stencil, 0, 1);
-    iterator.iterate();
-    wallVelocityIterator_.iterate();
+  if (parameters_.simulation.scenario == CAVITY) {
+    parameters_.walls.typeLeft   = DIRICHLET;
+    parameters_.walls.typeRight  = DIRICHLET;
+    parameters_.walls.typeBottom = DIRICHLET;
+    parameters_.walls.typeTop    = DIRICHLET;
+    parameters_.walls.typeFront  = DIRICHLET;
+    parameters_.walls.typeBack   = DIRICHLET;
+  } else if (parameters_.simulation.scenario == CHANNEL) {
+    parameters_.walls.typeLeft   = DIRICHLET;
+    parameters_.walls.typeRight  = NEUMANN;
+    parameters_.walls.typeBottom = DIRICHLET;
+    parameters_.walls.typeTop    = DIRICHLET;
+    parameters_.walls.typeFront  = DIRICHLET;
+    parameters_.walls.typeBack   = DIRICHLET;
+
+    Stencils::BFStepInitStencil bfStepInitStencil(parameters_);
+    FieldIterator<FlowField>    bfStepIterator(flowField_, parameters_, bfStepInitStencil, 0, 1);
+    bfStepIterator.iterate();
+    // wallVelocityIterator_.iterate();
+    boundaryIterator_.iterate(WALLVELOCITY);
   }
 
   solver_->reInitMatrix();
@@ -50,7 +68,8 @@ void Simulation::solveTimestep() {
   // Determine and set max. timestep which is allowed in this simulation
   setTimeStep();
   // Compute FGH
-  fghIterator_.iterate();
+  // fghIterator_.iterate();
+  fieldIterator_.iterate(FGH);
   solveTimestepHelper();
 }
 
@@ -58,19 +77,25 @@ void Simulation::solveTimestep() {
 void Simulation::solveTimestepHelper() {
   // Set global boundary values
   wallFGHIterator_.iterate();
+  // TODO
+  // boundaryIterator_.iterate(WALLFGH);
   // Compute the right hand side (RHS)
-  rhsIterator_.iterate();
+  // rhsIterator_.iterate();
+  fieldIterator_.iterate(RHS);
   // Solve for pressure
   solver_->solve();
   // TODO WS2: communicate pressure values
   petscParallelManager_.communicatePressure();
   // Compute velocity
-  velocityIterator_.iterate();
-  obstacleIterator_.iterate();
+  // velocityIterator_.iterate();
+  fieldIterator_.iterate(VELOCITY);
+  // obstacleIterator_.iterate();
+  fieldIterator_.iterate(OBSTACLE);
   // TODO WS2: communicate velocity values
   petscParallelManager_.communicateVelocities();
   // Iterate for velocities on the boundary
-  wallVelocityIterator_.iterate();
+  // wallVelocityIterator_.iterate();
+  boundaryIterator_.iterate(WALLVELOCITY);
 }
 
 void Simulation::plotVTK(int timeStep, RealType simulationTime) {
@@ -83,14 +108,16 @@ void Simulation::setTimeStep() {
   ASSERTION(parameters_.geometry.dim == 2 || parameters_.geometry.dim == 3);
   RealType factor = 1.0 / (parameters_.meshsize.getDxMin() * parameters_.meshsize.getDxMin()) + 1.0 / (parameters_.meshsize.getDyMin() * parameters_.meshsize.getDyMin());
   // Determine maximum velocity
-  maxUStencil_.reset();
-  maxUFieldIterator_.iterate();
-  maxUBoundaryIterator_.iterate();
+  stencil_.maxUStencil_.reset();
+  // maxUFieldIterator_.iterate();
+  // maxUBoundaryIterator_.iterate();
+  fieldIterator_.iterate(MAXU);
+  boundaryIterator_.iterate(MAXU);
   if (parameters_.geometry.dim == 3) {
     factor += 1.0 / (parameters_.meshsize.getDzMin() * parameters_.meshsize.getDzMin());
   }
 
-  parameters_.timestep.dt = 1.0 / (maxUStencil_.getMaxValue() + EPSILON);
+  parameters_.timestep.dt = 1.0 / (stencil_.maxUStencil_.getMaxValue() + EPSILON);
 
   localMin = std::min(parameters_.flow.Re / (2 * factor), parameters_.timestep.dt);
 

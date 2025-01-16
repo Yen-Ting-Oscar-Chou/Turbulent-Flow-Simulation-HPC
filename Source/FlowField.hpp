@@ -365,4 +365,24 @@ public:
     omp_target_free(ptrs.flagsDataPtr_, targetDevice);
     omp_target_free(ptrs.flowFieldPtr_, targetDevice);
   }
+
+  static void mapToCPUVTK(int hostDevice, int targetDevice, FlowField& flowField, FlowFieldGPUPtrs& ptrs) {
+    size_t scalarFieldDataSize    = flowField.RHS_.size_ * sizeof(RealType);
+    size_t vectorFieldDataSize    = flowField.velocity_.size_ * sizeof(RealType);
+
+    if (!omp_target_is_present(&flowField, targetDevice)) {
+      std::cout << "Error: FlowField is not a valid target pointer." << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    bool copiedPressure = omp_target_memcpy(flowField.pressure_.data_, ptrs.pressureDataPtr_, scalarFieldDataSize, 0, 0, hostDevice, targetDevice) == 0;
+    if (!copiedPressure) {
+      std::cout << "Error: Copying pressure data from GPU to CPU not successful." << std::endl;
+    }
+
+    bool copiedVelocity = omp_target_memcpy(flowField.velocity_.data_, ptrs.velocityDataPtr_, vectorFieldDataSize, 0, 0, hostDevice, targetDevice) == 0;
+    if (!copiedVelocity) {
+      std::cout << "Error: Copying velocity data from GPU to CPU not successful." << std::endl;
+    }
+  }
 };

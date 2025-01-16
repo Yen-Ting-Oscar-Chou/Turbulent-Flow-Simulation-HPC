@@ -144,7 +144,7 @@ public:
 class Parameters;
 
 struct ParametersGPUPtrs {
-  Parameters*       parametersGPUPtrs_;
+  Parameters* parametersGPUPtrs_;
   // Wall parameters
   RealType* vectorLeftGPUPtr_;
   RealType* vectorRightGPUPtr_;
@@ -237,7 +237,7 @@ public:
   StdOutParameters        stdOut;
   BFStepParameters        bfStep;
   TurbulenceParameters    turbulence;
-  MeshsizeDelegate*        meshsize;
+  MeshsizeDelegate*       meshsize;
 
   static ParametersGPUPtrs mapToGPU(int hostDevice, int targetDevice, Parameters& parameters) {
     size_t      parametersSize = sizeof(parameters);
@@ -577,5 +577,9 @@ public:
     omp_target_free(parameterPtrs.vectorRightGPUPtr_, targetDevice);
     omp_target_free(parameterPtrs.vectorTopGPUPtr_, targetDevice);
     omp_target_free(parameterPtrs.parametersGPUPtrs_, targetDevice);
+  }
+
+  static void mapToCPU(int hostDevice, int targetDevice, Parameters& parameters, ParametersGPUPtrs& parameterPtrs) {
+    omp_target_memcpy(&parameters.timestep.dt, &parameterPtrs.parametersGPUPtrs_->timestep.dt, sizeof(RealType), 0, 0, hostDevice, targetDevice);
   }
 };

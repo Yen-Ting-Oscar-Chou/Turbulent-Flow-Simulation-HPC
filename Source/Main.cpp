@@ -116,28 +116,29 @@ int main(int argc, char* argv[]) {
   int   targetDevice = omp_get_default_device();
 
   // Time loop
-  // TODO #pragma map to gpu and backwards
+  auto ptrs = Simulation::mapToGPU(hostDevice, targetDevice, *simulation);
   while (time < parameters.simulation.finalTime) {
-    auto ptrs = Simulation::mapToGPU(hostDevice, targetDevice, *simulation);
 #pragma omp target device(targetDevice)
     { simulation->solveTimestep(); }
-    Simulation::mapToCPUAndFree(hostDevice, targetDevice, *simulation, ptrs);
-
+    Parameters::mapToCPU(hostDevice, targetDevice, *simulation->parameters_, ptrs.parameterPtrs_);
     timeSteps++;
     time += parameters.timestep.dt;
 
     if ((rank == 0) && (timeStdOut <= time)) {
       spdlog::info("Current time: {}\tTimestep: {}", time, parameters.timestep.dt);
+      // printf("Current time: %f\tTimestep: %f\n", time, parameters.timestep.dt);
       timeStdOut += parameters.stdOut.interval;
     }
 
-    // TODO #pragma map from gpu to cpu and back afterwards
     if (timeVtk <= time) {
+      FlowField::mapToCPUVTK(hostDevice, targetDevice, *simulation->flowField_, ptrs.flowFieldGPUptrs_);
       simulation->plotVTK(timeSteps, time);
       timeVtk += parameters.vtk.interval;
     }
   }
   spdlog::info("Finished simulation with a duration of {}ns", clock.getTime());
+
+  Simulation::mapToCPUAndFree(hostDevice, targetDevice, *simulation, ptrs);
 
   // Plot final solution
   simulation->plotVTK(timeSteps, time);

@@ -116,29 +116,53 @@ int main(int argc, char* argv[]) {
   int   targetDevice = omp_get_default_device();
 
   // Time loop
-  auto ptrs = Simulation::mapToGPU(hostDevice, targetDevice, *simulation);
-  while (time < parameters.simulation.finalTime) {
-#pragma omp target device(targetDevice)
-    { simulation->solveTimestep(); }
-    Parameters::mapToCPU(hostDevice, targetDevice, *simulation->parameters_, ptrs.parameterPtrs_);
-    timeSteps++;
-    time += parameters.timestep.dt;
+  if (parameters.simulation.type == "dns") {
+    auto ptrs = Simulation::mapToGPU(hostDevice, targetDevice, *simulation);
+    while (time < parameters.simulation.finalTime) {
+    #pragma omp target device(targetDevice)
+      { simulation->solveTimestep(); }
+      Parameters::mapToCPU(hostDevice, targetDevice, *simulation->parameters_, ptrs.parameterPtrs_);
+      timeSteps++;
+      time += parameters.timestep.dt;
 
-    if ((rank == 0) && (timeStdOut <= time)) {
-      spdlog::info("Current time: {}\tTimestep: {}", time, parameters.timestep.dt);
-      // printf("Current time: %f\tTimestep: %f\n", time, parameters.timestep.dt);
-      timeStdOut += parameters.stdOut.interval;
-    }
+      if ((rank == 0) && (timeStdOut <= time)) {
+        spdlog::info("Current time: {}\tTimestep: {}", time, parameters.timestep.dt);
+        // printf("Current time: %f\tTimestep: %f\n", time, parameters.timestep.dt);
+        timeStdOut += parameters.stdOut.interval;
+      }
 
-    if (timeVtk <= time) {
-      FlowField::mapToCPUVTK(hostDevice, targetDevice, *simulation->flowField_, ptrs.flowFieldGPUptrs_);
-      simulation->plotVTK(timeSteps, time);
-      timeVtk += parameters.vtk.interval;
+      if (timeVtk <= time) {
+        FlowField::mapToCPUVTK(hostDevice, targetDevice, *simulation->flowField_, ptrs.flowFieldGPUptrs_);
+        simulation->plotVTK(timeSteps, time);
+        timeVtk += parameters.vtk.interval;
+      }
     }
+    Simulation::mapToCPUAndFree(hostDevice, targetDevice, *simulation, ptrs);
+  } else if (parameters.simulation.type == "turbulence") {
+    TurbulentSimulation* turbulentSimulation = static_cast<TurbulentSimulation*>(simulation);
+    auto                 ptrs                = TurbulentSimulation::mapToGPU(hostDevice, targetDevice, *turbulentSimulation);
+    while (time < parameters.simulation.finalTime) {
+    #pragma omp target device(targetDevice)
+      { turbulentSimulation->solveTimestep(); }
+      Parameters::mapToCPU(hostDevice, targetDevice, *simulation->parameters_, ptrs.parameterPtrs_);
+      timeSteps++;
+      time += parameters.timestep.dt;
+
+      if ((rank == 0) && (timeStdOut <= time)) {
+        spdlog::info("Current time: {}\tTimestep: {}", time, parameters.timestep.dt);
+        // printf("Current time: %f\tTimestep: %f\n", time, parameters.timestep.dt);
+        timeStdOut += parameters.stdOut.interval;
+      }
+
+      if (timeVtk <= time) {
+        TurbulentFlowField::mapToCPUVTK(hostDevice, targetDevice, *turbulentSimulation->turbulentField_, ptrs.flowFieldGPUptrs_);
+        turbulentSimulation->plotVTK(timeSteps, time);
+        timeVtk += parameters.vtk.interval;
+      }
+    }
+    TurbulentSimulation::mapToCPUAndFree(hostDevice, targetDevice, *turbulentSimulation, ptrs);
   }
   spdlog::info("Finished simulation with a duration of {}ns", clock.getTime());
-
-  Simulation::mapToCPUAndFree(hostDevice, targetDevice, *simulation, ptrs);
 
   // Plot final solution
   simulation->plotVTK(timeSteps, time);

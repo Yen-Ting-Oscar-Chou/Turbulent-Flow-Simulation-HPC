@@ -13,8 +13,8 @@ void TurbulentSimulation::initializeFlowField() {
   std::vector<std::tuple<RealType, RealType, RealType>> coordinateList3D;
   std::vector<std::tuple<RealType, RealType>>           coordinateList2D;
   Stencils::ObstacleCoordinatesStencil                  obstStencil(coordinateList2D, coordinateList3D);
-  FieldIterator<FlowField>                              obstIterator(*flowField_, *parameters_, obstStencil);
-  GlobalBoundaryIterator<FlowField>                     obstBoundaryIterator(*flowField_, *parameters_, obstStencil, 1, 0);
+  FieldIterator<FlowField>                              obstIterator(*turbulentField_, *parameters_, obstStencil);
+  GlobalBoundaryIterator<FlowField>                     obstBoundaryIterator(*turbulentField_, *parameters_, obstStencil, 1, 0);
   obstIterator.iterate();
   obstBoundaryIterator.iterate();
   if (parameters_->geometry.dim == 2) {
@@ -43,7 +43,20 @@ void TurbulentSimulation::solveTimestep() {
   // Compute FGH
   turbulentFieldIterator_.iterate(TURBFGH, *parameters_, *turbulentField_, *stencil_);
 
-  Simulation::solveTimestepHelper();
+  // Set global boundary values
+  wallIterator_.iterate(WALLFGH, *parameters_, *turbulentField_, *stencil_);
+  // Compute the right hand side (RHS)
+  fieldIterator_.iterate(RHS, *parameters_, *turbulentField_, *stencil_);
+  // Solve for pressure
+  solver_.solve(*turbulentField_, *parameters_);
+  // TODO WS2: communicate pressure values
+  // Compute velocity
+  fieldIterator_.iterate(VELOCITY, *parameters_, *turbulentField_, *stencil_);
+  // obstacleIterator_.iterate();
+  fieldIterator_.iterate(OBSTACLE, *parameters_, *turbulentField_, *stencil_);
+  // TODO WS2: communicate velocity values
+  // Iterate for velocities on the boundary
+  wallIterator_.iterate(WALLVELOCITY, *parameters_, *turbulentField_, *stencil_);
 }
 
 void TurbulentSimulation::setTimeStep() {
@@ -53,8 +66,8 @@ void TurbulentSimulation::setTimeStep() {
   // Determine maximum velocity
   stencil_->maxUStencil_.reset();
   stencil_->maxViscStencil_.reset();
-  fieldIterator_.iterate(MAXU, *parameters_, *flowField_, *stencil_);
-  boundaryIterator_.iterate(MAXU, *parameters_, *flowField_, *stencil_);
+  fieldIterator_.iterate(MAXU, *parameters_, *turbulentField_, *stencil_);
+  boundaryIterator_.iterate(MAXU, *parameters_, *turbulentField_, *stencil_);
   turbulentFieldIterator_.iterate(MAXV, *parameters_, *turbulentField_, *stencil_);
   turbulentBoundaryIterator_.iterate(MAXV, *parameters_, *turbulentField_, *stencil_);
   if (parameters_->geometry.dim == 3) {

@@ -14,15 +14,14 @@ Simulation::Simulation(Parameters* parameters, FlowField* flowField):
   fieldIterator_(),
   wallIterator_(1, 0),
   boundaryIterator_()
-// #ifdef ENABLE_PETSC
-//   ,
-//   solver_(std::make_unique<Solvers::PetscSolver>(*flowField_, *parameters))
-// #else
+  // #ifdef ENABLE_PETSC
+  //   ,
+  //   solver_(std::make_unique<Solvers::PetscSolver>(*flowField_, *parameters))
+  // #else
   ,
   solver_()
 // #endif
-{
-}
+{}
 
 void Simulation::initializeFlowField() {
   if (parameters_->simulation.scenario == CAVITY) {

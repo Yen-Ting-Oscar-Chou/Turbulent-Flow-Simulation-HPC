@@ -66,7 +66,6 @@ void Simulation::solveTimestepHelper() {
   // TODO WS2: communicate pressure values
   // Compute velocity
   fieldIterator_.iterate(VELOCITY, *parameters_, *flowField_, *stencil_);
-  // obstacleIterator_.iterate();
   fieldIterator_.iterate(OBSTACLE, *parameters_, *flowField_, *stencil_);
   // TODO WS2: communicate velocity values
   // Iterate for velocities on the boundary

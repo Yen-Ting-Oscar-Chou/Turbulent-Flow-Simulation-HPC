@@ -38,7 +38,7 @@ namespace Stencils {
 #pragma omp end declare target
 
   public:
-    RealType maxValues_[3]; //! Stores the maximum module of every component
+    RealType maxValue_; //! Stores the maximum module of every component
     MaxUStencil();
     ~MaxUStencil() override = default;
 

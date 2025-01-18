@@ -8,9 +8,6 @@ namespace Stencils {
 
   class ViscosityStencil: public FieldStencil<TurbulentFlowField> {
   public:
-    RealType localVelocity_[27 * 3];
-    RealType localMeshsize_[27 * 3];
-    RealType coords[3];
     ViscosityStencil()           = default;
     ~ViscosityStencil() override = default;
     // using FieldStencil::apply;

@@ -6,14 +6,11 @@
 #include "StencilFunctions.hpp"
 
 void Stencils::TurbulentFGHStencil::apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) {
-  // Load local velocities into the center layer of the local array
-  loadLocalVelocity2D(flowField, localVelocity_, i, j);
-  loadLocalMeshsize2D(parameters, localMeshsize_, i, j);
-  loadLocalViscosity2D(parameters, flowField, localViscosity_, i, j);
-
+  VectorField& velocity  = flowField.getVelocity();
+  ScalarField& viscosity = flowField.getViscosity();
   // Now the localVelocity array should contain lexicographically ordered elements around the given index
-  flowField.getFGH().getVectorElement(i, j, 0) = computeTurbulentF2D(localVelocity_, localViscosity_, localMeshsize_, parameters, parameters.timestep.dt);
-  flowField.getFGH().getVectorElement(i, j, 1) = computeTurbulentG2D(localVelocity_, localViscosity_, localMeshsize_, parameters, parameters.timestep.dt);
+  flowField.getFGH().getVectorElement(i, j, 0) = computeTurbulentF2D(velocity, viscosity, parameters, parameters.timestep.dt, i, j);
+  flowField.getFGH().getVectorElement(i, j, 1) = computeTurbulentG2D(velocity, viscosity, parameters, parameters.timestep.dt, i, j);
 }
 
 void Stencils::TurbulentFGHStencil::apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) {
@@ -22,18 +19,17 @@ void Stencils::TurbulentFGHStencil::apply(const Parameters& parameters, Turbulen
   const int obstacle = flowField.getFlags().getValue(i, j, k);
 
   if ((obstacle & OBSTACLE_SELF) == 0) { // If the cell is fluid
-    loadLocalVelocity3D(flowField, localVelocity_, i, j, k);
-    loadLocalMeshsize3D(parameters, localMeshsize_, i, j, k);
-    loadLocalViscosity3D(parameters, flowField, localViscosity_, i, j, k);
+    VectorField& velocity  = flowField.getVelocity();
+    ScalarField& viscosity = flowField.getViscosity();
 
     if ((obstacle & OBSTACLE_RIGHT) == 0) { // If the right cell is fluid
-      flowField.getFGH().getVectorElement(i, j, k, 0) = computeTurbulentF3D(localVelocity_, localViscosity_, localMeshsize_, parameters, parameters.timestep.dt);
+      flowField.getFGH().getVectorElement(i, j, k, 0) = computeTurbulentF3D(velocity, viscosity, parameters, parameters.timestep.dt, i, j, k);
     }
     if ((obstacle & OBSTACLE_TOP) == 0) {
-      flowField.getFGH().getVectorElement(i, j, k, 1) = computeTurbulentG3D(localVelocity_, localViscosity_, localMeshsize_, parameters, parameters.timestep.dt);
+      flowField.getFGH().getVectorElement(i, j, k, 1) = computeTurbulentG3D(velocity, viscosity, parameters, parameters.timestep.dt, i, j, k);
     }
     if ((obstacle & OBSTACLE_BACK) == 0) {
-      flowField.getFGH().getVectorElement(i, j, k, 2) = computeTurbulentH3D(localVelocity_, localViscosity_, localMeshsize_, parameters, parameters.timestep.dt);
+      flowField.getFGH().getVectorElement(i, j, k, 2) = computeTurbulentH3D(velocity, viscosity, parameters, parameters.timestep.dt, i, j, k);
     }
   }
 }

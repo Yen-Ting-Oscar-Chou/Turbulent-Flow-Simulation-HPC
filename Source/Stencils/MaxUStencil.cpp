@@ -37,11 +37,11 @@ void Stencils::MaxUStencil::cellMaxValue(const Parameters& parameters, FlowField
   const RealType scaledVelocityX = fabs(velocityX) / dx;
   const RealType scaledVelocityY = fabs(velocityY) / dy;
 
-  if (scaledVelocityX > maxValues_[0]) {
-    maxValues_[0] = scaledVelocityX;
+  if (scaledVelocityX > maxValue_) {
+    maxValue_ = scaledVelocityX;
   }
-  if (scaledVelocityY > maxValues_[1]) {
-    maxValues_[1] = scaledVelocityY;
+  if (scaledVelocityY > maxValue_) {
+    maxValue_ = scaledVelocityY;
   }
 }
 
@@ -57,33 +57,17 @@ void Stencils::MaxUStencil::cellMaxValue(const Parameters& parameters, FlowField
   const RealType scaledVelocityY = fabs(velocityY) / dy;
   const RealType scaledVelocityZ = fabs(velocityZ) / dz;
 
-  if (scaledVelocityX > maxValues_[0]) {
-    maxValues_[0] = scaledVelocityX;
+  if (scaledVelocityX > maxValue_) {
+    maxValue_ = scaledVelocityX;
   }
-  if (scaledVelocityY > maxValues_[1]) {
-    maxValues_[1] = scaledVelocityY;
+  if (scaledVelocityY > maxValue_) {
+    maxValue_ = scaledVelocityY;
   }
-  if (scaledVelocityZ > maxValues_[2]) {
-    maxValues_[2] = scaledVelocityZ;
+  if (scaledVelocityZ > maxValue_) {
+    maxValue_ = scaledVelocityZ;
   }
 }
 
-void Stencils::MaxUStencil::reset() {
-  maxValues_[0] = 0;
-  maxValues_[1] = 0;
-  maxValues_[2] = 0;
-}
+void Stencils::MaxUStencil::reset() { maxValue_ = 0.0; }
 
-const RealType Stencils::MaxUStencil::getMaxValue() const {
-  const RealType maxX = maxValues_[0];
-  const RealType maxY = maxValues_[1];
-  const RealType maxZ = maxValues_[2];
-
-  if (maxX >= maxY && maxX >= maxZ) {
-    return maxX;
-  } else if (maxY >= maxX && maxY >= maxZ) {
-    return maxY;
-  } else {
-    return maxZ;
-  }
-}
+const RealType Stencils::MaxUStencil::getMaxValue() const { return maxValue_; }

@@ -2,8 +2,6 @@
 
 #include "StdAfx.hpp"
 
-#include "StdAfx.hpp"
-
 #include "Definitions.hpp"
 #include "Parameters.hpp"
 #include "TurbulentFlowField.hpp"
@@ -23,195 +21,142 @@ namespace Stencils {
     coords[1] = parameters_.meshsize->getPosY(i, j) + 0.5 * parameters_.meshsize->getDy(i, j);
   }
 
+  inline void computeGlobalXCoordinate(RealType& x, const Parameters& parameters, int i, int j, int k = 0) {
+    x = parameters.meshsize->getPosX(i, j) + 0.5 * parameters.meshsize->getDx(i, j, k);
+  }
+
   inline void computeGlobalCoordinates(RealType* coords, const Parameters& parameters_, int i, int j, int k) {
     coords[0] = parameters_.meshsize->getPosX(i, j, k) + 0.5 * parameters_.meshsize->getDx(i, j, k);
     coords[1] = parameters_.meshsize->getPosY(i, j, k) + 0.5 * parameters_.meshsize->getDy(i, j, k);
     coords[2] = parameters_.meshsize->getPosZ(i, j, k) + 0.5 * parameters_.meshsize->getDz(i, j, k);
   }
 
-  // Load the local velocity cube with relevant velocities of the 2D plane
-  inline void loadLocalVelocity2D(FlowField& flowField, RealType* const localVelocity, int i, int j) {
-    for (int row = -1; row <= 1; row++) {
-      for (int column = -1; column <= 1; column++) {
-        localVelocity[39 + 9 * row + 3 * column]     = flowField.getVelocity().getVectorElement(i + column, j + row, 0); // x-component
-        localVelocity[39 + 9 * row + 3 * column + 1] = flowField.getVelocity().getVectorElement(i + column, j + row, 1); // y-component
-      }
-    }
-  }
-
-  // Load the local velocity cube with surrounding velocities
-  inline void loadLocalVelocity3D(FlowField& flowField, RealType* const localVelocity, int i, int j, int k) {
-    for (int layer = -1; layer <= 1; layer++) {
-      for (int row = -1; row <= 1; row++) {
-        for (int column = -1; column <= 1; column++) {
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column]     = flowField.getVelocity().getVectorElement(i + column, j + row, k + layer, 0); // x-component
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 1] = flowField.getVelocity().getVectorElement(i + column, j + row, k + layer, 1); // y-component
-          localVelocity[39 + 27 * layer + 9 * row + 3 * column + 2] = flowField.getVelocity().getVectorElement(i + column, j + row, k + layer, 2); // z-component
-        }
-      }
-    }
-  }
-
-  // Load local meshsize for 2D -> same as loadLocalVelocity2D, but invoking call to meshsize-ptr
-  inline void loadLocalMeshsize2D(const Parameters& parameters, RealType* const localMeshsize, int i, int j) {
-    for (int row = -1; row <= 1; row++) {
-      for (int column = -1; column <= 1; column++) {
-        localMeshsize[39 + 9 * row + 3 * column]     = parameters.meshsize->getDx(i + column, j + row);
-        localMeshsize[39 + 9 * row + 3 * column + 1] = parameters.meshsize->getDy(i + column, j + row);
-      }
-    }
-  }
-
-  // Load local meshsize for 3D
-  inline void loadLocalMeshsize3D(const Parameters& parameters, RealType* const localMeshsize, int i, int j, int k) {
-    for (int layer = -1; layer <= 1; layer++) {
-      for (int row = -1; row <= 1; row++) {
-        for (int column = -1; column <= 1; column++) {
-          localMeshsize[39 + 27 * layer + 9 * row + 3 * column]     = parameters.meshsize->getDx(i + column, j + row, k + layer);
-          localMeshsize[39 + 27 * layer + 9 * row + 3 * column + 1] = parameters.meshsize->getDy(i + column, j + row, k + layer);
-          localMeshsize[39 + 27 * layer + 9 * row + 3 * column + 2] = parameters.meshsize->getDz(i + column, j + row, k + layer);
-        }
-      }
-    }
-  }
-
-  // Load local viscosity for 2D -> same as loadLocalVelocity2D, but invoking call to meshsize-ptr
-  inline void loadLocalViscosity2D(const Parameters& parameters, TurbulentFlowField& turbulentField, RealType* const localViscosity, int i, int j) {
-    for (int row = -1; row <= 1; row++) {
-      for (int column = -1; column <= 1; column++) {
-        localViscosity[39 + 9 * row + 3 * column]     = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row);
-        localViscosity[39 + 9 * row + 3 * column + 1] = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row);
-      }
-    }
-  }
-
-  inline void loadLocalViscosity2D(const Parameters& parameters, ScalarField& viscosity, RealType* const localViscosity, int i, int j) {
-    for (int row = -1; row <= 1; row++) {
-      for (int column = -1; column <= 1; column++) {
-        localViscosity[39 + 9 * row + 3 * column]     = 1 / parameters.flow.Re + viscosity.getScalar(i + column, j + row);
-        localViscosity[39 + 9 * row + 3 * column + 1] = 1 / parameters.flow.Re + viscosity.getScalar(i + column, j + row);
-      }
-    }
-  }
-
-  // Load local meshsize for 3D
-  inline void loadLocalViscosity3D(const Parameters& parameters, TurbulentFlowField& turbulentField, RealType* const localViscosity, int i, int j, int k) {
-    for (int layer = -1; layer <= 1; layer++) {
-      for (int row = -1; row <= 1; row++) {
-        for (int column = -1; column <= 1; column++) {
-          localViscosity[39 + 27 * layer + 9 * row + 3 * column]     = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row, k + layer);
-          localViscosity[39 + 27 * layer + 9 * row + 3 * column + 1] = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row, k + layer);
-          localViscosity[39 + 27 * layer + 9 * row + 3 * column + 2] = 1 / parameters.flow.Re + turbulentField.getViscosity().getScalar(i + column, j + row, k + layer);
-        }
-      }
-    }
-  }
-
-  inline void loadLocalViscosity3D(const Parameters& parameters, ScalarField& viscosity, RealType* const localViscosity, int i, int j, int k) {
-    for (int layer = -1; layer <= 1; layer++) {
-      for (int row = -1; row <= 1; row++) {
-        for (int column = -1; column <= 1; column++) {
-          localViscosity[39 + 27 * layer + 9 * row + 3 * column]     = 1 / parameters.flow.Re + viscosity.getScalar(i + column, j + row, k + layer);
-          localViscosity[39 + 27 * layer + 9 * row + 3 * column + 1] = 1 / parameters.flow.Re + viscosity.getScalar(i + column, j + row, k + layer);
-          localViscosity[39 + 27 * layer + 9 * row + 3 * column + 2] = 1 / parameters.flow.Re + viscosity.getScalar(i + column, j + row, k + layer);
-        }
-      }
-    }
-  }
-
-  // Maps an index and a component to the corresponding value in the cube.
-  inline int mapd(int i, int j, int k, int component) { return 39 + 27 * k + 9 * j + 3 * i + component; }
-
-  inline RealType firstDerivative(const RealType* const lv, const RealType* const lm, const COMP comp, const DERIV deriv) {
+  inline RealType firstDerivative(VectorField& velocity, const Parameters& parameters, const COMP comp, const DERIV deriv, int i, int j, int k = 0) {
     const bool isX = DERIVX == deriv;
     const bool isY = DERIVY == deriv;
     const bool isZ = DERIVZ == deriv;
 
-    const int indexThis  = mapd(0, 0, 0, comp);
-    const int indexMinus = mapd(isX * -1, isY * -1, isZ * -1, comp);
-    const int indexPlus  = mapd(isX * 1, isY * 1, isZ * 1, comp);
-    const int indexDm    = mapd(isX * -1, isY * -1, isZ * -1, deriv);
-    const int indexDp    = mapd(0, 0, 0, deriv);
+    RealType dp;
+    RealType dm;
+    switch (deriv) {
+    case DERIVX:
+      dm = parameters.meshsize->getDx(i - 1, j, k);
+      dp = parameters.meshsize->getDx(i, j, k);
+      break;
+    case DERIVY:
+      dm = parameters.meshsize->getDy(i, j - 1, k);
+      dp = parameters.meshsize->getDy(i, j, k);
+      break;
+    case DERIVZ:
+      dm = parameters.meshsize->getDz(i, j, k - 1);
+      dp = parameters.meshsize->getDz(i, j, k);
+      break;
+    }
 
-    const RealType dp = lm[indexDp];
-    const RealType dm = lm[indexDm];
+    const RealType lvPlus  = velocity.getVectorElement(i + isX, j + isY, k + isZ, comp);
+    const RealType lvThis  = velocity.getVectorElement(i, j, k, comp);
+    const RealType lvMinus = velocity.getVectorElement(i - isX, j - isY, k - isZ, comp);
 
-    return 1 / (2 * (dp * dm)) * (dm * lv[indexPlus] + (dp - dm) * lv[indexThis] - dp * lv[indexMinus]);
+    return 1 / (2 * (dp * dm)) * (dm * lvPlus + (dp - dm) * lvThis - dp * lvMinus);
   }
 
-  inline RealType secondDerivative(const RealType* const lv, const RealType* const lm, const COMP comp, const DERIV deriv) {
+  inline RealType secondDerivative(VectorField& velocity, const Parameters& parameters, const COMP comp, const DERIV deriv, int i, int j, int k = 0) {
     const bool isX = DERIVX == deriv;
     const bool isY = DERIVY == deriv;
     const bool isZ = DERIVZ == deriv;
 
-    const int indexThis  = mapd(0, 0, 0, comp);
-    const int indexMinus = mapd(isX * -1, isY * -1, isZ * -1, comp);
-    const int indexPlus  = mapd(isX * 1, isY * 1, isZ * 1, comp);
-    const int indexDm    = mapd(isX * -1, isY * -1, isZ * -1, deriv);
-    const int indexDp    = mapd(0, 0, 0, deriv);
+    RealType dp;
+    RealType dm;
+    switch (deriv) {
+    case DERIVX:
+      dm = parameters.meshsize->getDx(i - 1, j, k);
+      dp = parameters.meshsize->getDx(i, j, k);
+      break;
+    case DERIVY:
+      dm = parameters.meshsize->getDy(i, j - 1, k);
+      dp = parameters.meshsize->getDy(i, j, k);
+      break;
+    case DERIVZ:
+      dm = parameters.meshsize->getDz(i, j, k - 1);
+      dp = parameters.meshsize->getDz(i, j, k);
+      break;
+    }
 
-    const RealType dp = lm[indexDp];
-    const RealType dm = lm[indexDm];
-
-    const RealType fac = 2 / (dm * dp * dp + dp * dm * dm);
-    return fac * (dm * (lv[indexPlus] - lv[indexThis]) + dp * (lv[indexMinus] - lv[indexThis]));
+    const RealType fac     = 2 / (dm * dp * dp + dp * dm * dm);
+    const RealType lvPlus  = velocity.getVectorElement(i + isX, j + isY, k + isZ, comp);
+    const RealType lvThis  = velocity.getVectorElement(i, j, k, comp);
+    const RealType lvMinus = velocity.getVectorElement(i - isX, j - isY, k - isZ, comp);
+    return fac * (dm * (lvPlus - lvThis) + dp * (lvMinus - lvThis));
   }
 
   // Derivative functions. They are applied to a cube of 3x3x3 cells. lv stands for the local velocity, lm represents
   // the local mesh sizes dudx <-> first derivative of u-component of velocity field w.r.t. x-direction.
-  inline RealType dudx(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMPX, DERIVX); }
+  inline RealType dudx(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return firstDerivative(velocity, parameters, COMPX, DERIVX, i, j, k); }
 
-  inline RealType dudy(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMPX, DERIVY); }
+  inline RealType dudy(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return firstDerivative(velocity, parameters, COMPX, DERIVY, i, j, k); }
 
-  inline RealType dudz(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMPX, DERIVZ); }
+  inline RealType dudz(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return firstDerivative(velocity, parameters, COMPX, DERIVZ, i, j, k); }
 
-  inline RealType dvdx(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMPY, DERIVX); }
+  inline RealType dvdx(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return firstDerivative(velocity, parameters, COMPY, DERIVX, i, j, k); }
 
-  inline RealType dvdy(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMPY, DERIVY); }
+  inline RealType dvdy(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return firstDerivative(velocity, parameters, COMPY, DERIVY, i, j, k); }
 
-  inline RealType dvdz(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMPY, DERIVZ); }
+  inline RealType dvdz(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return firstDerivative(velocity, parameters, COMPY, DERIVZ, i, j, k); }
 
-  inline RealType dwdx(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMPZ, DERIVX); }
+  inline RealType dwdx(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return firstDerivative(velocity, parameters, COMPZ, DERIVX, i, j, k); }
 
-  inline RealType dwdy(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMPZ, DERIVY); }
+  inline RealType dwdy(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return firstDerivative(velocity, parameters, COMPZ, DERIVY, i, j, k); }
 
-  inline RealType dwdz(const RealType* const lv, const RealType* const lm) { return firstDerivative(lv, lm, COMPZ, DERIVZ); }
+  inline RealType dwdz(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return firstDerivative(velocity, parameters, COMPZ, DERIVZ, i, j, k); }
 
   inline RealType interpolateViscosity(const RealType visc_bl, const RealType visc_br, const RealType visc_tl, const RealType visc_tr) {
     return 0.25 * (visc_bl + visc_br + visc_tl + visc_tr);
   }
 
-  inline RealType viscositySingleDerivative(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re, const COMP comp) {
+  inline RealType viscositySingleDerivative(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, const COMP comp, int i, int j, int k) {
     const bool  isX   = COMPX == comp;
     const bool  isY   = COMPY == comp;
     const bool  isZ   = COMPZ == comp;
     const DERIV deriv = static_cast<DERIV>(comp);
 
-    const int indexThis  = mapd(0, 0, 0, comp);
-    const int indexMinus = mapd(isX * -1, isY * -1, isZ * -1, comp);
-    const int indexPlus  = mapd(isX * 1, isY * 1, isZ * 1, comp);
-    const int indexDm    = mapd(isX * -1, isY * -1, isZ * -1, deriv);
-    const int indexDp    = mapd(0, 0, 0, deriv);
+    RealType dm;
+    RealType dp;
+    switch (deriv) {
+    case DERIVX:
+      dm = parameters.meshsize->getDx(i - 1, j, k);
+      dp = parameters.meshsize->getDx(i, j, k);
+      break;
+    case DERIVY:
+      dm = parameters.meshsize->getDy(i, j - 1, k);
+      dp = parameters.meshsize->getDy(i, j, k);
+      break;
+    case DERIVZ:
+      dm = parameters.meshsize->getDz(i, j, k - 1);
+      dp = parameters.meshsize->getDz(i, j, k);
+      break;
+    }
 
-    const RealType dm       = lMesh[indexDm];
-    const RealType dp       = lMesh[indexDp];
-    const RealType d        = (dm + dp) / 2;
-    const RealType forward  = (lVel[indexPlus] - lVel[indexThis]) / dp;
-    const RealType backward = (lVel[indexThis] - lVel[indexMinus]) / dm;
+    const RealType d = (dm + dp) / 2;
 
-    const RealType vis_plus = lVis[indexPlus] + (1 / re);
-    const RealType vis_this = lVis[indexThis] + (1 / re);
+    const RealType lVelPlus  = velocity.getVectorElement(i + isX, j + isY, k + isZ, comp);
+    const RealType lVelThis  = velocity.getVectorElement(i, j, k, comp);
+    const RealType lVelMinus = velocity.getVectorElement(i - isX, j - isY, k - isZ, comp);
+    const RealType forward   = (lVelPlus - lVelThis) / dp;
+    const RealType backward  = (lVelThis - lVelMinus) / dm;
+
+    const RealType vis_plus = viscosity.getScalar(i + isX * 1, j + isY * 1, k + isZ * 1) + (1 / re);
+    const RealType vis_this = viscosity.getScalar(i, j, k) + (1 / re);
 
     return 1 / d * (vis_plus * forward - vis_this * backward);
   }
 
   inline RealType viscosityDoubleDerivative(
-    const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re, const COMP comp1, const COMP comp2
+    VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, const COMP comp1, const COMP comp2, int i, int j, int k
   ) {
     // first component is the outer derivative and first inner derivative
-    const bool  isX1   = COMPX == comp1;
-    const bool  isY1   = COMPY == comp1;
-    const bool  isZ1   = COMPZ == comp1;
+    const bool isX1 = COMPX == comp1;
+    const bool isY1 = COMPY == comp1;
+    const bool isZ1 = COMPZ == comp1;
     // second component is the second inner derivative
     const bool  isX2   = COMPX == comp2;
     const bool  isY2   = COMPY == comp2;
@@ -219,151 +164,166 @@ namespace Stencils {
     const DERIV deriv1 = static_cast<DERIV>(comp1);
     const DERIV deriv2 = static_cast<DERIV>(comp2);
 
-    // here index*1 is associated with the outer derivative and first inner derivative 
-    // and index*2 is associated with the second inner derivative
-    const int indexThis1       = mapd(0, 0, 0, comp2);
-    const int indexThis2       = mapd(0, 0, 0, comp1);
-    const int indexMinus1      = mapd(isX1 * -1, isY1 * -1, isZ1 * -1, comp2);
-    const int indexMinus1Comp1 = mapd(isX1 * -1, isY1 * -1, isZ1 * -1, comp1);
-    // this index is shifted +1 in the second and -1 in the first component (i. e. i+1, j-1 for y, x)
-    const int indexPlus2Minus1 = mapd(isX2 + isX1 * -1, isY2 + isY1 * -1, isZ2 + isZ1 * -1, comp1);
-    const int indexPlus1       = mapd(isX1, isY1, isZ1, comp2);
-    const int indexPlus2       = mapd(isX2, isY2, isZ2, comp1);
-    const int indexDm1         = mapd(isX1 * -1, isY1 * -1, isZ1 * -1, deriv1);
-    const int indexDm2         = mapd(isX1 * -1, isY1 * -1, isZ1 * -1, deriv2);
-    const int indexDp1         = mapd(0, 0, 0, deriv1);
-    const int indexDp2         = mapd(0, 0, 0, deriv2);
+    RealType dm1;
+    RealType dm2;
+    RealType dp1;
+    RealType dp2;
 
-    const RealType dm1 = lMesh[indexDm1];
-    const RealType dm2 = lMesh[indexDm2];
-    const RealType dp1 = lMesh[indexDp1];
-    const RealType dp2 = lMesh[indexDp2];
-    const RealType d   = (dm1 + dp1) / 2; // stretched discretization length in first component
+    switch (deriv1) {
+    case DERIVX:
+      dm1 = parameters.meshsize->getDx(i - isX1, j - isY1, k - isZ1);
+      dp1 = parameters.meshsize->getDx(i, j, k);
+      break;
+    case DERIVY:
+      dm1 = parameters.meshsize->getDy(i - isX1, j - isY1, k - isZ1);
+      dp1 = parameters.meshsize->getDy(i, j, k);
+      break;
+    case DERIVZ:
+      dm1 = parameters.meshsize->getDz(i - isX1, j - isY1, k - isZ1);
+      dp1 = parameters.meshsize->getDz(i, j, k);
+      break;
+    }
+
+    switch (deriv2) {
+    case DERIVX:
+      dm2 = parameters.meshsize->getDx(i - isX2, j - isY2, k - isZ2);
+      dp2 = parameters.meshsize->getDx(i, j, k);
+      break;
+    case DERIVY:
+      dm2 = parameters.meshsize->getDy(i - isX2, j - isY2, k - isZ2);
+      dp2 = parameters.meshsize->getDy(i, j, k);
+      break;
+    case DERIVZ:
+      dm2 = parameters.meshsize->getDz(i - isX2, j - isY2, k - isZ2);
+      dp2 = parameters.meshsize->getDz(i, j, k);
+      break;
+    }
+
+
+    const RealType d = (dm1 + dp1) / 2; // stretched discretization length in first component
 
     // comments are for y, x
-    const int      indexBottomLeft1  = indexThis1; // (i,j)
-    const int      indexBottomRight1 = indexPlus2; // (i+1, j)
-    const int      indexTopLeft1     = mapd(isX1, isY1, isZ1, 0); // (i, j+1)
-    const int      indexTopRight1    = mapd(isX1 + isX2, isY1 + isY2, isZ1 + isZ2, 0); // (i+1, j+1)
-    const RealType visc1             = interpolateViscosity(lVis[indexBottomLeft1], lVis[indexBottomRight1], lVis[indexTopLeft1], lVis[indexTopRight1]) + (1 / re);
+    const RealType viscBottomLeft1  = viscosity.getScalar(i, j, k);                                           // (i,j)
+    const RealType viscBottomRight1 = viscosity.getScalar(i + isX2, j + isY2, k + isZ2);                      // (i+1, j)
+    const RealType viscTopLeft1     = viscosity.getScalar(i + isX1, j + isY1, k + isZ1);                      // (i, j+1)
+    const RealType viscTopRight1    = viscosity.getScalar(i + isX1 + isX2, j + isY1 + isY2, k + isZ1 + isZ2); // (i+1, j+1)
+    const RealType visc1            = interpolateViscosity(viscBottomLeft1, viscBottomRight1, viscTopLeft1, viscTopRight1) + (1 / re);
 
-    const int      indexBottomLeft2  = indexMinus1; // (i, j-1)
-    const int      indexBottomRight2 = mapd(isX1 * -1 + isX2, isY1 * -1 + isY2, isZ1 * -1 + isZ2, 0); // (i+1, j-1)
-    const int      indexTopLeft2     = indexThis2; // (i, j)
-    const int      indexTopRight2    = mapd(isX2, isY2, isZ2, 0); // (i+1, j)
-    const RealType visc2             = interpolateViscosity(lVis[indexBottomLeft2], lVis[indexBottomRight2], lVis[indexTopLeft2], lVis[indexTopRight2]) + (1 / re);
+    const RealType viscBottomLeft2  = viscosity.getScalar(i - isX1, j - isY1, k - isZ1);                      // (i, j-1)
+    const RealType viscBottomRight2 = viscosity.getScalar(i - isX1 + isX2, j - isY1 + isY2, k - isZ1 + isZ2); // (i+1, j-1)
+    const RealType viscTopLeft2     = viscosity.getScalar(i, j, k);                                           // (i, j)
+    const RealType viscTopRight2    = viscosity.getScalar(i + isX2, j + isY2, k + isZ2);                      // (i+1, j)
+    const RealType visc2            = interpolateViscosity(viscBottomLeft2, viscBottomRight2, viscTopLeft2, viscTopRight2) + (1 / re);
 
-    const RealType forward1  = (lVel[indexPlus1] - lVel[indexThis1]) / dp1;
-    const RealType forward2  = (lVel[indexPlus2] - lVel[indexThis2]) / dp2;
-    const RealType backward1 = (lVel[indexThis1] - lVel[indexMinus1]) / dm1;
-    const RealType backward2 = (lVel[indexPlus2Minus1] - lVel[indexMinus1Comp1]) / dm2;
+    const RealType velPlus1       = velocity.getVectorElement(i + isX1, j + isY1, k + isZ1, comp2);
+    const RealType velPlus2       = velocity.getVectorElement(i + isX2, j + isY2, k + isZ2, comp1);
+    const RealType velThis1       = velocity.getVectorElement(i, j, k, comp2);
+    const RealType velThis2       = velocity.getVectorElement(i, j, k, comp1);
+    const RealType velMinus1      = velocity.getVectorElement(i - isX1, j - isY1, k - isZ1, comp2);
+    const RealType velPlus2Minus1 = velocity.getVectorElement(i + isX2 - isX1, j + isY2 - isY1, k + isZ2 - isZ1, comp1);
+    const RealType velMinus1Comp1 = velocity.getVectorElement(i - isX1, j - isY1, k - isZ1, comp1);
+
+    const RealType forward1  = (velPlus1 - velThis1) / dp1;
+    const RealType forward2  = (velPlus2 - velThis2) / dp2;
+    const RealType backward1 = (velThis1 - velMinus1) / dm1;
+    const RealType backward2 = (velPlus2Minus1 - velMinus1Comp1) / dm2;
 
     return 1 / d * (visc1 * (forward1 + forward2) - visc2 * (backward1 + backward2));
   }
 
   // d/dx * (v * du/dx)
-  inline RealType dVdxdudx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    return viscositySingleDerivative(lVel, lVis, lMesh, re, COMPX);
+  inline RealType dVdxdudx(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, int i, int j, int k = 0) {
+    return viscositySingleDerivative(velocity, viscosity, parameters, re, COMPX, i, j, k);
   }
 
   // d/dy * (v * dv/dy)
-  inline RealType dVdydvdy(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    return viscositySingleDerivative(lVel, lVis, lMesh, re, COMPY);
+  inline RealType dVdydvdy(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, int i, int j, int k = 0) {
+    return viscositySingleDerivative(velocity, viscosity, parameters, re, COMPY, i, j, k);
   }
 
   // d/dz * (v * dw/dz)
-  inline RealType dVdzdwdz(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    return viscositySingleDerivative(lVel, lVis, lMesh, re, COMPZ);
+  inline RealType dVdzdwdz(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, int i, int j, int k) {
+    return viscositySingleDerivative(velocity, viscosity, parameters, re, COMPZ, i, j, k);
   }
 
   // d/dy * (v * (du/dy + dv/dx))
-  inline RealType dVdydudydvdx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    return viscosityDoubleDerivative(lVel, lVis, lMesh, re, COMPY, COMPX);
+  inline RealType dVdydudydvdx(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, int i, int j, int k = 0) {
+    return viscosityDoubleDerivative(velocity, viscosity, parameters, re, COMPY, COMPX, i, j, k);
   }
 
   // d/dz * (v * (du/dz + dw/dx))
-  inline RealType dVdzdudzdwdx(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    return viscosityDoubleDerivative(lVel, lVis, lMesh, re, COMPZ, COMPX);
+  inline RealType dVdzdudzdwdx(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, int i, int j, int k) {
+    return viscosityDoubleDerivative(velocity, viscosity, parameters, re, COMPZ, COMPX, i, j, k);
   }
 
   // d/dx * (v * (dv/dx + du/dy))
-  inline RealType dVdxdvdxdudy(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    return viscosityDoubleDerivative(lVel, lVis, lMesh, re, COMPX, COMPY);
+  inline RealType dVdxdvdxdudy(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, int i, int j, int k = 0) {
+    return viscosityDoubleDerivative(velocity, viscosity, parameters, re, COMPX, COMPY, i, j, k);
   }
 
   // d/dz * (v * (dv/dz + dw/dy))
-  inline RealType dVdzdvdzdwdy(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    return viscosityDoubleDerivative(lVel, lVis, lMesh, re, COMPZ, COMPY);
+  inline RealType dVdzdvdzdwdy(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, int i, int j, int k) {
+    return viscosityDoubleDerivative(velocity, viscosity, parameters, re, COMPZ, COMPY, i, j, k);
   }
 
   // d/dx * (v * (dw/dx + du/dz))
-  inline RealType dVdxdwdxdudz(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    return viscosityDoubleDerivative(lVel, lVis, lMesh, re, COMPX, COMPZ);
+  inline RealType dVdxdwdxdudz(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, int i, int j, int k) {
+    return viscosityDoubleDerivative(velocity, viscosity, parameters, re, COMPX, COMPZ, i, j, k);
   }
 
   // d/dy * (v * (dw/dy + dv/dz))
-  inline RealType dVdydwdydvdz(const RealType* const lVel, const RealType* const lVis, const RealType* const lMesh, const RealType re) {
-    return viscosityDoubleDerivative(lVel, lVis, lMesh, re, COMPY, COMPZ);
+  inline RealType dVdydwdydvdz(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, const RealType re, int i, int j, int k) {
+    return viscosityDoubleDerivative(velocity, viscosity, parameters, re, COMPY, COMPZ, i, j, k);
   }
 
   // TODO WS1: Second derivatives
   // Second derivative of u w.r.t. x-direction
-  inline RealType d2udx2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMPX, DERIVX); }
+  inline RealType d2udx2(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return secondDerivative(velocity, parameters, COMPX, DERIVX, i, j, k); }
 
   // Second derivative of u w.r.t. y-direction
-  inline RealType d2udy2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMPX, DERIVY); }
+  inline RealType d2udy2(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return secondDerivative(velocity, parameters, COMPX, DERIVY, i, j, k); }
 
   // Second derivative of u w.r.t. z-direction
-  inline RealType d2udz2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMPX, DERIVZ); }
+  inline RealType d2udz2(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return secondDerivative(velocity, parameters, COMPX, DERIVZ, i, j, k); }
 
   // Second derivative of v w.r.t. x-direction
-  inline RealType d2vdx2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMPY, DERIVX); }
+  inline RealType d2vdx2(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return secondDerivative(velocity, parameters, COMPY, DERIVX, i, j, k); }
 
   // Second derivative of v w.r.t. y-direction
-  inline RealType d2vdy2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMPY, DERIVY); }
+  inline RealType d2vdy2(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return secondDerivative(velocity, parameters, COMPY, DERIVY, i, j, k); }
 
   // Second derivative of v w.r.t. z-direction
-  inline RealType d2vdz2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMPY, DERIVZ); }
+  inline RealType d2vdz2(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return secondDerivative(velocity, parameters, COMPY, DERIVZ, i, j, k); }
 
   // Second derivative of w w.r.t. x-direction
-  inline RealType d2wdx2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMPZ, DERIVX); }
+  inline RealType d2wdx2(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return secondDerivative(velocity, parameters, COMPZ, DERIVX, i, j, k); }
 
   // Second derivative of w w.r.t. y-direction
-  inline RealType d2wdy2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMPZ, DERIVY); }
+  inline RealType d2wdy2(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return secondDerivative(velocity, parameters, COMPZ, DERIVY, i, j, k); }
 
   // Second derivative of w w.r.t. z-direction
-  inline RealType d2wdz2(const RealType* const lv, const RealType* const lm) { return secondDerivative(lv, lm, COMPZ, DERIVZ); }
+  inline RealType d2wdz2(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) { return secondDerivative(velocity, parameters, COMPZ, DERIVZ, i, j, k); }
 
   // First derivative of product (u*v), evaluated at the location of the v-component.
-  inline RealType duvdx(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
-#ifndef NDEBUG
-    // const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 1, 0, 0)]) *
-    //     (lv[mapd(0, 0, 0, 1)] + lv[mapd(1, 0, 0, 1)])) -
-    //     ((lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 1, 0, 0)]) *
-    //         (lv[mapd(-1, 0, 0, 1)] + lv[mapd(0, 0, 0, 1)])))
-    //     + parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 1, 0, 0)]) *
-    //         (lv[mapd(0, 0, 0, 1)] - lv[mapd(1, 0, 0, 1)])) -
-    //         (fabs(lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 1, 0, 0)]) *
-    //             (lv[mapd(-1, 0, 0, 1)] - lv[mapd(0, 0, 0, 1)])))
-    //     ) / lm[mapd(0, 0, 0, 0)];
-#endif
+  inline RealType duvdx(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) {
+    const RealType mp0000  = parameters.meshsize->getDx(i, j, k);
+    const RealType hxShort = 0.5 * mp0000;                                             // Distance of corner points in x-direction from center v-value
+    const RealType hxLong0 = 0.5 * (mp0000 + parameters.meshsize->getDx(i - 1, j, k)); // Distance between center and west
+                                                                                       // v-value
+    const RealType hxLong1 = 0.5 * (mp0000 + parameters.meshsize->getDx(i + 1, j, k)); // Distance between center and east
+    // v-value
+    const RealType mp0001  = parameters.meshsize->getDy(i, j, k);
+    const RealType hyShort = 0.5 * mp0001;                                             // Distance of center u-value from upper edge of cell
+    const RealType hyLong  = 0.5 * (mp0001 + parameters.meshsize->getDy(i, j + 1, k)); // Distance of north and center u-value
 
-    const RealType hxShort = 0.5 * lm[mapd(0, 0, 0, 0)];                           // Distance of corner points in x-direction from center v-value
-    const RealType hxLong0 = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(-1, 0, 0, 0)]); // Distance between center and west
-                                                                                   // v-value
-    const RealType hxLong1 = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(1, 0, 0, 0)]);  // Distance between center and east
-                                                                                   // v-value
-    const RealType hyShort = 0.5 * lm[mapd(0, 0, 0, 1)];                           // Distance of center u-value from upper edge of cell
-    const RealType hyLong  = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, 1, 0, 1)]);  // Distance of north and center u-value
+    const RealType u00 = velocity.getVectorElement(i, j, k, 0);
+    const RealType u01 = velocity.getVectorElement(i, j + 1, k, 0);
+    const RealType v00 = velocity.getVectorElement(i, j, k, 1);
+    const RealType v10 = velocity.getVectorElement(i + 1, j, k, 1);
 
-    const RealType u00 = lv[mapd(0, 0, 0, 0)];
-    const RealType u01 = lv[mapd(0, 1, 0, 0)];
-    const RealType v00 = lv[mapd(0, 0, 0, 1)];
-    const RealType v10 = lv[mapd(1, 0, 0, 1)];
-
-    const RealType uM10 = lv[mapd(-1, 0, 0, 0)];
-    const RealType uM11 = lv[mapd(-1, 1, 0, 0)];
-    const RealType vM10 = lv[mapd(-1, 0, 0, 1)];
+    const RealType uM10 = velocity.getVectorElement(i - 1, j, k, 0);
+    const RealType uM11 = velocity.getVectorElement(i - 1, j + 1, k, 0);
+    const RealType vM10 = velocity.getVectorElement(i - 1, j, k, 1);
 
     // This a central difference expression for the first-derivative. We therefore linearly interpolate u*v onto the
     // surface of the current cell (in 2D: upper left and upper right corner) and then take the central difference.
@@ -381,46 +341,29 @@ namespace Stencils {
 
     // Return linear combination of central and donor-cell difference
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
-
-#ifndef NDEBUG
-    // if (fabs(tmp1 - tmp2) > 1.0e-12) {
-    //   throw std::runtime_error("Error in duvdx");
-    // }
-#endif
-
     return tmp2;
   }
 
   // Evaluates first derivative w.r.t. y for u*v at location of u-component. For details on implementation, see duvdx.
-  inline RealType duvdy(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
-#ifndef NDEBUG
-    /* const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 1)] + lv[mapd(1, 0, 0, 1)]) *
-        (lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 1, 0, 0)])) -
-        ((lv[mapd(0, -1, 0, 1)] + lv[mapd(1, -1, 0, 1)]) *
-            (lv[mapd(0, -1, 0, 0)] + lv[mapd(0, 0, 0, 0)]))) +
-        parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 1)] + lv[mapd(1, 0, 0, 1)]) *
-            (lv[mapd(0, 0, 0, 0)] - lv[mapd(0, 1, 0, 0)])) -
-            (fabs(lv[mapd(0, -1, 0, 1)] + lv[mapd(1, -1, 0, 1)]) *
-                (lv[mapd(0, -1, 0, 0)] - lv[mapd(0, 0, 0, 0)])))) /
-        lm[mapd(0, 0, 0, 1)]; */
-#endif
+  inline RealType duvdy(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) {
+    const RealType mp0001  = parameters.meshsize->getDy(i, j, k);
+    const RealType hyShort = 0.5 * mp0001;                                             // Distance of corner points in x-direction from center v-value
+    const RealType hyLong0 = 0.5 * (mp0001 + parameters.meshsize->getDy(i, j - 1, k)); // Distance between center and west
+                                                                                       // v-value
+    const RealType hyLong1 = 0.5 * (mp0001 + parameters.meshsize->getDy(i, j + 1, k)); // Distance between center and east
+                                                                                       // v-value
+    const RealType mp0000  = parameters.meshsize->getDx(i, j, k);
+    const RealType hxShort = 0.5 * mp0000;                                             // Distance of center u-value from upper edge of cell
+    const RealType hxLong  = 0.5 * (mp0000 + parameters.meshsize->getDx(i + 1, j, k)); // Distance of north and center u-value
 
-    const RealType hyShort = 0.5 * lm[mapd(0, 0, 0, 1)];                           // Distance of corner points in x-direction from center v-value
-    const RealType hyLong0 = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, -1, 0, 1)]); // Distance between center and west
-                                                                                   // v-value
-    const RealType hyLong1 = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, 1, 0, 1)]);  // Distance between center and east
-                                                                                   // v-value
-    const RealType hxShort = 0.5 * lm[mapd(0, 0, 0, 0)];                           // Distance of center u-value from upper edge of cell
-    const RealType hxLong  = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(1, 0, 0, 0)]);  // Distance of north and center u-value
+    const RealType v00 = velocity.getVectorElement(i, j, k, 1);
+    const RealType v10 = velocity.getVectorElement(i + 1, j, k, 1);
+    const RealType u00 = velocity.getVectorElement(i, j, k, 0);
+    const RealType u01 = velocity.getVectorElement(i, j + 1, k, 0);
 
-    const RealType v00 = lv[mapd(0, 0, 0, 1)];
-    const RealType v10 = lv[mapd(1, 0, 0, 1)];
-    const RealType u00 = lv[mapd(0, 0, 0, 0)];
-    const RealType u01 = lv[mapd(0, 1, 0, 0)];
-
-    const RealType v0M1 = lv[mapd(0, -1, 0, 1)];
-    const RealType v1M1 = lv[mapd(1, -1, 0, 1)];
-    const RealType u0M1 = lv[mapd(0, -1, 0, 0)];
+    const RealType v0M1 = velocity.getVectorElement(i, j - 1, k, 1);
+    const RealType v1M1 = velocity.getVectorElement(i + 1, j - 1, k, 1);
+    const RealType u0M1 = velocity.getVectorElement(i, j - 1, k, 0);
 
     const RealType secondOrder = (((hxLong - hxShort) / hxLong * v00 + hxShort / hxLong * v10) * ((hyLong1 - hyShort) / hyLong1 * u00 + hyShort / hyLong1 * u01)
                                   - ((hxLong - hxShort) / hxLong * v0M1 + hxShort / hxLong * v1M1) * ((hyLong0 - hyShort) / hyLong0 * u00 + hyShort / hyLong0 * u0M1))
@@ -433,45 +376,29 @@ namespace Stencils {
 
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
-#ifndef NDEBUG
-    // if (fabs(tmp1 - tmp2) > 1.0e-12) {
-    //   throw std::runtime_error("Error in duvdy");
-    // }
-#endif
-
     return tmp2;
   }
 
   // Evaluates first derivative w.r.t. x for u*w at location of w-component. For details on implementation, see duvdx.
-  inline RealType duwdx(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
-#ifndef NDEBUG
-    // const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 0, 1, 0)]) *
-    //     (lv[mapd(0, 0, 0, 2)] + lv[mapd(1, 0, 0, 2)])) -
-    //     ((lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 0, 1, 0)]) *
-    //         (lv[mapd(-1, 0, 0, 2)] + lv[mapd(0, 0, 0, 2)]))) +
-    //     parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 0, 1, 0)]) *
-    //         (lv[mapd(0, 0, 0, 2)] - lv[mapd(1, 0, 0, 2)])) -
-    //         (fabs(lv[mapd(-1, 0, 0, 0)] + lv[mapd(-1, 0, 1, 0)]) *
-    //             (lv[mapd(-1, 0, 0, 2)] - lv[mapd(0, 0, 0, 2)])))) /
-    //     lm[mapd(0, 0, 0, 0)];
-#endif
+  inline RealType duwdx(VectorField& velocity, const Parameters& parameters, int i, int j, int k) {
+    const RealType mp0000  = parameters.meshsize->getDx(i, j, k);
+    const RealType hxShort = 0.5 * mp0000;                                             // Distance of corner points in x-direction from center v-value
+    const RealType hxLong0 = 0.5 * (mp0000 + parameters.meshsize->getDx(i - 1, j, k)); // Distance between center and west
+                                                                                       // v-value
+    const RealType hxLong1 = 0.5 * (mp0000 + parameters.meshsize->getDx(i + 1, j, k)); // Distance between center and east
+    // v-value
+    const RealType mp0002  = parameters.meshsize->getDz(i, j, k);
+    const RealType hzShort = 0.5 * mp0002;                                             // Distance of center u-value from upper edge of cell
+    const RealType hzLong  = 0.5 * (mp0002 + parameters.meshsize->getDz(i, j, k + 1)); // Distance of north and center u-value
 
-    const RealType hxShort = 0.5 * lm[mapd(0, 0, 0, 0)];                           // Distance of corner points in x-direction from center v-value
-    const RealType hxLong0 = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(-1, 0, 0, 0)]); // Distance between center and west
-                                                                                   // v-value
-    const RealType hxLong1 = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(1, 0, 0, 0)]);  // Distance between center and east
-                                                                                   // v-value
-    const RealType hzShort = 0.5 * lm[mapd(0, 0, 0, 2)];                           // Distance of center u-value from upper edge of cell
-    const RealType hzLong  = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, 1, 2)]);  // Distance of north and center u-value
+    const RealType u00 = velocity.getVectorElement(i, j, k, 0);
+    const RealType u01 = velocity.getVectorElement(i, j, k + 1, 0);
+    const RealType w00 = velocity.getVectorElement(i, j, k, 2);
+    const RealType w10 = velocity.getVectorElement(i + 1, j, k, 2);
 
-    const RealType u00 = lv[mapd(0, 0, 0, 0)];
-    const RealType u01 = lv[mapd(0, 0, 1, 0)];
-    const RealType w00 = lv[mapd(0, 0, 0, 2)];
-    const RealType w10 = lv[mapd(1, 0, 0, 2)];
-
-    const RealType uM10 = lv[mapd(-1, 0, 0, 0)];
-    const RealType uM11 = lv[mapd(-1, 0, 1, 0)];
-    const RealType wM10 = lv[mapd(-1, 0, 0, 2)];
+    const RealType uM10 = velocity.getVectorElement(i - 1, j, k, 0);
+    const RealType uM11 = velocity.getVectorElement(i - 1, j, k + 1, 0);
+    const RealType wM10 = velocity.getVectorElement(i - 1, j, k, 2);
 
     const RealType secondOrder = (((hzLong - hzShort) / hzLong * u00 + hzShort / hzLong * u01) * ((hxLong1 - hxShort) / hxLong1 * w00 + hxShort / hxLong1 * w10)
                                   - ((hzLong - hzShort) / hzLong * uM10 + hzShort / hzLong * uM11) * ((hxLong0 - hxShort) / hxLong0 * w00 + hxShort / hxLong0 * wM10))
@@ -484,45 +411,29 @@ namespace Stencils {
 
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
-#ifndef NDEBUG
-    // if (fabs(tmp1 - tmp2) > 1.0e-12) {
-    //   throw std::runtime_error("Error in duwdx");
-    // }
-#endif
-
     return tmp2;
   }
 
   // Evaluates first derivative w.r.t. z for u*w at location of u-component. For details on implementation, see duvdx.
-  inline RealType duwdz(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
-#ifndef NDEBUG
-    /* const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 2)] + lv[mapd(1, 0, 0, 2)]) *
-        (lv[mapd(0, 0, 0, 0)] + lv[mapd(0, 0, 1, 0)])) -
-        ((lv[mapd(0, 0, -1, 2)] + lv[mapd(1, 0, -1, 2)]) *
-            (lv[mapd(0, 0, -1, 0)] + lv[mapd(0, 0, 0, 0)]))) +
-        parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 2)] + lv[mapd(1, 0, 0, 2)]) *
-            (lv[mapd(0, 0, 0, 0)] - lv[mapd(0, 0, 1, 0)])) -
-            (fabs(lv[mapd(0, 0, -1, 2)] + lv[mapd(1, 0, -1, 2)]) *
-                (lv[mapd(0, 0, -1, 0)] - lv[mapd(0, 0, 0, 0)])))) /
-        lm[mapd(0, 0, 0, 2)]; */
-#endif
+  inline RealType duwdz(VectorField& velocity, const Parameters& parameters, int i, int j, int k) {
+    const RealType mp0002  = parameters.meshsize->getDz(i, j, k);
+    const RealType hzShort = 0.5 * mp0002;                                             // Distance of corner points in x-direction from center v-value
+    const RealType hzLong0 = 0.5 * (mp0002 + parameters.meshsize->getDz(i, j, k - 1)); // Distance between center and west
+                                                                                       // v-value
+    const RealType hzLong1 = 0.5 * (mp0002 + parameters.meshsize->getDz(i, j, k + 1)); // Distance between center and east
+    // v-value
+    const RealType mp0000  = parameters.meshsize->getDx(i, j, k);
+    const RealType hxShort = 0.5 * mp0000;                                             // Distance of center u-value from upper edge of cell
+    const RealType hxLong  = 0.5 * (mp0000 + parameters.meshsize->getDx(i + 1, j, k)); // Distance of north and center u-value
 
-    const RealType hzShort = 0.5 * lm[mapd(0, 0, 0, 2)];                           // Distance of corner points in x-direction from center v-value
-    const RealType hzLong0 = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, -1, 2)]); // Distance between center and west
-                                                                                   // v-value
-    const RealType hzLong1 = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, 1, 2)]);  // Distance between center and east
-                                                                                   // v-value
-    const RealType hxShort = 0.5 * lm[mapd(0, 0, 0, 0)];                           // Distance of center u-value from upper edge of cell
-    const RealType hxLong  = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(1, 0, 0, 0)]);  // Distance of north and center u-value
+    const RealType w00 = velocity.getVectorElement(i, j, k, 2);
+    const RealType w10 = velocity.getVectorElement(i + 1, j, k, 2);
+    const RealType u00 = velocity.getVectorElement(i, j, k, 0);
+    const RealType u01 = velocity.getVectorElement(i, j, k + 1, 0);
 
-    const RealType w00 = lv[mapd(0, 0, 0, 2)];
-    const RealType w10 = lv[mapd(1, 0, 0, 2)];
-    const RealType u00 = lv[mapd(0, 0, 0, 0)];
-    const RealType u01 = lv[mapd(0, 0, 1, 0)];
-
-    const RealType w0M1 = lv[mapd(0, 0, -1, 2)];
-    const RealType w1M1 = lv[mapd(1, 0, -1, 2)];
-    const RealType u0M1 = lv[mapd(0, 0, -1, 0)];
+    const RealType w0M1 = velocity.getVectorElement(i, j, k - 1, 2);
+    const RealType w1M1 = velocity.getVectorElement(i + 1, j, k - 1, 2);
+    const RealType u0M1 = velocity.getVectorElement(i, j, k - 1, 0);
 
     const RealType secondOrder = (((hxLong - hxShort) / hxLong * w00 + hxShort / hxLong * w10) * ((hzLong1 - hzShort) / hzLong1 * u00 + hzShort / hzLong1 * u01)
                                   - ((hxLong - hxShort) / hxLong * w0M1 + hxShort / hxLong * w1M1) * ((hzLong0 - hzShort) / hzLong0 * u00 + hzShort / hzLong0 * u0M1))
@@ -535,45 +446,29 @@ namespace Stencils {
 
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
-#ifndef NDEBUG
-    // if (fabs(tmp1 - tmp2) > 1.0e-12) {
-    //   throw std::runtime_error("Error in duwdz");
-    // }
-#endif
-
     return tmp2;
   }
 
   // Evaluates first derivative w.r.t. y for v*w at location of w-component. For details on implementation, see duvdx.
-  inline RealType dvwdy(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
-#ifndef NDEBUG
-    /* const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 0, 1, 1)]) *
-        (lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 1, 0, 2)])) -
-        ((lv[mapd(0, -1, 0, 1)] + lv[mapd(0, -1, 1, 1)]) *
-            (lv[mapd(0, -1, 0, 2)] + lv[mapd(0, 0, 0, 2)]))) +
-        parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 0, 1, 1)]) *
-            (lv[mapd(0, 0, 0, 2)] - lv[mapd(0, 1, 0, 2)])) -
-            (fabs(lv[mapd(0, -1, 0, 1)] + lv[mapd(0, -1, 1, 1)]) *
-                (lv[mapd(0, -1, 0, 2)] - lv[mapd(0, 0, 0, 2)])))) /
-        lm[mapd(0, 0, 0, 1)]; */
-#endif
+  inline RealType dvwdy(VectorField& velocity, const Parameters& parameters, int i, int j, int k) {
+    const RealType mp0001  = parameters.meshsize->getDy(i, j, k);
+    const RealType hyShort = 0.5 * mp0001;                                             // Distance of corner points in x-direction from center v-value
+    const RealType hyLong0 = 0.5 * (mp0001 + parameters.meshsize->getDy(i, j - 1, k)); // Distance between center and west
+                                                                                       // v-value
+    const RealType hyLong1 = 0.5 * (mp0001 + parameters.meshsize->getDy(i, j + 1, k)); // Distance between center and east
+                                                                                       // v-value
+    const RealType mp0002  = parameters.meshsize->getDz(i, j, k);
+    const RealType hzShort = 0.5 * mp0002;                                             // Distance of center u-value from upper edge of cell
+    const RealType hzLong  = 0.5 * (mp0002 + parameters.meshsize->getDz(i, j, k + 1)); // Distance of north and center u-value
 
-    const RealType hyShort = 0.5 * lm[mapd(0, 0, 0, 1)];                           // Distance of corner points in x-direction from center v-value
-    const RealType hyLong0 = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, -1, 0, 1)]); // Distance between center and west
-                                                                                   // v-value
-    const RealType hyLong1 = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, 1, 0, 1)]);  // Distance between center and east
-                                                                                   // v-value
-    const RealType hzShort = 0.5 * lm[mapd(0, 0, 0, 2)];                           // Distance of center u-value from upper edge of cell
-    const RealType hzLong  = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, 1, 2)]);  // Distance of north and center u-value
+    const RealType v00 = velocity.getVectorElement(i, j, k, 1);
+    const RealType v01 = velocity.getVectorElement(i, j, k + 1, 1);
+    const RealType w00 = velocity.getVectorElement(i, j, k, 2);
+    const RealType w10 = velocity.getVectorElement(i, j + 1, k, 2);
 
-    const RealType v00 = lv[mapd(0, 0, 0, 1)];
-    const RealType v01 = lv[mapd(0, 0, 1, 1)];
-    const RealType w00 = lv[mapd(0, 0, 0, 2)];
-    const RealType w10 = lv[mapd(0, 1, 0, 2)];
-
-    const RealType vM10 = lv[mapd(0, -1, 0, 1)];
-    const RealType vM11 = lv[mapd(0, -1, 1, 1)];
-    const RealType wM10 = lv[mapd(0, -1, 0, 2)];
+    const RealType vM10 = velocity.getVectorElement(i, j - 1, k, 1);
+    const RealType vM11 = velocity.getVectorElement(i, j - 1, k + 1, 1);
+    const RealType wM10 = velocity.getVectorElement(i, j - 1, k, 2);
 
     const RealType secondOrder = (((hzLong - hzShort) / hzLong * v00 + hzShort / hzLong * v01) * ((hyLong1 - hyShort) / hyLong1 * w00 + hyShort / hyLong1 * w10)
                                   - ((hzLong - hzShort) / hzLong * vM10 + hzShort / hzLong * vM11) * ((hyLong0 - hyShort) / hyLong0 * w00 + hyShort / hyLong0 * wM10))
@@ -586,45 +481,29 @@ namespace Stencils {
 
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
-#ifndef NDEBUG
-    // if (fabs(tmp1 - tmp2) > 1.0e-12) {
-    //   throw std::runtime_error("Error in dvwdy");
-    // }
-#endif
-
     return tmp2;
   }
 
   // Evaluates first derivative w.r.t. z for v*w at location of v-component. For details on implementation, see duvdx.
-  inline RealType dvwdz(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
-#ifndef NDEBUG
-    /* const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 1, 0, 2)]) *
-        (lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 0, 1, 1)])) -
-        ((lv[mapd(0, 0, -1, 2)] + lv[mapd(0, 1, -1, 2)]) *
-            (lv[mapd(0, 0, -1, 1)] + lv[mapd(0, 0, 0, 1)]))) +
-        parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 1, 0, 2)]) *
-            (lv[mapd(0, 0, 0, 1)] - lv[mapd(0, 0, 1, 1)])) -
-            (fabs(lv[mapd(0, 0, -1, 2)] + lv[mapd(0, 1, -1, 2)]) *
-                (lv[mapd(0, 0, -1, 1)] - lv[mapd(0, 0, 0, 1)])))) /
-        lm[mapd(0, 0, 0, 2)]; */
-#endif
+  inline RealType dvwdz(VectorField& velocity, const Parameters& parameters, int i, int j, int k) {
+    const RealType mp0002  = parameters.meshsize->getDz(i, j, k);
+    const RealType hzShort = 0.5 * mp0002;                                             // Distance of corner points in x-direction from center v-value
+    const RealType hzLong0 = 0.5 * (mp0002 + parameters.meshsize->getDz(i, j, k - 1)); // Distance between center and west
+                                                                                       // v-value
+    const RealType hzLong1 = 0.5 * (mp0002 + parameters.meshsize->getDz(i, j, k + 1)); // Distance between center and east
+    // v-value
+    const RealType mp0001  = parameters.meshsize->getDy(i, j, k);
+    const RealType hyShort = 0.5 * mp0001;                                             // Distance of center u-value from upper edge of cell
+    const RealType hyLong  = 0.5 * (mp0001 + parameters.meshsize->getDy(i, j + 1, k)); // Distance of north and center u-value
 
-    const RealType hzShort = 0.5 * lm[mapd(0, 0, 0, 2)];                           // Distance of corner points in x-direction from center v-value
-    const RealType hzLong0 = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, -1, 2)]); // Distance between center and west
-                                                                                   // v-value
-    const RealType hzLong1 = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, 1, 2)]);  // Distance between center and east
-                                                                                   // v-value
-    const RealType hyShort = 0.5 * lm[mapd(0, 0, 0, 1)];                           // Distance of center u-value from upper edge of cell
-    const RealType hyLong  = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, 1, 0, 1)]);  // Distance of north and center u-value
+    const RealType w00 = velocity.getVectorElement(i, j, k, 2);
+    const RealType w10 = velocity.getVectorElement(i, j + 1, k, 2);
+    const RealType v00 = velocity.getVectorElement(i, j, k, 1);
+    const RealType v01 = velocity.getVectorElement(i, j, k + 1, 1);
 
-    const RealType w00 = lv[mapd(0, 0, 0, 2)];
-    const RealType w10 = lv[mapd(0, 1, 0, 2)];
-    const RealType v00 = lv[mapd(0, 0, 0, 1)];
-    const RealType v01 = lv[mapd(0, 0, 1, 1)];
-
-    const RealType w0M1 = lv[mapd(0, 0, -1, 2)];
-    const RealType w1M1 = lv[mapd(0, 1, -1, 2)];
-    const RealType v0M1 = lv[mapd(0, 0, -1, 1)];
+    const RealType w0M1 = velocity.getVectorElement(i, j, k - 1, 2);
+    const RealType w1M1 = velocity.getVectorElement(i, j + 1, k - 1, 2);
+    const RealType v0M1 = velocity.getVectorElement(i, j, k - 1, 1);
 
     const RealType secondOrder = (((hyLong - hyShort) / hyLong * w00 + hyShort / hyLong * w10) * ((hzLong1 - hzShort) / hzLong1 * v00 + hzShort / hzLong1 * v01)
                                   - ((hyLong - hyShort) / hyLong * w0M1 + hyShort / hyLong * w1M1) * ((hzLong0 - hzShort) / hzLong0 * v00 + hzShort / hzLong0 * v0M1))
@@ -637,50 +516,24 @@ namespace Stencils {
 
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
-#ifndef NDEBUG
-    /* if (fabs(tmp1 - tmp2) > 1.0e-12) {
-      spdlog::error("{}, {}", tmp1, tmp2);
-      throw std::runtime_error("Error in dvwdz");
-    } */
-#endif
-
     return tmp2;
   }
 
   // First derivative of u*u w.r.t. x, evaluated at location of u-component.
-  inline RealType du2dx(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
-#ifndef NDEBUG
-    // const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 0)] + lv[mapd(1, 0, 0, 0)]) *
-    //     (lv[mapd(0, 0, 0, 0)] + lv[mapd(1, 0, 0, 0)])) -
-    //     ((lv[mapd(-1, 0, 0, 0)] + lv[mapd(0, 0, 0, 0)]) *
-    //         (lv[mapd(-1, 0, 0, 0)] + lv[mapd(0, 0, 0, 0)]))) +
-    //     parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 0)] + lv[mapd(1, 0, 0, 0)]) *
-    //         (lv[mapd(0, 0, 0, 0)] - lv[mapd(1, 0, 0, 0)])) -
-    //         (fabs(lv[mapd(-1, 0, 0, 0)] + lv[mapd(0, 0, 0, 0)]) *
-    //             (lv[mapd(-1, 0, 0, 0)] - lv[mapd(0, 0, 0, 0)])))) /
-    //     lm[mapd(0, 0, 0, 0)];
-#endif
+  inline RealType du2dx(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) {
+    const RealType mp0000  = parameters.meshsize->getDx(i, j, k);
+    const RealType dxShort = 0.5 * mp0000;
+    const RealType dxLong1 = 0.5 * (mp0000 + parameters.meshsize->getDx(i + 1, j, k));
 
-    const RealType dxShort = 0.5 * lm[mapd(0, 0, 0, 0)];
-    // const RealType dxLong0 = 0.5*(lm[mapd(-1,0,0,0)] + lm[mapd(0,0,0,0)]);
-    const RealType dxLong1 = 0.5 * (lm[mapd(0, 0, 0, 0)] + lm[mapd(1, 0, 0, 0)]);
+    const RealType u0  = velocity.getVectorElement(i, j, k, 0);
+    const RealType uM1 = velocity.getVectorElement(i - 1, j, k, 0);
+    const RealType u1  = velocity.getVectorElement(i + 1, j, k, 0);
 
-    const RealType u0  = lv[mapd(0, 0, 0, 0)];
-    const RealType uM1 = lv[mapd(-1, 0, 0, 0)];
-    const RealType u1  = lv[mapd(1, 0, 0, 0)];
-
-    // const RealType kr = (dxLong1 - dxShort) / dxLong1 * u0 + dxShort / dxLong1 * u1;
-    // const RealType kl = (dxLong0 - dxShort) / dxLong0 * u0 + dxShort / dxLong0 * uM1;
     const RealType kr = (u0 + u1) / 2;
     const RealType kl = (u0 + uM1) / 2;
 
     // Central difference expression which is second-order accurate for uniform meshes. We interpolate u half-way
     // between neighboured u-component values and afterwards build the central difference for u*u.
-
-    /*const RealType secondOrder = (((dxLong1 - dxShort) / dxLong1 * u0 + dxShort / dxLong1 * u1) * ((dxLong1 - dxShort)
-       / dxLong1 * u0 + dxShort / dxLong1 * u1)
-        - ((dxLong0 - dxShort) / dxLong0 * u0 + dxShort / dxLong0 * uM1) * ((dxLong0 - dxShort) / dxLong0 * u0 + dxShort
-       / dxLong0 * uM1) ) / (2.0 * dxShort);*/
 
     const RealType secondOrder = ((u0 + u1) * (u0 + u1) - (u0 + uM1) * (u0 + uM1)) / (4 * dxLong1);
 
@@ -691,47 +544,21 @@ namespace Stencils {
     // Return linear combination of central- and upwind difference
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
-#ifndef NDEBUG
-    /* if (fabs(tmp1 - tmp2) > 1.0e-12) {
-      spdlog::error("{}, {}", tmp1, tmp2);
-      throw std::runtime_error("Error in du2dx");
-    } */
-#endif
-
     return tmp2;
   }
 
   // First derivative of v*v w.r.t. y, evaluated at location of v-component. For details, see du2dx.
-  inline RealType dv2dy(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
-#ifndef NDEBUG
-    // const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 1, 0, 1)]) *
-    //     (lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 1, 0, 1)])) -
-    //     ((lv[mapd(0, -1, 0, 1)] + lv[mapd(0, 0, 0, 1)]) *
-    //         (lv[mapd(0, -1, 0, 1)] + lv[mapd(0, 0, 0, 1)]))) +
-    //     parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 1)] + lv[mapd(0, 1, 0, 1)]) *
-    //         (lv[mapd(0, 0, 0, 1)] - lv[mapd(0, 1, 0, 1)])) -
-    //         (fabs(lv[mapd(0, -1, 0, 1)] + lv[mapd(0, 0, 0, 1)]) *
-    //             (lv[mapd(0, -1, 0, 1)] - lv[mapd(0, 0, 0, 1)])))) /
-    //     lm[mapd(0, 0, 0, 1)];
-#endif
+  inline RealType dv2dy(VectorField& velocity, const Parameters& parameters, int i, int j, int k = 0) {
+    const RealType mp0001  = parameters.meshsize->getDy(i, j, k);
+    const RealType dyShort = 0.5 * mp0001;
+    const RealType dyLong1 = 0.5 * (mp0001 + parameters.meshsize->getDy(i, j + 1, k));
 
-    const RealType dyShort = 0.5 * lm[mapd(0, 0, 0, 1)];
-    // const RealType dyLong0 = 0.5*(lm[mapd(0,-1,0,1)] + lm[mapd(0,0,0,1)]);
-    const RealType dyLong1 = 0.5 * (lm[mapd(0, 0, 0, 1)] + lm[mapd(0, 1, 0, 1)]);
+    const RealType v0  = velocity.getVectorElement(i, j, k, 1);
+    const RealType vM1 = velocity.getVectorElement(i, j - 1, k, 1);
+    const RealType v1  = velocity.getVectorElement(i, j + 1, k, 1);
 
-    const RealType v0  = lv[mapd(0, 0, 0, 1)];
-    const RealType vM1 = lv[mapd(0, -1, 0, 1)];
-    const RealType v1  = lv[mapd(0, 1, 0, 1)];
-
-    // const RealType kr = (dyLong1 - dyShort) / dyLong1 * v0 + dyShort / dyLong1 * v1;
-    // const RealType kl = (dyLong0 - dyShort) / dyLong0 * v0 + dyShort / dyLong0 * vM1;
     const RealType kr = (v0 + v1) / 2;
     const RealType kl = (v0 + vM1) / 2;
-
-    /*const RealType secondOrder = (((dyLong1 - dyShort) / dyLong1 * v0 + dyShort / dyLong1 * v1) * ((dyLong1 - dyShort)
-       / dyLong1 * v0 + dyShort / dyLong1 * v1)
-        - ((dyLong0 - dyShort) / dyLong0 * v0 + dyShort / dyLong0 * vM1) * ((dyLong0 - dyShort) / dyLong0 * v0 + dyShort
-       / dyLong0 * vM1) ) / (2.0 * dyShort);*/
 
     const RealType secondOrder = ((v0 + v1) * (v0 + v1) - (v0 + vM1) * (v0 + vM1)) / (4 * dyLong1);
 
@@ -739,47 +566,21 @@ namespace Stencils {
 
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
-#ifndef NDEBUG
-    /* if (fabs(tmp1 - tmp2) > 1.0e-12) {
-      spdlog::error("{}, {}", tmp1, tmp2);
-      throw std::runtime_error("Error in dv2dy");
-    } */
-#endif
-
     return tmp2;
   }
 
   // First derivative of w*w w.r.t. z, evaluated at location of w-component. For details, see du2dx.
-  inline RealType dw2dz(const RealType* const lv, const Parameters& parameters, const RealType* const lm) {
-#ifndef NDEBUG
-    /* const RealType tmp1 = 1.0 / 4.0 * ((((lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 0, 1, 2)]) *
-        (lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 0, 1, 2)])) -
-        ((lv[mapd(0, 0, -1, 2)] + lv[mapd(0, 0, 0, 2)]) *
-            (lv[mapd(0, 0, -1, 2)] + lv[mapd(0, 0, 0, 2)]))) +
-        parameters.solver.gamma * ((fabs(lv[mapd(0, 0, 0, 2)] + lv[mapd(0, 0, 1, 2)]) *
-            (lv[mapd(0, 0, 0, 2)] - lv[mapd(0, 0, 1, 2)])) -
-            (fabs(lv[mapd(0, 0, -1, 2)] + lv[mapd(0, 0, 0, 2)]) *
-                (lv[mapd(0, 0, -1, 2)] - lv[mapd(0, 0, 0, 2)])))) /
-        lm[mapd(0, 0, 0, 2)]; */
-#endif
+  inline RealType dw2dz(VectorField& velocity, const Parameters& parameters, int i, int j, int k) {
+    const RealType mp0002  = parameters.meshsize->getDz(i, j, k);
+    const RealType dzShort = 0.5 * mp0002;
+    const RealType dzLong1 = 0.5 * (mp0002 + parameters.meshsize->getDz(i, j, k + 1));
 
-    const RealType dzShort = 0.5 * lm[mapd(0, 0, 0, 2)];
-    // const RealType dzLong0 = 0.5 * (lm[mapd(0, 0, -1, 2)] + lm[mapd(0, 0, 0, 2)]);
-    const RealType dzLong1 = 0.5 * (lm[mapd(0, 0, 0, 2)] + lm[mapd(0, 0, 1, 2)]);
+    const RealType w0  = velocity.getVectorElement(i, j, k, 2);
+    const RealType wM1 = velocity.getVectorElement(i, j, k - 1, 2);
+    const RealType w1  = velocity.getVectorElement(i, j, k + 1, 2);
 
-    const RealType w0  = lv[mapd(0, 0, 0, 2)];
-    const RealType wM1 = lv[mapd(0, 0, -1, 2)];
-    const RealType w1  = lv[mapd(0, 0, 1, 2)];
-
-    // const RealType kr = (dzLong1 - dzShort) / dzLong1 * w0 + dzShort / dzLong1 * w1;
-    // const RealType kl = (dzLong0 - dzShort) / dzLong0 * w0 + dzShort / dzLong0 * wM1;
     const RealType kr = (w0 + w1) / 2;
     const RealType kl = (w0 + wM1) / 2;
-
-    /*const RealType secondOrder = (((dzLong1 - dzShort) / dzLong1 * w0 + dzShort / dzLong1 * w1) * ((dzLong1 - dzShort)
-       / dzLong1 * w0 + dzShort / dzLong1 * w1)
-        - ((dzLong0 - dzShort) / dzLong0 * w0 + dzShort / dzLong0 * wM1) * ((dzLong0 - dzShort) / dzLong0 * w0 + dzShort
-       / dzLong0 * wM1) ) / (2.0 * dzShort);*/
 
     const RealType secondOrder = ((w0 + w1) * (w0 + w1) - (w0 + wM1) * (w0 + wM1)) / (4 * dzLong1);
 
@@ -787,115 +588,72 @@ namespace Stencils {
 
     const RealType tmp2 = (1.0 - parameters.solver.gamma) * secondOrder + parameters.solver.gamma * firstOrder;
 
-#ifndef NDEBUG
-    /* if (fabs(tmp1 - tmp2) > 1.0e-12) {
-      spdlog::error("{}, {}", tmp1, tmp2);
-      throw std::runtime_error("Error in dw2dz");
-    } */
-#endif
-
     return tmp2;
   }
 
-  inline RealType computeF2D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {
-    return localVelocity[mapd(0, 0, 0, 0)]
+  inline RealType computeF2D(VectorField& velocity, const Parameters& parameters, RealType dt, int i, int j) {
+    return velocity.getVectorElement(i, j, 0)
            + dt
-               * (-du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize) + 1 / parameters.flow.Re * (d2udx2(localVelocity, localMeshsize) + d2udy2(localVelocity, localMeshsize)));
+               * (-du2dx(velocity, parameters, i, j) - duvdy(velocity, parameters, i, j) + 1 / parameters.flow.Re * (d2udx2(velocity, parameters, i, j) + d2udy2(velocity, parameters, i, j)));
   }
 
-  inline RealType computeTurbulentF2D(
-    const RealType* const localVelocity, const RealType* const localViscosity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt
-  ) {
+  inline RealType computeTurbulentF2D(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, RealType dt, int i, int j) {
     const RealType re = parameters.flow.Re;
-    return localVelocity[mapd(0, 0, 0, 0)]
+    return velocity.getVectorElement(i, j, 0)
            + dt
-               * (-du2dx(localVelocity, parameters, localMeshsize) 
-               - duvdy(localVelocity, parameters, localMeshsize) 
-               + 2 * dVdxdudx(localVelocity, localViscosity, localMeshsize, re) + dVdydudydvdx(localVelocity, localViscosity, localMeshsize, re));
+               * (-du2dx(velocity, parameters, i, j) - duvdy(velocity, parameters, i, j) + 2 * dVdxdudx(velocity, viscosity, parameters, re, i, j) + dVdydudydvdx(velocity, viscosity, parameters, re, i, j));
   }
 
-  inline RealType computeF3D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {
-    return localVelocity[mapd(0, 0, 0, 0)]
-        + dt * (
-            -du2dx(localVelocity, parameters, localMeshsize) 
-            - duvdy(localVelocity, parameters, localMeshsize) 
-            - duwdz(localVelocity, parameters, localMeshsize) 
-            + 1 / parameters.flow.Re * (
-              d2udx2(localVelocity, localMeshsize) 
-              + d2udy2(localVelocity, localMeshsize) 
-              + d2udz2(localVelocity, localMeshsize)
-            )
-            );
+  inline RealType computeF3D(VectorField& velocity, const Parameters& parameters, RealType dt, int i, int j, int k) {
+    return velocity.getVectorElement(i, j, k, 0)
+           + dt
+               * (-du2dx(velocity, parameters, i, j, k) - duvdy(velocity, parameters, i, j, k) - duwdz(velocity, parameters, i, j, k) + 1 / parameters.flow.Re * (d2udx2(velocity, parameters, i, j, k) + d2udy2(velocity, parameters, i, j, k) + d2udz2(velocity, parameters, i, j, k)));
   }
 
-  inline RealType computeTurbulentF3D(
-    const RealType* const localVelocity, const RealType* const localViscosity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt
-  ) {
+  inline RealType computeTurbulentF3D(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, RealType dt, int i, int j, int k) {
     const RealType re = parameters.flow.Re;
-    return localVelocity[mapd(0, 0, 0, 0)]
+    return velocity.getVectorElement(i, j, k, 0)
            + dt
-               * (-du2dx(localVelocity, parameters, localMeshsize) - duvdy(localVelocity, parameters, localMeshsize) - duwdz(localVelocity, parameters, localMeshsize) + 2 * dVdxdudx(localVelocity, localViscosity, localMeshsize, re) + dVdydudydvdx(localVelocity, localViscosity, localMeshsize, re) + dVdzdudzdwdx(localVelocity, localViscosity, localMeshsize, re));
+               * (-du2dx(velocity, parameters, i, j, k) - duvdy(velocity, parameters, i, j, k) - duwdz(velocity, parameters, i, j, k) + 2 * dVdxdudx(velocity, viscosity, parameters, re, i, j, k) + dVdydudydvdx(velocity, viscosity, parameters, re, i, j, k) + dVdzdudzdwdx(velocity, viscosity, parameters, re, i, j, k));
   }
 
-  inline RealType computeG2D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {
-    return localVelocity[mapd(0, 0, 0, 1)]
+  inline RealType computeG2D(VectorField& velocity, const Parameters& parameters, RealType dt, int i, int j) {
+    return velocity.getVectorElement(i, j, 1)
            + dt
-               * (-duvdx(localVelocity, parameters, localMeshsize) - dv2dy(localVelocity, parameters, localMeshsize) + 1 / parameters.flow.Re * (d2vdx2(localVelocity, localMeshsize) + d2vdy2(localVelocity, localMeshsize)));
+               * (-duvdx(velocity, parameters, i, j) - dv2dy(velocity, parameters, i, j) + 1 / parameters.flow.Re * (d2vdx2(velocity, parameters, i, j) + d2vdy2(velocity, parameters, i, j)));
   }
 
-  inline RealType computeTurbulentG2D(
-    const RealType* const localVelocity, const RealType* const localViscosity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt
-  ) {
+  inline RealType computeTurbulentG2D(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, RealType dt, int i, int j) {
     const RealType re = parameters.flow.Re;
-    return localVelocity[mapd(0, 0, 0, 1)]
+    return velocity.getVectorElement(i, j, 1)
            + dt
-               * (-duvdx(localVelocity, parameters, localMeshsize) - dv2dy(localVelocity, parameters, localMeshsize) + dVdxdvdxdudy(localVelocity, localViscosity, localMeshsize, re) + 2 * dVdydvdy(localVelocity, localViscosity, localMeshsize, re));
+               * (-duvdx(velocity, parameters, i, j) - dv2dy(velocity, parameters, i, j) + dVdxdvdxdudy(velocity, viscosity, parameters, re, i, j) + 2 * dVdydvdy(velocity, viscosity, parameters, re, i, j));
   }
 
-  inline RealType computeG3D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {
-    return localVelocity[mapd(0, 0, 0, 1)]
-        + dt * (
-          -dv2dy(localVelocity, parameters, localMeshsize) 
-          - duvdx(localVelocity, parameters, localMeshsize)
-          - dvwdz(localVelocity, parameters, localMeshsize) 
-          + 1 / parameters.flow.Re * (
-            d2vdx2(localVelocity, localMeshsize)
-            + d2vdy2(localVelocity, localMeshsize)
-            + d2vdz2(localVelocity, localMeshsize)
-          )
-          );
+  inline RealType computeG3D(VectorField& velocity, const Parameters& parameters, RealType dt, int i, int j, int k) {
+    return velocity.getVectorElement(i, j, k, 1)
+           + dt
+               * (-dv2dy(velocity, parameters, i, j, k) - duvdx(velocity, parameters, i, j, k) - dvwdz(velocity, parameters, i, j, k) + 1 / parameters.flow.Re * (d2vdx2(velocity, parameters, i, j, k) + d2vdy2(velocity, parameters, i, j, k) + d2vdz2(velocity, parameters, i, j, k)));
   }
 
-  inline RealType computeTurbulentG3D(
-    const RealType* const localVelocity, const RealType* const localViscosity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt
-  ) {
+  inline RealType computeTurbulentG3D(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, RealType dt, int i, int j, int k) {
     const RealType re = parameters.flow.Re;
-    return localVelocity[mapd(0, 0, 0, 1)]
+    return velocity.getVectorElement(i, j, k, 1)
            + dt
-               * (-dv2dy(localVelocity, parameters, localMeshsize) - duvdx(localVelocity, parameters, localMeshsize) - dvwdz(localVelocity, parameters, localMeshsize) + dVdxdvdxdudy(localVelocity, localViscosity, localMeshsize, re) + 2 * dVdydvdy(localVelocity, localViscosity, localMeshsize, re) + dVdzdvdzdwdy(localVelocity, localViscosity, localMeshsize, re));
+               * (-dv2dy(velocity, parameters, i, j, k) - duvdx(velocity, parameters, i, j, k) - dvwdz(velocity, parameters, i, j, k) + dVdxdvdxdudy(velocity, viscosity, parameters, re, i, j, k) + 2 * dVdydvdy(velocity, viscosity, parameters, re, i, j, k) + dVdzdvdzdwdy(velocity, viscosity, parameters, re, i, j, k));
   }
 
-  inline RealType computeH3D(const RealType* const localVelocity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt) {
-    return localVelocity[mapd(0, 0, 0, 2)]
-        + dt * (
-          -dw2dz(localVelocity, parameters, localMeshsize) 
-          - duwdx(localVelocity, parameters, localMeshsize)
-          - dvwdy(localVelocity, parameters, localMeshsize) 
-          + 1 / parameters.flow.Re * (
-            d2wdx2(localVelocity, localMeshsize)
-            + d2wdy2(localVelocity, localMeshsize)
-            + d2wdz2(localVelocity, localMeshsize)
-          )
-          );
+  inline RealType computeH3D(VectorField& velocity, const Parameters& parameters, RealType dt, int i, int j, int k) {
+    return velocity.getVectorElement(i, j, k, 2)
+           + dt
+               * (-dw2dz(velocity, parameters, i, j, k) - duwdx(velocity, parameters, i, j, k) - dvwdy(velocity, parameters, i, j, k) + 1 / parameters.flow.Re * (d2wdx2(velocity, parameters, i, j, k) + d2wdy2(velocity, parameters, i, j, k) + d2wdz2(velocity, parameters, i, j, k)));
   }
 
-  inline RealType computeTurbulentH3D(
-    const RealType* const localVelocity, const RealType* const localViscosity, const RealType* const localMeshsize, const Parameters& parameters, RealType dt
-  ) {
+  inline RealType computeTurbulentH3D(VectorField& velocity, ScalarField& viscosity, const Parameters& parameters, RealType dt, int i, int j, int k) {
     const RealType re = parameters.flow.Re;
-    return localVelocity[mapd(0, 0, 0, 2)]
+    return velocity.getVectorElement(i, j, k, 2)
            + dt
-               * (-dw2dz(localVelocity, parameters, localMeshsize) - duwdx(localVelocity, parameters, localMeshsize) - dvwdy(localVelocity, parameters, localMeshsize) + (dVdxdwdxdudz(localVelocity, localViscosity, localMeshsize, re) + dVdydwdydvdz(localVelocity, localViscosity, localMeshsize, re) + 2 * dVdzdwdz(localVelocity, localViscosity, localMeshsize, re)));
+               * (-dw2dz(velocity, parameters, i, j, k) - duwdx(velocity, parameters, i, j, k) - dvwdy(velocity, parameters, i, j, k) + (dVdxdwdxdudz(velocity, viscosity, parameters, re, i, j, k) + dVdydwdydvdz(velocity, viscosity, parameters, re, i, j, k) + 2 * dVdzdwdz(velocity, viscosity, parameters, re, i, j, k)));
   }
 
 } // namespace Stencils

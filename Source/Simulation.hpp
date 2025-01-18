@@ -24,13 +24,13 @@ class Simulation;
 struct SimulationPtrs {
   Simulation*         simulationGPU_;
   FlowFieldGPUPtrs    flowFieldGPUptrs_;
-  StencilDelegatePtrs stencilDelegatePtrs_;
+  StencilDelegate* stencilDelegateGPU_;
   ParametersGPUPtrs   parameterPtrs_;
 
-  SimulationPtrs(Simulation* simulationGPU, FlowFieldGPUPtrs flowFieldGPUPtrs, StencilDelegatePtrs stencilDelegatePtrs, ParametersGPUPtrs parameterGPUPtrs):
+  SimulationPtrs(Simulation* simulationGPU, FlowFieldGPUPtrs flowFieldGPUPtrs, StencilDelegate* stencilDelegateGPU, ParametersGPUPtrs parameterGPUPtrs):
     simulationGPU_(simulationGPU),
     flowFieldGPUptrs_(flowFieldGPUPtrs),
-    stencilDelegatePtrs_(stencilDelegatePtrs),
+    stencilDelegateGPU_(stencilDelegateGPU),
     parameterPtrs_(parameterGPUPtrs) {}
 };
 
@@ -80,7 +80,7 @@ public:
     }
 
     FlowFieldGPUPtrs    flowFieldPtrs       = FlowField::mapToGPU(hostDevice, targetDevice, *simulation.flowField_);
-    StencilDelegatePtrs stencilDelegatePtrs = StencilDelegate::mapToGPU(hostDevice, targetDevice, *simulation.stencil_);
+    StencilDelegate* stecilDelegateGPU = StencilDelegate::mapToGPU(hostDevice, targetDevice, *simulation.stencil_);
     ParametersGPUPtrs   parametersPtrs      = Parameters::mapToGPU(hostDevice, targetDevice, *simulation.parameters_);
 
     bool copiedFlowFieldPtr = omp_target_memcpy(&simulationGPU->flowField_, &flowFieldPtrs.flowFieldPtr_, sizeof(FlowField*), 0, 0, targetDevice, hostDevice) == 0;
@@ -88,7 +88,7 @@ public:
       std::cout << "Failed to copy FlowField pointer to Simulation object" << std::endl;
     }
 
-    bool copiedStencilDelegatePtr = omp_target_memcpy(&simulationGPU->stencil_, &stencilDelegatePtrs.stencilDelegateGPU_, sizeof(StencilDelegate*), 0, 0, targetDevice, hostDevice)
+    bool copiedStencilDelegatePtr = omp_target_memcpy(&simulationGPU->stencil_, &stecilDelegateGPU, sizeof(StencilDelegate*), 0, 0, targetDevice, hostDevice)
                                     == 0;
     if (!copiedStencilDelegatePtr) {
       std::cout << "Failed to copy StencilDelegate pointer to Simulation object" << std::endl;
@@ -105,7 +105,7 @@ public:
     omp_target_memcpy(&simulationGPU->wallIterator_.highOffset_, &simulation.wallIterator_.highOffset_, sizeof(int), 0, 0, targetDevice, hostDevice);
     omp_target_memcpy(&simulationGPU->wallIterator_.lowOffset_, &simulation.wallIterator_.lowOffset_, sizeof(int), 0, 0, targetDevice, hostDevice);
 
-    return SimulationPtrs(simulationGPU, flowFieldPtrs, stencilDelegatePtrs, parametersPtrs);
+    return SimulationPtrs(simulationGPU, flowFieldPtrs, stecilDelegateGPU, parametersPtrs);
   }
 
   static void mapToCPU(int hostDevice, int targetDevice, Simulation& simulation, SimulationPtrs& simulationPtrs) {
@@ -119,7 +119,7 @@ public:
     }
 
     FlowField::mapToCPUAndFree(hostDevice, targetDevice, *simulation.flowField_, simulationPtrs.flowFieldGPUptrs_);
-    StencilDelegate::freeGPU(hostDevice, targetDevice, *simulation.stencil_, simulationPtrs.stencilDelegatePtrs_);
+    StencilDelegate::freeGPU(hostDevice, targetDevice, *simulation.stencil_, simulationPtrs.stencilDelegateGPU_);
     omp_target_memcpy(&simulation.parameters_->timestep.dt, &simulationPtrs.parameterPtrs_.parametersGPUPtrs_->timestep.dt, sizeof(RealType), 0, 0, hostDevice, targetDevice);
     Parameters::freeGPU(hostDevice, targetDevice, *simulation.parameters_, simulationPtrs.parameterPtrs_);
   }

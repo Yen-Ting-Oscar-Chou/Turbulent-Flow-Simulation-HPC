@@ -18,7 +18,7 @@ static constexpr RealType MY_FLOAT_MIN = std::numeric_limits<RealType>::min();
 static constexpr RealType KAPPA        = 0.41;
 static constexpr RealType EPSILON      = std::numeric_limits<RealType>::epsilon();
 static constexpr int      NUM_TEAMS    = 32;
-static constexpr int      NUM_THREADS  = 1024;
+static constexpr int      NUM_THREADS  = 640;
 
 enum COMP { COMPX = 0, COMPY = 1, COMPZ = 2 };
 enum DERIV { DERIVX = 0, DERIVY = 1, DERIVZ = 2 };

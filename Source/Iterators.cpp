@@ -49,8 +49,9 @@ void FieldIteratorGPU<FlowFieldType>::iterate(StencilType type, const Parameters
   stencil.setType(type);
   // The index k can be used for the 2D and 3D cases.
   if (parameters.geometry.dim == 2) {
-    // Loop without lower boundaries. These will be dealt with by the global boundary stencils
-    // or by the subdomain boundary iterators.
+// Loop without lower boundaries. These will be dealt with by the global boundary stencils
+// or by the subdomain boundary iterators.
+#pragma omp target teams distribute parallel for collapse(2) num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
     for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
       for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
         stencil.apply(parameters, flowField, i, j);
@@ -59,6 +60,7 @@ void FieldIteratorGPU<FlowFieldType>::iterate(StencilType type, const Parameters
   }
 
   if (parameters.geometry.dim == 3) {
+#pragma omp target teams distribute parallel for collapse(3) num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
     for (int k = 1 + lowOffset_; k < cellsZ - 1 + highOffset_; k++) {
       for (int j = 1 + lowOffset_; j < cellsY - 1 + highOffset_; j++) {
         for (int i = 1 + lowOffset_; i < cellsX - 1 + highOffset_; i++) {
@@ -80,24 +82,28 @@ void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type, const P
   stencil.setType(type);
   if (parameters.geometry.dim == 2) {
     if (parameters.parallel.leftNb < 0) {
+#pragma omp target teams distribute parallel for num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
       for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
         stencil.applyLeftWall(parameters, flowField, lowOffset_, j);
       }
     }
 
     if (parameters.parallel.rightNb < 0) {
+#pragma omp target teams distribute parallel for num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
       for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
         stencil.applyRightWall(parameters, flowField, flowField.getCellsX() + highOffset_ - 1, j);
       }
     }
 
     if (parameters.parallel.bottomNb < 0) {
+#pragma omp target teams distribute parallel for num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
       for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
         stencil.applyBottomWall(parameters, flowField, i, lowOffset_);
       }
     }
 
     if (parameters.parallel.topNb < 0) {
+#pragma omp target teams distribute parallel for num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
       for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
         stencil.applyTopWall(parameters, flowField, i, flowField.getCellsY() + highOffset_ - 1);
       }
@@ -106,6 +112,7 @@ void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type, const P
 
   if (parameters.geometry.dim == 3) {
     if (parameters.parallel.leftNb < 0) {
+#pragma omp target teams distribute parallel for collapse(2) num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
       for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
         for (int k = lowOffset_; k < flowField.getCellsZ() + highOffset_; k++) {
           stencil.applyLeftWall(parameters, flowField, lowOffset_, j, k);
@@ -114,6 +121,7 @@ void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type, const P
     }
 
     if (parameters.parallel.rightNb < 0) {
+#pragma omp target teams distribute parallel for collapse(2) num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
       for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
         for (int k = lowOffset_; k < flowField.getCellsZ() + highOffset_; k++) {
           stencil.applyRightWall(parameters, flowField, flowField.getCellsX() + highOffset_ - 1, j, k);
@@ -122,6 +130,7 @@ void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type, const P
     }
 
     if (parameters.parallel.bottomNb < 0) {
+#pragma omp target teams distribute parallel for collapse(2) num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
       for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
         for (int k = lowOffset_; k < flowField.getCellsZ() + highOffset_; k++) {
           stencil.applyBottomWall(parameters, flowField, i, lowOffset_, k);
@@ -130,6 +139,7 @@ void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type, const P
     }
 
     if (parameters.parallel.topNb < 0) {
+#pragma omp target teams distribute parallel for collapse(2) num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
       for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
         for (int k = lowOffset_; k < flowField.getCellsZ() + highOffset_; k++) {
           stencil.applyTopWall(parameters, flowField, i, flowField.getCellsY() + highOffset_ - 1, k);
@@ -138,6 +148,7 @@ void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type, const P
     }
 
     if (parameters.parallel.frontNb < 0) {
+#pragma omp target teams distribute parallel for collapse(2) num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
       for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
         for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
           stencil.applyFrontWall(parameters, flowField, i, j, lowOffset_);
@@ -146,6 +157,7 @@ void GlobalBoundaryIteratorGPU<FlowFieldType>::iterate(StencilType type, const P
     }
 
     if (parameters.parallel.backNb < 0) {
+#pragma omp target teams distribute parallel for collapse(2) num_teams(NUM_TEAMS) num_threads(NUM_THREADS)
       for (int i = lowOffset_; i < flowField.getCellsX() + highOffset_; i++) {
         for (int j = lowOffset_; j < flowField.getCellsY() + highOffset_; j++) {
           stencil.applyBackWall(parameters, flowField, i, j, flowField.getCellsZ() + highOffset_ - 1);

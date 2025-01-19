@@ -1,9 +1,9 @@
 #pragma once
 
+#include "BoundaryStencil.hpp"
 #include "FieldStencil.hpp"
 #include "Parameters.hpp"
 #include "TurbulentFlowField.hpp"
-#include "BoundaryStencil.hpp"
 
 namespace Stencils {
 
@@ -13,7 +13,7 @@ namespace Stencils {
 
   public:
     RealType maxValue_; //! Stores the maximum module of every component
-    
+
     MaxViscStencil();
     ~MaxViscStencil() override = default;
 
@@ -26,15 +26,15 @@ namespace Stencils {
     void applyBottomWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
     void applyTopWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
 
-    void applyLeftWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyRightWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyBottomWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyTopWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyFrontWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void applyBackWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-
+    void     applyLeftWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void     applyRightWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void     applyBottomWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void     applyTopWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void     applyFrontWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void     applyBackWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void     cellMaxValue(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k = 0);
     RealType getMaxValue() const;
-    void           reset();
+    void     reset();
 #pragma omp end declare target
   };
 

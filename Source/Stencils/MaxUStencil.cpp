@@ -56,15 +56,19 @@ void Stencils::MaxUStencil::cellMaxValue(const Parameters& parameters, FlowField
   const RealType scaledVelocityX = fabs(velocityX) / dx;
   const RealType scaledVelocityY = fabs(velocityY) / dy;
   const RealType scaledVelocityZ = fabs(velocityZ) / dz;
-
-  if (scaledVelocityX > maxValue_) {
-    maxValue_ = scaledVelocityX;
-  }
-  if (scaledVelocityY > maxValue_) {
-    maxValue_ = scaledVelocityY;
-  }
-  if (scaledVelocityZ > maxValue_) {
-    maxValue_ = scaledVelocityZ;
+  if (scaledVelocityX > maxValue_ || scaledVelocityY > maxValue_ || scaledVelocityZ > maxValue_) {
+#pragma omp critical(maxUVelX)
+    if (scaledVelocityX > maxValue_) {
+      maxValue_ = scaledVelocityX;
+    }
+#pragma omp critical(maxUVelY)
+    if (scaledVelocityY > maxValue_) {
+      maxValue_ = scaledVelocityY;
+    }
+#pragma omp critical(maxUVelZ)
+    if (scaledVelocityZ > maxValue_) {
+      maxValue_ = scaledVelocityZ;
+    }
   }
 }
 

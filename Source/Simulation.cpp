@@ -38,11 +38,12 @@ void Simulation::initializeFlowField() {
     parameters_->walls.typeTop    = DIRICHLET;
     parameters_->walls.typeFront  = DIRICHLET;
     parameters_->walls.typeBack   = DIRICHLET;
-
     Stencils::BFStepInitStencil bfStepInitStencil(*parameters_);
     FieldIterator<FlowField>    bfStepIterator(*flowField_, *parameters_, bfStepInitStencil, 0, 1);
     bfStepIterator.iterate();
-    boundaryIterator_.iterate(WALLVELOCITY, *parameters_, *flowField_, *stencil_);
+    GlobalBoundaryFactory factory(*parameters_);
+    GlobalBoundaryIterator velocityBoundaryIterator = factory.getGlobalBoundaryVelocityIterator(*flowField_);
+    velocityBoundaryIterator.iterate();
   }
 
   solver_.reInitMatrix();

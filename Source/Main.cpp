@@ -119,7 +119,7 @@ int main(int argc, char* argv[]) {
   if (parameters.simulation.type == "dns") {
     auto ptrs = Simulation::mapToGPU(hostDevice, targetDevice, *simulation);
     while (time < parameters.simulation.finalTime) {
-    #pragma omp target device(targetDevice)
+#pragma omp target device(targetDevice)
       { simulation->solveTimestep(); }
       Parameters::mapToCPU(hostDevice, targetDevice, *simulation->parameters_, ptrs.parameterPtrs_);
       timeSteps++;
@@ -127,7 +127,6 @@ int main(int argc, char* argv[]) {
 
       if ((rank == 0) && (timeStdOut <= time)) {
         spdlog::info("Current time: {}\tTimestep: {}", time, parameters.timestep.dt);
-        // printf("Current time: %f\tTimestep: %f\n", time, parameters.timestep.dt);
         timeStdOut += parameters.stdOut.interval;
       }
 
@@ -142,7 +141,7 @@ int main(int argc, char* argv[]) {
     TurbulentSimulation* turbulentSimulation = static_cast<TurbulentSimulation*>(simulation);
     auto                 ptrs                = TurbulentSimulation::mapToGPU(hostDevice, targetDevice, *turbulentSimulation);
     while (time < parameters.simulation.finalTime) {
-    #pragma omp target device(targetDevice)
+#pragma omp target device(targetDevice)
       { turbulentSimulation->solveTimestep(); }
       Parameters::mapToCPU(hostDevice, targetDevice, *simulation->parameters_, ptrs.parameterPtrs_);
       timeSteps++;
@@ -150,7 +149,6 @@ int main(int argc, char* argv[]) {
 
       if ((rank == 0) && (timeStdOut <= time)) {
         spdlog::info("Current time: {}\tTimestep: {}", time, parameters.timestep.dt);
-        // printf("Current time: %f\tTimestep: %f\n", time, parameters.timestep.dt);
         timeStdOut += parameters.stdOut.interval;
       }
 

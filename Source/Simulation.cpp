@@ -15,11 +15,11 @@ Simulation::Simulation(Parameters* parameters, FlowField* flowField):
   wallIterator_(1, 0),
   boundaryIterator_()
   // #ifdef ENABLE_PETSC
-  //   ,
-  //   solver_(std::make_unique<Solvers::PetscSolver>(*flowField_, *parameters))
-  // #else
   ,
-  solver_()
+  solver_(std::make_unique<Solvers::PetscSolver>(*flowField_, *parameters))
+//   #else
+//   ,
+//   solver_()
 // #endif
 {}
 
@@ -41,36 +41,44 @@ void Simulation::initializeFlowField() {
     Stencils::BFStepInitStencil bfStepInitStencil(*parameters_);
     FieldIterator<FlowField>    bfStepIterator(*flowField_, *parameters_, bfStepInitStencil, 0, 1);
     bfStepIterator.iterate();
-    GlobalBoundaryFactory factory(*parameters_);
+    GlobalBoundaryFactory  factory(*parameters_);
     GlobalBoundaryIterator velocityBoundaryIterator = factory.getGlobalBoundaryVelocityIterator(*flowField_);
     velocityBoundaryIterator.iterate();
   }
 
-  solver_.reInitMatrix();
+  solver_->reInitMatrix();
 }
 
-void Simulation::solveTimestep() {
-  // Determine and set max. timestep which is allowed in this simulation
-  setTimeStep();
-  // Compute FGH
-  fieldIterator_.iterate(FGH, *parameters_, *flowField_, *stencil_);
-  solveTimestepHelper();
+void               Simulation::solveTimestep(int hostDevice, int targetDevice, FlowFieldGPUPtrs& ptrs) {
+#pragma omp target device(targetDevice)
+  {
+    // Determine and set max. timestep which is allowed in this simulation
+    setTimeStep();
+    // Compute FGH
+    fieldIterator_.iterate(FGH, *parameters_, *flowField_, *stencil_);
+  }
+  solveTimestepHelper(hostDevice, targetDevice, ptrs);
 }
 
-void Simulation::solveTimestepHelper() {
-  // Set global boundary values
-  wallIterator_.iterate(WALLFGH, *parameters_, *flowField_, *stencil_);
-  // Compute the right hand side (RHS)
-  fieldIterator_.iterate(RHS, *parameters_, *flowField_, *stencil_);
+void               Simulation::solveTimestepHelper(int hostDevice, int targetDevice, FlowFieldGPUPtrs& ptrs) {
+#pragma omp target device(targetDevice)
+  {
+    // Set global boundary values
+    wallIterator_.iterate(WALLFGH, *parameters_, *flowField_, *stencil_);
+    // Compute the right hand side (RHS)
+    fieldIterator_.iterate(RHS, *parameters_, *flowField_, *stencil_);
+  }
+  FlowField::mapToCPUPETSc(hostDevice, targetDevice, *flowField_, ptrs);
   // Solve for pressure
-  solver_.solve(*flowField_, *parameters_);
-  // TODO WS2: communicate pressure values
-  // Compute velocity
-  fieldIterator_.iterate(VELOCITY, *parameters_, *flowField_, *stencil_);
-  fieldIterator_.iterate(OBSTACLE, *parameters_, *flowField_, *stencil_);
-  // TODO WS2: communicate velocity values
-  // Iterate for velocities on the boundary
-  wallIterator_.iterate(WALLVELOCITY, *parameters_, *flowField_, *stencil_);
+  solver_->solve();
+  FlowField::mapToGPUPETSc(hostDevice, targetDevice, *flowField_, ptrs);
+#pragma omp target device(targetDevice)
+  { // Compute velocity
+    fieldIterator_.iterate(VELOCITY, *parameters_, *flowField_, *stencil_);
+    fieldIterator_.iterate(OBSTACLE, *parameters_, *flowField_, *stencil_);
+    // Iterate for velocities on the boundary
+    wallIterator_.iterate(WALLVELOCITY, *parameters_, *flowField_, *stencil_);
+  }
 }
 
 void Simulation::plotVTK(int timeStep, RealType simulationTime) {

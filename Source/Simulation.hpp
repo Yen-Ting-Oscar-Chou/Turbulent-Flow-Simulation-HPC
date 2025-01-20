@@ -5,7 +5,7 @@
 #include "GlobalBoundaryFactory.hpp"
 #include "Iterators.hpp"
 #include "ParallelManagers/PetscParallelManager.hpp"
-#include "Solvers/SORSolver.hpp"
+#include "Solvers/PetscSolver.hpp"
 #include "Stencils/BFInputStencils.hpp"
 #include "Stencils/BFStepInitStencil.hpp"
 #include "Stencils/FGHStencil.hpp"
@@ -22,10 +22,10 @@
 class Simulation;
 
 struct SimulationPtrs {
-  Simulation*         simulationGPU_;
-  FlowFieldGPUPtrs    flowFieldGPUptrs_;
-  StencilDelegate* stencilDelegateGPU_;
-  ParametersGPUPtrs   parameterPtrs_;
+  Simulation*       simulationGPU_;
+  FlowFieldGPUPtrs  flowFieldGPUptrs_;
+  StencilDelegate*  stencilDelegateGPU_;
+  ParametersGPUPtrs parameterPtrs_;
 
   SimulationPtrs(Simulation* simulationGPU, FlowFieldGPUPtrs flowFieldGPUPtrs, StencilDelegate* stencilDelegateGPU, ParametersGPUPtrs parameterGPUPtrs):
     simulationGPU_(simulationGPU),
@@ -39,7 +39,7 @@ public:
   Parameters* parameters_;
   FlowField*  flowField_;
 
-  Solvers::SORSolver solver_;
+  std::unique_ptr<Solvers::LinearSolver> solver_;
 
   Stencils::VTKStencil<FlowField> vtkStencil;
   FieldIterator<FlowField>        vtkIterator;
@@ -55,14 +55,13 @@ public:
   /** Initialises the flow field according to the scenario */
   virtual void initializeFlowField();
 
+  void solveTimestep(int hostDevice, int targetDevice, FlowFieldGPUPtrs& ptrs);
+
 #pragma omp declare target
-  void solveTimestep();
-
   void setTimeStep();
-
-  void solveTimestepHelper();
-
 #pragma omp end declare target
+
+  void solveTimestepHelper(int hostDevice, int targetDevice, FlowFieldGPUPtrs& ptrs);
 
   /** Plots the flow field */
   virtual void plotVTK(int timeStep, RealType simulationTime);
@@ -79,17 +78,16 @@ public:
       std::cout << "Failed to associate simulation with GPU memory" << std::endl;
     }
 
-    FlowFieldGPUPtrs    flowFieldPtrs       = FlowField::mapToGPU(hostDevice, targetDevice, *simulation.flowField_);
-    StencilDelegate* stecilDelegateGPU = StencilDelegate::mapToGPU(hostDevice, targetDevice, *simulation.stencil_);
-    ParametersGPUPtrs   parametersPtrs      = Parameters::mapToGPU(hostDevice, targetDevice, *simulation.parameters_);
+    FlowFieldGPUPtrs  flowFieldPtrs     = FlowField::mapToGPU(hostDevice, targetDevice, *simulation.flowField_);
+    StencilDelegate*  stecilDelegateGPU = StencilDelegate::mapToGPU(hostDevice, targetDevice, *simulation.stencil_);
+    ParametersGPUPtrs parametersPtrs    = Parameters::mapToGPU(hostDevice, targetDevice, *simulation.parameters_);
 
     bool copiedFlowFieldPtr = omp_target_memcpy(&simulationGPU->flowField_, &flowFieldPtrs.flowFieldPtr_, sizeof(FlowField*), 0, 0, targetDevice, hostDevice) == 0;
     if (!copiedFlowFieldPtr) {
       std::cout << "Failed to copy FlowField pointer to Simulation object" << std::endl;
     }
 
-    bool copiedStencilDelegatePtr = omp_target_memcpy(&simulationGPU->stencil_, &stecilDelegateGPU, sizeof(StencilDelegate*), 0, 0, targetDevice, hostDevice)
-                                    == 0;
+    bool copiedStencilDelegatePtr = omp_target_memcpy(&simulationGPU->stencil_, &stecilDelegateGPU, sizeof(StencilDelegate*), 0, 0, targetDevice, hostDevice) == 0;
     if (!copiedStencilDelegatePtr) {
       std::cout << "Failed to copy StencilDelegate pointer to Simulation object" << std::endl;
     }

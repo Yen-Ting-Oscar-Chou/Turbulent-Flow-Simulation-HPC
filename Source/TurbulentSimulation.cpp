@@ -36,27 +36,33 @@ void TurbulentSimulation::plotVTK(int timeStep, RealType simulationTime) {
   vtkStencil.write(*turbulentField_, timeStep, simulationTime);
 }
 
-void TurbulentSimulation::solveTimestep() {
-  turbulentFieldIterator_.iterate(VISCOSITY, *parameters_, *turbulentField_, *stencil_);
-  // Determine and set max. timestep which is allowed in this simulation
-  setTimeStep();
-  // Compute FGH
-  turbulentFieldIterator_.iterate(TURBFGH, *parameters_, *turbulentField_, *stencil_);
+void               TurbulentSimulation::solveTimestep(int hostDevice, int targetDevice, TurbulentFlowFieldPtrs& ptrs) {
+#pragma omp target device(targetDevice)
+  {
+    turbulentFieldIterator_.iterate(VISCOSITY, *parameters_, *turbulentField_, *stencil_);
+    // Determine and set max. timestep which is allowed in this simulation
+    setTimeStep();
+    // Compute FGH
+    turbulentFieldIterator_.iterate(TURBFGH, *parameters_, *turbulentField_, *stencil_);
 
-  // Set global boundary values
-  wallIterator_.iterate(WALLFGH, *parameters_, *turbulentField_, *stencil_);
-  // Compute the right hand side (RHS)
-  fieldIterator_.iterate(RHS, *parameters_, *turbulentField_, *stencil_);
+    // Set global boundary values
+    wallIterator_.iterate(WALLFGH, *parameters_, *turbulentField_, *stencil_);
+    // Compute the right hand side (RHS)
+    fieldIterator_.iterate(RHS, *parameters_, *turbulentField_, *stencil_);
+  }
+  TurbulentFlowField::mapToCPUPETSc(hostDevice, targetDevice, *turbulentField_, ptrs);
   // Solve for pressure
-  solver_.solve(*turbulentField_, *parameters_);
-  // TODO WS2: communicate pressure values
-  // Compute velocity
-  fieldIterator_.iterate(VELOCITY, *parameters_, *turbulentField_, *stencil_);
-  // obstacleIterator_.iterate();
-  fieldIterator_.iterate(OBSTACLE, *parameters_, *turbulentField_, *stencil_);
-  // TODO WS2: communicate velocity values
-  // Iterate for velocities on the boundary
-  wallIterator_.iterate(WALLVELOCITY, *parameters_, *turbulentField_, *stencil_);
+  solver_->solve();
+  TurbulentFlowField::mapToGPUPETSc(hostDevice, targetDevice, *turbulentField_, ptrs);
+#pragma omp target device(targetDevice)
+  {
+    // Compute velocity
+    fieldIterator_.iterate(VELOCITY, *parameters_, *turbulentField_, *stencil_);
+    // obstacleIterator_.iterate();
+    fieldIterator_.iterate(OBSTACLE, *parameters_, *turbulentField_, *stencil_);
+    // Iterate for velocities on the boundary
+    wallIterator_.iterate(WALLVELOCITY, *parameters_, *turbulentField_, *stencil_);
+  }
 }
 
 void TurbulentSimulation::setTimeStep() {

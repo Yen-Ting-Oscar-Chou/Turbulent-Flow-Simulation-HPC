@@ -134,7 +134,7 @@ private:
       std::cout << "Error: Copying flags data pointer to flags object not successful." << std::endl;
       return nullptr;
     }
-    
+
     omp_target_memcpy(&(flowFieldGPU->flags_.sizeX_), &(flowField.flags_.sizeX_), sizeof(int), 0, 0, targetDevice, hostDevice);
     omp_target_memcpy(&(flowFieldGPU->flags_.sizeY_), &(flowField.flags_.sizeY_), sizeof(int), 0, 0, targetDevice, hostDevice);
     omp_target_memcpy(&(flowFieldGPU->flags_.sizeZ_), &(flowField.flags_.sizeZ_), sizeof(int), 0, 0, targetDevice, hostDevice);
@@ -367,8 +367,8 @@ public:
   }
 
   static void mapToCPUVTK(int hostDevice, int targetDevice, FlowField& flowField, FlowFieldGPUPtrs& ptrs) {
-    size_t scalarFieldDataSize    = flowField.RHS_.size_ * sizeof(RealType);
-    size_t vectorFieldDataSize    = flowField.velocity_.size_ * sizeof(RealType);
+    size_t scalarFieldDataSize = flowField.RHS_.size_ * sizeof(RealType);
+    size_t vectorFieldDataSize = flowField.velocity_.size_ * sizeof(RealType);
 
     if (!omp_target_is_present(&flowField, targetDevice)) {
       std::cout << "Error: FlowField is not a valid target pointer." << std::endl;
@@ -383,6 +383,42 @@ public:
     bool copiedVelocity = omp_target_memcpy(flowField.velocity_.data_, ptrs.velocityDataPtr_, vectorFieldDataSize, 0, 0, hostDevice, targetDevice) == 0;
     if (!copiedVelocity) {
       std::cout << "Error: Copying velocity data from GPU to CPU not successful." << std::endl;
+    }
+  }
+
+  static void mapToCPUPETSc(int hostDevice, int targetDevice, FlowField& flowField, FlowFieldGPUPtrs& ptrs) {
+    size_t scalarFieldDataSize = flowField.RHS_.size_ * sizeof(RealType);
+    if (!omp_target_is_present(&flowField, targetDevice)) {
+      std::cout << "Error: FlowField is not a valid target pointer." << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    bool copiedPressure = omp_target_memcpy(flowField.pressure_.data_, ptrs.pressureDataPtr_, scalarFieldDataSize, 0, 0, hostDevice, targetDevice) == 0;
+    if (!copiedPressure) {
+      std::cout << "Error: Copying pressure data from GPU to CPU not successful." << std::endl;
+    }
+
+    bool copiedRHS = omp_target_memcpy(flowField.RHS_.data_, ptrs.rhsDataPtr_, scalarFieldDataSize, 0, 0, hostDevice, targetDevice) == 0;
+    if (!copiedRHS) {
+      std::cout << "Error: Copying RHS data from GPU to CPU not successful." << std::endl;
+    }
+  }
+
+  static void mapToGPUPETSc(int hostDevice, int targetDevice, FlowField& flowField, FlowFieldGPUPtrs& ptrs) {
+    size_t scalarFieldDataSize = flowField.RHS_.size_ * sizeof(RealType);
+    if (!omp_target_is_present(&flowField, targetDevice)) {
+      std::cout << "Error: FlowField is not a valid target pointer." << std::endl;
+      exit(EXIT_FAILURE);
+    }
+
+    bool copiedPressure = omp_target_memcpy(ptrs.pressureDataPtr_, flowField.pressure_.data_, scalarFieldDataSize, 0, 0, targetDevice, hostDevice) == 0;
+    if (!copiedPressure) {
+      std::cout << "Error: Copying pressure data from CPU to GPU not successful." << std::endl;
+    }
+
+    bool copiedRHS = omp_target_memcpy(ptrs.rhsDataPtr_, flowField.RHS_.data_, scalarFieldDataSize, 0, 0, targetDevice, hostDevice) == 0;
+    if (!copiedRHS) {
+      std::cout << "Error: Copying RHS data from CPU to GPU not successful." << std::endl;
     }
   }
 };

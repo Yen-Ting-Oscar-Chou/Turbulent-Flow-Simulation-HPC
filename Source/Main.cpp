@@ -119,8 +119,7 @@ int main(int argc, char* argv[]) {
   if (parameters.simulation.type == "dns") {
     auto ptrs = Simulation::mapToGPU(hostDevice, targetDevice, *simulation);
     while (time < parameters.simulation.finalTime) {
-#pragma omp target device(targetDevice)
-      { simulation->solveTimestep(); }
+      simulation->solveTimestep(hostDevice, targetDevice, ptrs.flowFieldGPUptrs_);
       Parameters::mapToCPU(hostDevice, targetDevice, *simulation->parameters_, ptrs.parameterPtrs_);
       timeSteps++;
       time += parameters.timestep.dt;
@@ -141,8 +140,7 @@ int main(int argc, char* argv[]) {
     TurbulentSimulation* turbulentSimulation = static_cast<TurbulentSimulation*>(simulation);
     auto                 ptrs                = TurbulentSimulation::mapToGPU(hostDevice, targetDevice, *turbulentSimulation);
     while (time < parameters.simulation.finalTime) {
-#pragma omp target device(targetDevice)
-      { turbulentSimulation->solveTimestep(); }
+      turbulentSimulation->solveTimestep(hostDevice, targetDevice, ptrs.flowFieldGPUptrs_);
       Parameters::mapToCPU(hostDevice, targetDevice, *simulation->parameters_, ptrs.parameterPtrs_);
       timeSteps++;
       time += parameters.timestep.dt;

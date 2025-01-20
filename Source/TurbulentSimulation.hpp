@@ -15,7 +15,7 @@ class TurbulentSimulation;
 struct TurbulentSimulationPtrs {
   TurbulentSimulation*   simulationGPU_;
   TurbulentFlowFieldPtrs flowFieldGPUptrs_;
-  StencilDelegate*    stencilDelegateGPU_;
+  StencilDelegate*       stencilDelegateGPU_;
   ParametersGPUPtrs      parameterPtrs_;
 
   TurbulentSimulationPtrs(TurbulentSimulation* simulationGPU, TurbulentFlowFieldPtrs flowFieldGPUPtrs, StencilDelegate* stencilDelegateGPU, ParametersGPUPtrs parameterGPUPtrs):
@@ -37,8 +37,8 @@ public:
   /** Initialises the flow field according to the scenario */
   virtual void initializeFlowField() override;
 
+  void solveTimestep(int hostDevice, int targetDevice, TurbulentFlowFieldPtrs& ptrs);
 #pragma omp declare target
-  void solveTimestep();
   void setTimeStep();
 #pragma omp end declare target
 
@@ -57,17 +57,16 @@ public:
       std::cout << "Failed to associate turbulentSimulation with GPU memory" << std::endl;
     }
 
-    TurbulentFlowFieldPtrs flowFieldPtrs       = TurbulentFlowField::mapToGPU(hostDevice, targetDevice, *simulation.turbulentField_);
-    StencilDelegate*    stecilDelegateGPU = StencilDelegate::mapToGPU(hostDevice, targetDevice, *simulation.stencil_);
-    ParametersGPUPtrs      parametersPtrs      = Parameters::mapToGPU(hostDevice, targetDevice, *simulation.parameters_);
+    TurbulentFlowFieldPtrs flowFieldPtrs     = TurbulentFlowField::mapToGPU(hostDevice, targetDevice, *simulation.turbulentField_);
+    StencilDelegate*       stecilDelegateGPU = StencilDelegate::mapToGPU(hostDevice, targetDevice, *simulation.stencil_);
+    ParametersGPUPtrs      parametersPtrs    = Parameters::mapToGPU(hostDevice, targetDevice, *simulation.parameters_);
 
     bool copiedFlowFieldPtr = omp_target_memcpy(&simulationGPU->turbulentField_, &flowFieldPtrs.flowFieldPtr_, sizeof(TurbulentFlowField*), 0, 0, targetDevice, hostDevice) == 0;
     if (!copiedFlowFieldPtr) {
       std::cout << "Failed to copy TurbulentFlowField pointer to TurbulentSimulation object" << std::endl;
     }
 
-    bool copiedStencilDelegatePtr = omp_target_memcpy(&simulationGPU->stencil_, &stecilDelegateGPU, sizeof(StencilDelegate*), 0, 0, targetDevice, hostDevice)
-                                    == 0;
+    bool copiedStencilDelegatePtr = omp_target_memcpy(&simulationGPU->stencil_, &stecilDelegateGPU, sizeof(StencilDelegate*), 0, 0, targetDevice, hostDevice) == 0;
     if (!copiedStencilDelegatePtr) {
       std::cout << "Failed to copy StencilDelegate pointer to TurbulentSimulation object" << std::endl;
     }

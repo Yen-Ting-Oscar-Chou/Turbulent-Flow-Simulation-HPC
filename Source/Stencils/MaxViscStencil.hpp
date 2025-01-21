@@ -14,27 +14,35 @@ namespace Stencils {
   public:
     RealType maxValue_; //! Stores the maximum module of every component
 
-    MaxViscStencil();
+    MaxViscStencil() = default;
     ~MaxViscStencil() override = default;
 
 #pragma omp declare target
-    void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
-    void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
+    void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override { cellMaxValue(parameters, flowField, i, j); }
+    void apply(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override { cellMaxValue(parameters, flowField, i, j, k); }
 
-    void applyLeftWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
-    void applyRightWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
-    void applyBottomWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
-    void applyTopWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override;
+    void applyLeftWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override { cellMaxValue(parameters, flowField, i, j); }
+    void applyRightWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override { cellMaxValue(parameters, flowField, i, j); }
+    void applyBottomWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override { cellMaxValue(parameters, flowField, i, j); }
+    void applyTopWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j) override { cellMaxValue(parameters, flowField, i, j); }
 
-    void     applyLeftWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void     applyRightWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void     applyBottomWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void     applyTopWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void     applyFrontWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void     applyBackWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override;
-    void     cellMaxValue(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k = 0);
-    RealType getMaxValue() const;
-    void     reset();
+    void applyLeftWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override { cellMaxValue(parameters, flowField, i, j, k); }
+    void applyRightWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override { cellMaxValue(parameters, flowField, i, j, k); }
+    void applyBottomWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override { cellMaxValue(parameters, flowField, i, j, k); }
+    void applyTopWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override { cellMaxValue(parameters, flowField, i, j, k); }
+    void applyFrontWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override { cellMaxValue(parameters, flowField, i, j, k); }
+    void applyBackWall(const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k) override { cellMaxValue(parameters, flowField, i, j, k); }
+    void cellMaxValue([[maybe_unused]] const Parameters& parameters, TurbulentFlowField& flowField, int i, int j, int k = 0) {
+      const RealType visc = fabs(flowField.getViscosity().getScalar(i, j, k));
+      if (visc > maxValue_) {
+#pragma omp critical(maxVisc)
+        if (visc > maxValue_) {
+          maxValue_ = visc;
+        }
+      }
+    }
+    RealType getMaxValue() const { return maxValue_; }
+    void     reset() { maxValue_ = 0.0; }
 #pragma omp end declare target
   };
 

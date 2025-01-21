@@ -73,7 +73,8 @@ void               Simulation::solveTimestepHelper(int hostDevice, int targetDev
   solver_->solve();
   FlowField::mapToGPUPETSc(hostDevice, targetDevice, *flowField_, ptrs);
 #pragma omp target device(targetDevice)
-  { // Compute velocity
+  {
+    // Compute velocity
     fieldIterator_.iterate(VELOCITY, *parameters_, *flowField_, *stencil_);
     fieldIterator_.iterate(OBSTACLE, *parameters_, *flowField_, *stencil_);
     // Iterate for velocities on the boundary

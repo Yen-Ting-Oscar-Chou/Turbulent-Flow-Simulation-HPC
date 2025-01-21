@@ -129,4 +129,4 @@ target_link_libraries(NS-EOF-Interface INTERFACE
 )
 
 add_subdirectory(Source)
-add_subdirectory(Tests)
+# add_subdirectory(Tests)

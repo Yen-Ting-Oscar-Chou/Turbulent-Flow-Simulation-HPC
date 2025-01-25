@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
-    <flow Re="100" />
-    <simulation finalTime="10" >
+    <flow Re="1000" />
+    <simulation finalTime="30" >
         <type>dns</type>
         <scenario>cavity</scenario>
     </simulation>
     <timestep dt="1" tau="0.5" />
     <solver gamma="0.5" />
     <geometry dim="3"
-      lengthX="1.0" lengthY="1.0" lengthZ="1.0"
-      sizeX="20" sizeY="10" sizeZ="20"
+              lengthX="1.0" lengthY="1.0" lengthZ="1.0"
+              sizeX="30" sizeY="30" sizeZ="30"
     >
-      <mesh>uniform</mesh>
+        <mesh>uniform</mesh>
     </geometry>
     <environment gx="0" gy="0" gz="0" />
     <walls>
@@ -36,5 +36,5 @@
     </walls>
     <vtk interval="0.01">Cavity3D</vtk>
     <stdOut interval="0.01" />
-    <parallel numProcessorsX="2" numProcessorsY="2" numProcessorsZ="2" />
+    <parallel numProcessorsX="1" numProcessorsY="6" numProcessorsZ="6" />
 </configuration>

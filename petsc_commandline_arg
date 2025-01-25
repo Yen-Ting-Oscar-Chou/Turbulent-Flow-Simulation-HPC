@@ -1,6 +1,8 @@
+#### https://www.mcs.anl.gov/petsc/petsc-3.4/docs/manual.pdf
 #### This shows the solver used
 #-ksp_view
--ksp_converged_reason
+#### Comment this in for covergence output
+#-ksp_converged_reason
 #### Plotting the convergence of the solver
 #-ksp_monitor
 
@@ -25,3 +27,6 @@
 
 #### Maximum number of iterations
 -ksp_max_it 100000
+
+#### No debugging 
+-with_debugging 0
